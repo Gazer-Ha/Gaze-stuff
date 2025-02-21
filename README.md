@@ -1,1 +1,1 @@
-# Gazer-secret-stuffs
+# Gazer-silly stuff

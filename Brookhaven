@@ -1,0 +1,415 @@
+--// Local things
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+local Glazed_Version = "TEST"
+local camera = workspace.CurrentCamera
+local viewportSize = camera.ViewportSize
+
+--//Creating Window
+local Window = Fluent:CreateWindow({
+    Title = "Glazed Hub " .. Glazed_Version,
+    SubTitle = "by Gazer_HA",
+    TabWidth = viewportSize.X * 0.15,
+    Size = UDim2.fromOffset(viewportSize.X * 0.5, viewportSize.Y * 0.8),
+    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Darker",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+
+Fluent:ToggleTransparency(false) 
+
+--// Tabs. of course..
+local Tabs = {
+    Bundles =          Window:AddTab({ Title = "Bundles", Icon = "person-standing" }),
+    Accessories =  Window:AddTab({ Title = "Accessories", Icon = "hard-hat" }),
+    House =             Window:AddTab({ Title = "Houses", Icon = "home" }),
+    Trolling =           Window:AddTab({ Title = "Trolling", Icon = "smile" }),
+    Settings =          Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+--// Function
+local cooldown = false
+local function AvatarChanges(torso, rarm, larm, rleg, lleg, head)
+    if cooldown then
+        Window:Notify({
+            Title = "Cooldown",
+            Description = "AvatarChanges is on cooldown, please wait!",
+            Duration = 3
+        })
+        return
+    end
+    cooldown = true
+    game:GetService("ReplicatedStorage").RE:FindFirstChild("1Avata1rOrigina1l"):FireServer("CharacterChange", {torso or 0, rarm or 0, larm or 0, rleg or 0, lleg or 0, head or 0}, "Gaze")
+    Window:Notify({
+        Title = "Wait..",
+        Description = "Avatar Changes...",
+        Duration = 5
+    })
+    task.delay(5, function()
+        cooldown = false
+        Window:Notify({
+        Title = "Success",
+        Description = "Avatar changed successfully!",
+        Duration = 3
+    })
+    end)
+end
+
+
+local function Color(name)
+local args = {
+    [1] = "skintone",
+    [2] = name
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Updat1eAvata1r"):FireServer(unpack(args))
+end
+
+local function Wear(id)
+game:GetService("ReplicatedStorage").RE:FindFirstChild("1Updat1eAvata1r"):FireServer("wear", id) end
+
+local function anim(id)
+local args = {
+    [1] = "AskIfIdAvailable",
+    [2] = id
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Clothe1s"):FireServer(unpack(args))
+end
+--// Function
+local cooldown = false
+local function AvatarChanges(torso, rarm, larm, rleg, lleg, head)
+    if cooldown then
+        Window:Notify({
+            Title = "Cooldown",
+            Description = "AvatarChanges is on cooldown, please wait!",
+            Duration = 3
+        })
+        return
+    end
+    cooldown = true
+    game:GetService("ReplicatedStorage").RE:FindFirstChild("1Avata1rOrigina1l"):FireServer("CharacterChange", {torso or 0, rarm or 0, larm or 0, rleg or 0, lleg or 0, head or 0}, "Gaze")
+    Fluent:Notify({
+        Title = "Glazed",
+        Content = "Wait",
+        SubContent = "Avatar Changes..",
+        Duration = 3
+    })
+    task.delay(5, function()
+        cooldown = false
+        Fluent:Notify({
+        Title = "Glazed",
+        Content = "Success",
+        SubContent = "Avatar Changed Successfully",
+        Duration = 3
+    })
+    end)
+end
+
+local function Wear(id)
+game:GetService("ReplicatedStorage").RE:FindFirstChild("1Updat1eAvata1r"):FireServer("wear", id) end
+
+local function Ask(id)
+local args = {
+    [1] = "AskIfIdAvailable",
+    [2] = id
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Clothe1s"):FireServer(unpack(args))
+end
+
+
+local function Tool(name)
+    local args = {
+        [1] = "PickingTools",
+        [2] = tostring(name)
+    }
+
+    game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer(unpack(args))
+end
+
+
+local function Permission(housenumber)
+    local player = game:GetService("Players").LocalPlayer
+    if not player then
+        warn("This script must be run in a LocalScript!")
+        return
+    end
+    
+    local event = game:GetService("ReplicatedStorage"):WaitForChild("1Playe1rTrigge1rEven1t", 5) -- Wait up to 5 sec
+    if not event then
+        warn("Event not found in ReplicatedStorage!")
+        return
+    end
+
+    local numberHouse = tonumber(housenumber) -- Convert to number
+
+    if not numberHouse then
+        warn("Invalid house number! Must be a valid number.")
+        return
+    end
+
+    local args = {
+        "GivePermissionLoopToServer",
+        player,
+        numberHouse -- Now guaranteed to be a number
+    }
+
+    event:FireServer(unpack(args))
+end
+
+
+local Options = Fluent.Options
+
+do
+    
+    
+    
+    Tabs.Accessories:AddParagraph({
+        Title = "Sound Accessories",
+        Content = "Yes, Accessories with sound."
+    })
+    
+    local SoundAccessories = {
+    {Name = "Witches Brew Hat", ID = 305888394},
+    {Name = "Transient-Harmonica", ID = 33070696},
+    {Name = "Chicken-Suit", ID = 24112667},
+    {Name = "Bloxy-Cola", ID = 24114402},
+}
+
+for _, accessory in pairs(SoundAccessories) do
+    Tabs.Accessories:AddButton({
+        Title = accessory.Name,
+        Description = "Sound - " .. accessory.Name,
+        Callback = function()
+            Wear(accessory.ID)
+        end
+    })
+end
+
+    Tabs.Accessories:AddParagraph({
+        Title = "Hand Accessories",
+        Content = "Yes, Holdable Accessories"
+    })
+    
+    local HandAccessories = {
+    {Name = "Ambris-Lum-Sword", ID = 5722175994},
+    {Name = "Atlantean-Trident", ID = 3241238974},
+    {Name = "Barbarian-Battleaxe", ID = 3131064293},
+    {Name = "Tide-Shovel", ID = 3381195240},
+    {Name = "Spray-Can", ID = 2936950534},
+    {Name = "Thickhoof-Axe", ID = 3240543366},
+    {Name = "Bread-Sword", ID = 3052700547},
+    {Name = "Terrible-Teddy", ID = 3339372724},
+    {Name = "Frozen-Blaster", ID = 3013849063},
+    {Name = "Infinity-Gauntlet", ID = 2988781799},
+}
+
+
+
+for _, accessory in pairs(HandAccessories) do
+        Tabs.Accessories:AddButton({
+        Title = accessory.Name,
+        Description = "HandHeld - " .. accessory.Name,
+        Callback = function()
+            Wear(accessory.ID)
+        end
+    })
+end
+
+Tabs.Accessories:AddParagraph({
+        Title = "Particles Whoa",
+        Content = "Yes, Particles Accessories"
+    })
+
+local ParticleAccessories = {
+    -- FIRE EFFECT
+    {Name = "Doomsekkar", ID = 132809431},
+    {Name = "Ghosdeeri", ID = 183468963},
+    {Name = "Dusekkar", ID = 1474657},
+    {Name = "Hiccup's Improved Viking Helmet", ID = 262669756},
+    {Name = "Korblox Grand Marshal", ID = 233253311},
+    {Name = "Flaming Mohawk", ID = 191101707},
+    {Name = "Fiery Horns of the Netherworld", ID = 215718515},
+    {Name = "Bluesteel Horns of Pwnage", ID = 233705354},
+
+    -- SPARKLE EFFECT
+    {Name = "Boss White Hat", ID = 89171071},
+    {Name = "Gold Sparkle Time Banded Boss White Hat", ID = 173624651},
+    {Name = "Red Banded Boss White Hat", ID = 173624749},
+    {Name = "Blue Banded Boss White Hat", ID = 173624602},
+    {Name = "Purple Banded Boss White Hat", ID = 173624697},
+    {Name = "Binary Banded Boss White Hat", ID = 173624561},
+    {Name = "Egg of Destiny", ID = 153059501},
+    {Name = "Spring Fairy", ID = 150381051},
+    {Name = "Winter Fairy", ID = 141742418},
+    {Name = "Fall Fairy", ID = 128217885},
+    {Name = "St Patrick's Day Fairy", ID = 226189871},
+    {Name = "Snow Queen's Necklace", ID = 187998056},
+    {Name = "Sparkling Angel Wings", ID = 192557913},
+
+    -- SMOKE EFFECT
+    {Name = "Rbadam's Smokestack Top Hat", ID = 169444515}
+}
+
+for _, accessory in pairs(ParticleAccessories) do
+    Tabs.Accessories:AddButton({
+        Title = accessory.Name,
+        Description = "Particle - " .. accessory.Name,
+        Callback = function()
+            Wear(accessory.ID)
+        end
+    })
+end
+
+
+Tabs.Trolling:AddButton({
+        Title = "Get Coach",
+        Description = "Why everyone calling it sofa",
+        Callback = function()
+            Tool("Coach")
+        end
+    })
+
+ Tabs.Bundles:AddButton({
+        Title = "Invisible",
+        Description = "Make Your Character\nInvisible",
+        Callback = function()
+            AvatarChanges("15312911732","14532583477","14532583469","14532583517","14532583483","134082579")
+        end
+    })
+    
+    Tabs.Bundles:AddButton({
+        Title = "No Arm",
+        Description = "Make Your Character\nInvisible",
+        Callback = function()
+            AvatarChanges("0","14532583477","14532583469","0","0","0")
+        end
+    })
+    
+    Tabs.Bundles:AddButton({
+        Title = "R6",
+        Description = "Make Your Character\nTurn R6",
+        Callback = function()
+            AvatarChanges("81500432784353","103452055306587","87202958751790","129699548221468","106411216404626")
+        end
+    })
+    
+    
+    Tabs.Bundles:AddButton({
+        Title = "R6 1x1x1x1x",
+        Description = "Ohh Hackerrr",
+        Callback = function()
+        Color("Lime green")
+            Wear(11320962276)
+            Wear(2058582454)
+            Wear(17653269247)
+            Wear(18570894442)
+            AvatarChanges("17662225318","103452055306587","87202958751790","129699548221468","106411216404626")
+            
+        end
+    })
+    
+    Tabs.Bundles:AddButton({
+        Title = "R6 - Female",
+        Description = "Make Your Character\nTurn R6 but female",
+        Callback = function()
+            AvatarChanges("17900050031","17900049887","17900050095","17900050108","17900050024")
+        end
+    })
+    
+    Tabs.Bundles:AddButton({
+        Title = "Red Outline",
+        Description = "Make Your Character\nHas Red Outline",
+        Callback = function()
+            AvatarChanges("14578962608","14578962586","14578962590","14578962604","14578958644","0")
+    Wear(16346671665)
+        end
+    })
+
+  Tabs.House:AddInput("Input", {
+        Title = "",
+        Default = "",
+        Placeholder = "Get House Permission\nEnter House Number",
+        Numeric = true,
+        Finished = true,
+        Callback = function(Value)
+            Permission(Value)
+        end
+    })
+
+    
+end
+
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "Fluent",
+    Content = "The script has been loaded.",
+    Duration = 8
+})
+
+SaveManager:LoadAutoloadConfig()
+
+
+local cloneref = cloneref or function(o) return o end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "Toggleui"
+ScreenGui.Parent = cloneref(game.CoreGui)
+ScreenGui.ResetOnSpawn = false
+
+local Toggle = Instance.new("TextButton")
+Toggle.Name = "Toggle"
+Toggle.Parent = ScreenGui
+Toggle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Toggle.BackgroundTransparency = 0.5
+Toggle.Position = UDim2.new(0, 0, 0.454706937, 0)
+Toggle.Size = UDim2.new(0, 50, 0, 50)
+Toggle.Font = Enum.Font.SourceSans
+Toggle.Text = ""
+Toggle.TextColor3 = Color3.fromRGB(248, 248, 248)
+Toggle.TextSize = 1
+Toggle.Draggable = true
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0.2, 0)
+Corner.Parent = Toggle
+
+local Image = Instance.new("ImageLabel")
+Image.Name = "Icon"
+Image.Parent = Toggle
+Image.Size = UDim2.new(1, 0, 1, 0)
+Image.BackgroundTransparency = 1
+Image.Image = "rbxassetid://137534367998088" 
+
+local Corner2 = Instance.new("UICorner")
+Corner2.CornerRadius = UDim.new(0.2, 0)
+Corner2.Parent = Image
+
+
+local function simulateKeyPress1()
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.LeftControl, false, game)
+    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.LeftControl, false, game)
+end
+
+
+Toggle.MouseButton1Click:Connect(function()
+    simulateKeyPress1()
+end)
+
+
+

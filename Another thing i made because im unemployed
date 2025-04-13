@@ -1,0 +1,212 @@
+local coreGui = cloneref(game:GetService("CoreGui"))
+coreGui.CallDialogScreen.Enabled = true
+
+local callDialog = coreGui.CallDialogScreen.CallDialog.AlertContents
+local title = callDialog.TitleContainer.TitleArea.Title
+local bodyText = callDialog.MiddleContent.Content.BodyText
+local button1 = callDialog.Footer.Buttons["1"]
+local button1Text = button1.ButtonContent.ButtonMiddleContent.Text
+
+title.Size = UDim2.new(0, 100, 0, 26)
+title.Text = "Gaze Stuff"
+title.TextScaled = true
+bodyText.Text = "Made By Gaze"
+
+local titleTextSize = title.TextSize
+
+
+button1Text.Text = "Continue"
+button1Text.TextSize = bodyText.TextSize
+button1Text.Size = button1.Size
+
+
+button1.MouseButton1Click:Wait()
+coreGui.CallDialogScreen.Enabled = false
+
+
+local emotes = {
+Laugh = {154157543, 12521018724},
+	Hi = {154147007, 12521004586},
+	Bye = {154157386, 12521004586},
+	Sleep = {868409374, 2695918332},
+}
+
+
+
+local emoteNames = {}
+for name in pairs(emotes) do
+	table.insert(emoteNames, name)
+end
+
+local currentIndex = 1
+
+local player = game.Players.LocalPlayer
+local char, humanoid
+
+local function updateCharacter()
+	char = player.Character or player.CharacterAdded:Wait()
+	humanoid = char:WaitForChild("Humanoid")
+end
+
+player.CharacterAdded:Connect(updateCharacter)
+updateCharacter()
+
+
+local camera = workspace.CurrentCamera
+local screenGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+
+local viewportSize = camera.ViewportSize
+local frameWidth = viewportSize.X * 0.3 -- 30% of screen width
+local frameHeight = viewportSize.Y * 0.25 -- 25% of screen height
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, frameWidth, 0, frameHeight)
+frame.Position = UDim2.new(0.5, -frameWidth / 2, 0.5, -frameHeight / 2)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.BackgroundTransparency = 0.3
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
+frame.Draggable = true
+frame.Active = true
+
+local uicorner = Instance.new("UICorner", frame)
+uicorner.CornerRadius = UDim.new(0, 10)
+
+-- TextLabel for emote name
+local textLabel = Instance.new("TextLabel", frame)
+textLabel.Size = UDim2.new(0.6, 0, 0.35, 0)
+textLabel.Position = UDim2.new(0.2, 0, 0.15, 0)
+textLabel.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+textLabel.BackgroundTransparency = 0.2
+textLabel.TextScaled = true
+textLabel.TextColor3 = Color3.new(1, 1, 1)
+textLabel.Font = Enum.Font.GothamBold
+local labelCorner = Instance.new("UICorner", textLabel)
+labelCorner.CornerRadius = UDim.new(0, 6)
+
+-- Previous Button
+local prevBtn = Instance.new("TextButton", frame)
+prevBtn.Size = UDim2.new(0.15, 0, 0.35, 0)
+prevBtn.Position = UDim2.new(0.025, 0, 0.15, 0)
+prevBtn.Text = "<"
+prevBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+prevBtn.BackgroundTransparency = 0.2
+prevBtn.TextScaled = true
+prevBtn.TextColor3 = Color3.new(1, 1, 1)
+prevBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", prevBtn).CornerRadius = UDim.new(0, 6)
+
+-- Next Button
+local nextBtn = Instance.new("TextButton", frame)
+nextBtn.Size = UDim2.new(0.15, 0, 0.35, 0)
+nextBtn.Position = UDim2.new(0.825, 0, 0.15, 0)
+nextBtn.Text = ">"
+nextBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+nextBtn.BackgroundTransparency = 0.2
+nextBtn.TextScaled = true
+nextBtn.TextColor3 = Color3.new(1, 1, 1)
+nextBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", nextBtn).CornerRadius = UDim.new(0, 6)
+
+-- Play Button
+local playBtn = Instance.new("TextButton", frame)
+playBtn.Size = UDim2.new(0.95, 0, 0.3, 0)
+playBtn.Position = UDim2.new(0.025, 0, 0.6, 0)
+playBtn.Text = "Play"
+playBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+playBtn.BackgroundTransparency = 0.1
+playBtn.TextScaled = true
+playBtn.TextColor3 = Color3.new(1, 1, 1)
+playBtn.Font = Enum.Font.GothamMedium
+Instance.new("UICorner", playBtn).CornerRadius = UDim.new(0, 8)
+
+-- SOUND function
+local function SOUND(id)
+
+local RE = game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Gu1nSound1s")
+	RE:FireServer(char:WaitForChild("HumanoidRootPart"), id, 1)
+	
+	
+-- Optional: Fire the client as well (if still needed for you to hear)
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://" .. id
+	sound.Volume = 1
+	sound.Parent = char:WaitForChild("HumanoidRootPart")
+	sound:Play()
+
+	-- Clean up after finished
+	sound.Ended:Connect(function()
+		sound:Destroy()
+	end)
+	
+end
+
+-- Play animation
+local function playEmote()
+	local character = player.Character
+	if not character then return end
+
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+	if not humanoid or not humanoidRootPart then return end
+
+	local emote = emotes[emoteNames[currentIndex]]
+	if not emote then return end
+
+	SOUND(emote[1]) -- Play sound
+
+local originalSpeed, originalJump
+
+if humanoid.WalkSpeed > 0 then
+	originalSpeed = humanoid.WalkSpeed
+end
+
+if humanoid.JumpPower > 0 then
+	originalJump = humanoid.JumpPower
+end
+
+	humanoid.WalkSpeed = 0
+	humanoid.JumpPower = 0
+	task.wait(0.1)
+
+	for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+		track:Stop()
+	end
+	
+	
+
+	local anim = Instance.new("Animation")
+	anim.AnimationId = "rbxassetid://" .. emote[2]
+	local track = humanoid:LoadAnimation(anim)
+	track.Looped = false
+	track:Play()
+	
+	
+
+	track.Stopped:Connect(function()
+		humanoid.WalkSpeed = originalSpeed or 16
+		humanoid.JumpPower = originalJump or 50
+		anim:Destroy()
+	end)
+end
+
+-- Update UI
+local function updateUI()
+	textLabel.Text = emoteNames[currentIndex]
+end
+
+prevBtn.MouseButton1Click:Connect(function()
+	currentIndex = (currentIndex - 2) % #emoteNames + 1
+	updateUI()
+end)
+
+nextBtn.MouseButton1Click:Connect(function()
+	currentIndex = (currentIndex % #emoteNames) + 1
+	updateUI()
+end)
+
+playBtn.MouseButton1Click:Connect(function()
+	playEmote()
+end)
+
+updateUI()

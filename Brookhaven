@@ -233,56 +233,6 @@ Tabs.Avatar:CreateButton({
 })
 
 
-Tabs.Animation:CreateParagraph({
-        Title = "Gaze Animation Editor",
-        Content = "If Your Character Freezed Reset Your Avatar To Default"
-    })
-    
-    
-    Tabs.Animation:CreateButton({
-   Name = "(Warning) Reset Avatar",
-   Callback = function()
-           local args = {
-    [1] = "OCA"
-}
-game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Avata1rOrigina1l"):FireServer(unpack(args))
-   end,
-})
-
-Tabs.Animation:CreateButton({
-   Name = "Gazer Fe Animation Editor",
-   Callback = function()
-   
-   if _G.GazehasFired then return end
-_G.GazehasFired = true
-   
-           local mt = getrawmetatable(game)
-setreadonly(mt, false)
-
-local oldNamecall = mt.__namecall
-
-mt.__namecall = newcclosure(function(self, ...)
-	local method = getnamecallmethod()
-	local args = {...}
-
-	if method == "FireServer" and tostring(self) == "1Updat1eAvata1r" and args[1] == "wearWalkStyle" then
-		warn("Blocked wearWalkStyle FireServer")
-		return nil
-	end
-
-	return oldNamecall(self, ...)
-end)
-
-setreadonly(mt, true)
---[[
-	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
-]]
-loadstring(game:HttpGet('https://raw.githubusercontent.com/Gazer-Ha/Reimagined/refs/heads/main/FE%20Animation%20editor'))()
-
-   end,
-})
-    
-    
 
 
 

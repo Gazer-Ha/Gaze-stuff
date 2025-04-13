@@ -1,331 +1,292 @@
---// Local things
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
-local Glazed_Version = "TEST"
-local camera = workspace.CurrentCamera
-local viewportSize = camera.ViewportSize
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local coreGui = cloneref(game:GetService("CoreGui"))
+coreGui.CallDialogScreen.Enabled = true
 
---//Creating Window
-local Window = Fluent:CreateWindow({
-    Title = "Glazed Hub " .. Glazed_Version,
-    SubTitle = "by Gazer_HA",
-    TabWidth = viewportSize.X * 0.15,
-    Size = UDim2.fromOffset(viewportSize.X * 0.5, viewportSize.Y * 0.8),
-    Acrylic = false, -- The blur may be detectable, setting this to false disables blur entirely
-    Theme = "Darker",
-    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+local callDialog = coreGui.CallDialogScreen.CallDialog.AlertContents
+local title = callDialog.TitleContainer.TitleArea.Title
+local bodyText = callDialog.MiddleContent.Content.BodyText
+local button1 = callDialog.Footer.Buttons["1"]
+
+title.Size = UDim2.new(0, 100, 0, 26)
+title.Text = "Glazed Hub"
+title.TextScaled = true
+bodyText.Text = "Made By Gaze"
+
+button1.MouseButton1Click:Wait()
+coreGui.CallDialogScreen.Enabled = false
+
+print("Button clicked, continuing...")
+
+-- Create Main Window
+local Window = Rayfield:CreateWindow({
+   Name = "Glazed Hub Keyless ( Brookhaven 🏡 ) v 1.2",
+   LoadingTitle = "Glazed ahh",
+   LoadingSubtitle = "by Gaze",
+   ConfigurationSaving = {
+      Enabled = false,
+   }
 })
 
-Fluent:ToggleTransparency(false) 
-
---// Tabs. of course..
-local Tabs = {
-    Bundles =          Window:AddTab({ Title = "Bundles", Icon = "person-standing" }),
-    Accessories =  Window:AddTab({ Title = "Accessories", Icon = "hard-hat" }),
-    House =             Window:AddTab({ Title = "Houses", Icon = "home" }),
-    Trolling =           Window:AddTab({ Title = "Trolling", Icon = "smile" }),
-    Settings =          Window:AddTab({ Title = "Settings", Icon = "settings" })
-}
 
 --// Function
 
-
-local function RESETBLOCK()
-local args = {
-    [1] = "CharacterChange",
-    [2] = {
-        [1] = 0,
-        [2] = 0,
-        [3] = 0,
-        [4] = 0,
-        [5] = 0,
-        [6] = 0
-    },
-    [3] = "AllBlocky"
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Avata1rOrigina1l"):FireServer(unpack(args))
+local function TOOL(name)
+game:GetService("ReplicatedStorage").RE["1Too1l"]:InvokeServer("PickingTools",name)
 end
 
 
-
-
-local function APPLY_SKINTONE(Player)
-    local p = Player
-    local c = p.Character or p.CharacterAdded:Wait()
-    local h = c:FindFirstChildOfClass("Humanoid")
-
-    if not h then
-        warn("Humanoid not found!")
-        return
-    end
-
-    local bodyColors = c:FindFirstChildOfClass("BodyColors")
-
-    if not bodyColors then
-        warn("BodyColors not found!")
-        return
-    end
-
-    -- Get skin tone (use HeadColor or any other body part color)
-    local skinTone = bodyColors.HeadColor
-
-    -- Convert BrickColor to readable string
-    local skinToneName = skinTone.Name
-
-    -- Fire the RemoteEvent with the detected skin tone
-    local args = {
-        [1] = "skintone",
-        [2] = skinToneName
-    }
-
-    game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Updat1eAvata1r"):FireServer(unpack(args))
+local function RESET()
+    game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Avata1rOrigina1l"):FireServer(
+        "CharacterChange",
+        0, 0, 0, 0, 0, 0, 
+        "AllBlocky"
+    )
 end
 
-local function Wear(id)
+local function WEAR(id)
 game:GetService("ReplicatedStorage").RE:FindFirstChild("1Updat1eAvata1r"):FireServer("wear", id) end
-
-
-local function COPYCLOTHING(Player)
-    local p = Player
-    local c = p.Character or p.CharacterAdded:Wait()
-    local h = c:FindFirstChildOfClass("Humanoid")
-
-    if not h then
-        warn("Humanoid not found!")
-        return
-    end
-
-    local d = h:GetAppliedDescription()
-    local cIds = { d.Shirt, d.Pants, d.GraphicTShirt }
-    local done = false
-
-    task.spawn(function()
-        for _, id in ipairs(cIds) do
-            if id ~= 0 then
-                task.wait(1)
-                Wear(id)
-            end
-        end
-        done = true
-    end)
-
-    repeat task.wait() until done -- Ensure the function waits until completion
-end
-
-local function COPYBODYPART(Player)
-    local p = Player
-    local c = p.Character or p.CharacterAdded:Wait()
-    local h = c:FindFirstChildOfClass("Humanoid")
-
-    if not h then
-        warn("Humanoid not found!")
-        return
-    end
-
-    local d = h:GetAppliedDescription()
-    
-    local bIds = {
-        d.Torso,
-        d.RightArm,
-        d.LeftArm,
-        d.RightLeg,
-        d.LeftLeg,
-        d.Head
-    }
-
-    local done = false
-    task.spawn(function()
-        game:GetService("ReplicatedStorage").RE:FindFirstChild("1Avata1rOrigina1l"):FireServer(
-            "CharacterChange",
-            bIds,
-            "GAZE"
-        )
-        done = true
-    end)
-
-    repeat task.wait() until done
-end
-
-local function COPYACCESSORIES(Player)
-    local p = Player
-    local c = p.Character or p.CharacterAdded:Wait()
-    local h = c:FindFirstChildOfClass("Humanoid")
-
-    if not h then
-        warn("Humanoid not found!")
-        return
-    end
-
-    local d = h:GetAppliedDescription()
-    local aIds = {}
-
-    for _, aList in ipairs({
-        d.HatAccessory,
-        d.HairAccessory,
-        d.FaceAccessory,
-        d.NeckAccessory,
-        d.ShouldersAccessory,
-        d.FrontAccessory,
-        d.BackAccessory,
-        d.WaistAccessory
-    }) do
-        for id in string.gmatch(aList, "%d+") do
-            table.insert(aIds, tonumber(id))
-        end
-    end
-
-    local done = false
-    task.spawn(function()
-        for _, id in ipairs(aIds) do
-            task.wait(1)
-            Wear(id)
-        end
-        done = true
-    end)
-
-    repeat task.wait() until done
-end
+local function COLOR(name)
+    game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Updat1eAvata1r"):FireServer("skintone", name) end
+local function ASK(id)
+pcall(function()
+    game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Clothe1s"):FireServer("AskIfIdAvailable", id) end) end
 
 local cooldown = false
 local function AvatarChanges(torso, rarm, larm, rleg, lleg, head)
     if cooldown then
-        Window:Notify({
+        Rayfield:Notify({
             Title = "Cooldown",
-            Description = "AvatarChanges is on cooldown, please wait!",
+            Content = "AvatarChanges is on cooldown, please wait!",
             Duration = 3
         })
         return
     end
     cooldown = true
-    game:GetService("ReplicatedStorage").RE:FindFirstChild("1Avata1rOrigina1l"):FireServer("CharacterChange", {torso or 0, rarm or 0, larm or 0, rleg or 0, lleg or 0, head or 0}, "Gaze")
-    Window:Notify({
+    pcall(function()
+    game:GetService("ReplicatedStorage").RE:FindFirstChild("1Avata1rOrigina1l"):FireServer("CharacterChange", {torso , rarm , larm , rleg , lleg , head }, "Gaze")
+    end)
+    Rayfield:Notify({
         Title = "Wait..",
-        Description = "Avatar Changes...",
-        Duration = 5
+        Content = "Avatar Changes...",
+        Duration = 7
     })
-    task.delay(5, function()
+    task.delay(7, function()
         cooldown = false
-        Window:Notify({
+        Rayfield:Notify({
         Title = "Success",
-        Description = "Avatar changed successfully!",
+        Content = "Avatar changed successfully!",
         Duration = 3
     })
     end)
 end
 
 
-local function Color(name)
-local args = {
-    [1] = "skintone",
-    [2] = name
+local Tabs = {
+Accessories = Window:CreateTab("Accessories"),
+Bundles = Window:CreateTab("Bundles"),
+LocalPlayer = Window:CreateTab("Local Player"),
+Avatar = Window:CreateTab("Avatar"),
+Animation = Window:CreateTab("Animation"),
+Troll = Window:CreateTab("Troll n stuff"),
+Credits = Window:CreateTab("Credits")
 }
 
-game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Updat1eAvata1r"):FireServer(unpack(args))
-end
 
-local function Wear(id)
-game:GetService("ReplicatedStorage").RE:FindFirstChild("1Updat1eAvata1r"):FireServer("wear", id) end
 
-local function anim(id)
-local args = {
-    [1] = "AskIfIdAvailable",
-    [2] = id
-}
-
-game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Clothe1s"):FireServer(unpack(args))
-end
---// Function
-local cooldown = false
-local function AvatarChanges(torso, rarm, larm, rleg, lleg, head)
-    if cooldown then
-        Window:Notify({
-            Title = "Cooldown",
-            Description = "AvatarChanges is on cooldown, please wait!",
-            Duration = 3
-        })
-        return
-    end
-    cooldown = true
-    game:GetService("ReplicatedStorage").RE:FindFirstChild("1Avata1rOrigina1l"):FireServer("CharacterChange", {torso or 0, rarm or 0, larm or 0, rleg or 0, lleg or 0, head or 0}, "Gaze")
-    Fluent:Notify({
-        Title = "Glazed",
-        Content = "Wait",
-        SubContent = "Avatar Changes..",
-        Duration = 3
+Tabs.Bundles:CreateParagraph({
+        Title = "Info",
+        Content = "Default scale is reccomended\nfor R6 And Minecraft Bundle\nTutorial: https://youtu.be/KYQgwKYT4lk"
     })
-    task.delay(5, function()
-        cooldown = false
-        Fluent:Notify({
-        Title = "Glazed",
-        Content = "Success",
-        SubContent = "Avatar Changed Successfully",
-        Duration = 3
+    
+    Tabs.Bundles:CreateButton({
+   Name = "copy link",
+   Callback = function()
+      setclipboard("https://youtu.be/KYQgwKYT4lk")
+   end,
+})
+
+Tabs.Bundles:CreateParagraph({
+        Title = "Bundles",
+        Content = "Funny Bundles"
     })
-    end)
-end
 
-local function Wear(id)
-game:GetService("ReplicatedStorage").RE:FindFirstChild("1Updat1eAvata1r"):FireServer("wear", id) end
+Tabs.Bundles:CreateButton({
+   Name = "Minecraft",
+   Callback = function()
+      AvatarChanges(14976595538, 14976595831, 14976595559, 14976595617, 14976595675, 134082579)
+   end,
+})
 
-local function Ask(id)
-local args = {
-    [1] = "AskIfIdAvailable",
-    [2] = id
+
+
+
+Tabs.Bundles:CreateButton({
+   Name = "R6 - Male",
+   Callback = function()
+      AvatarChanges(81500432784353, 103452055306587, 87202958751790, 129699548221468, 106411216404626, 0)
+   end,
+})
+
+
+Tabs.Bundles:CreateButton({
+   Name = "R6 - Female",
+   Callback = function()
+      AvatarChanges(124225564167965, 103452055306587, 87202958751790, 129699548221468, 106411216404626, 0)
+   end,
+})
+
+
+
+Tabs.Bundles:CreateButton({
+   Name = "Classic R6",
+   Callback = function()
+      AvatarChanges(17675630775, 17675630666, 17675630763, 17675630677, 17675630636, 0)
+   end,
+})
+
+Tabs.Bundles:CreateButton({
+   Name = "Invisible",
+   Callback = function()
+           AvatarChanges("15312911732","14532583477","14532583469","14532583517","14532583483","134082579")
+   end,
+})
+
+Tabs.Bundles:CreateButton({
+   Name = "Void Red Outline",
+   Callback = function()
+-- torso, rarm, larm, rleg, lleg, head  (Forgor To Remov)
+AvatarChanges(107664305832755, 118439782321955, 102394541963166, 139086821056857, 130029826352306, 134082579)
+      wait(2)
+    WEAR(16346671665)
+    WEAR(12146169621)
+   end,
+})
+
+
+Tabs.Avatar:CreateParagraph({
+        Title = "Colors",
+        Content = "Some Exclusive Color That Didnt Appear In Color UI"
+    })
+    
+    Tabs.Avatar:CreateButton({
+   Name = "Pastel Yellow",
+   Callback = function()
+           COLOR("Pastel yellow")
+   end,
+})
+
+Tabs.Avatar:CreateButton({
+   Name = "Noob Yellow",
+   Callback = function()
+           COLOR("Bright yellow")
+   end,
+})
+    
+
+Tabs.Avatar:CreateParagraph({
+        Title = "Heads",
+        Content = "Yeah Just Some Head Like Headless"
+    })
+
+
+Tabs.Avatar:CreateButton({
+   Name = "Headless",
+   Callback = function()
+           AvatarChanges(1, 1, 1, 1, 1, 134082579)
+   end,
+})
+
+
+Tabs.Avatar:CreateButton({
+   Name = "BlazeBurner Head",
+   Callback = function()
+           AvatarChanges(1, 1, 1, 1, 1, 3210773801)
+   end,
+})
+
+
+Tabs.Avatar:CreateButton({
+   Name = "DeathWalker Head",
+   Callback = function()
+           AvatarChanges(1, 1, 1, 1, 1, 16580493236)
+   end,
+})
+
+Tabs.Avatar:CreateParagraph({
+        Title = "Legs",
+        Content = "Stick Leg ahh, You Look Cringe"
+    })
+
+
+Tabs.Avatar:CreateButton({
+   Name = "Korblox Right Leg",
+   Callback = function()
+           AvatarChanges(1, 1, 1, 139607718, 1, 1)
+   end,
+})
+
+Tabs.Avatar:CreateButton({
+   Name = "Korblox Left Leg",
+   Callback = function()
+           AvatarChanges(1, 1, 1, 1, 139607718, 1)
+   end,
+})
+
+
+Tabs.Animation:CreateParagraph({
+        Title = "Gaze Animation Editor",
+        Content = "If Your Character Freezed Reset Your Avatar To Default"
+    })
+    
+    
+    Tabs.Animation:CreateButton({
+   Name = "(Warning) Reset Avatar",
+   Callback = function()
+           local args = {
+    [1] = "OCA"
 }
+game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Avata1rOrigina1l"):FireServer(unpack(args))
+   end,
+})
 
-game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Clothe1s"):FireServer(unpack(args))
-end
+Tabs.Animation:CreateButton({
+   Name = "Gazer Fe Animation Editor",
+   Callback = function()
+   
+   if _G.GazehasFired then return end
+_G.GazehasFired = true
+   
+           local mt = getrawmetatable(game)
+setreadonly(mt, false)
 
+local oldNamecall = mt.__namecall
 
-local function Tool(name)
-    local args = {
-        [1] = "PickingTools",
-        [2] = tostring(name)
-    }
+mt.__namecall = newcclosure(function(self, ...)
+	local method = getnamecallmethod()
+	local args = {...}
 
-    game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Too1l"):InvokeServer(unpack(args))
-end
+	if method == "FireServer" and tostring(self) == "1Updat1eAvata1r" and args[1] == "wearWalkStyle" then
+		warn("Blocked wearWalkStyle FireServer")
+		return nil
+	end
 
+	return oldNamecall(self, ...)
+end)
 
-local function Permission(housenumber)
-    local player = game:GetService("Players").LocalPlayer
-    if not player then
-        warn("This script must be run in a LocalScript!")
-        return
-    end
-    
-    local event = game:GetService("ReplicatedStorage"):WaitForChild("1Playe1rTrigge1rEven1t", 5) -- Wait up to 5 sec
-    if not event then
-        warn("Event not found in ReplicatedStorage!")
-        return
-    end
+setreadonly(mt, true)
+--[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+loadstring(game:HttpGet('https://raw.githubusercontent.com/Gazer-Ha/Reimagined/refs/heads/main/FE%20Animation%20editor'))()
 
-    local numberHouse = tonumber(housenumber) -- Convert to number
-
-    if not numberHouse then
-        warn("Invalid house number! Must be a valid number.")
-        return
-    end
-
-    local args = {
-        "GivePermissionLoopToServer",
-        player,
-        numberHouse -- Now guaranteed to be a number
-    }
-
-    event:FireServer(unpack(args))
-end
-
-
-local Options = Fluent.Options
-
-do
+   end,
+})
     
     
-    
-    Tabs.Accessories:AddParagraph({
+
+
+
+Tabs.Accessories:CreateParagraph({
         Title = "Sound Accessories",
         Content = "Yes, Accessories with sound."
     })
@@ -338,16 +299,16 @@ do
 }
 
 for _, accessory in pairs(SoundAccessories) do
-    Tabs.Accessories:AddButton({
-        Title = accessory.Name,
-        Description = "Sound - " .. accessory.Name,
+    Tabs.Accessories:CreateButton({
+        Name = accessory.Name,
         Callback = function()
-            Wear(accessory.ID)
+            WEAR(accessory.ID)
         end
     })
 end
 
-    Tabs.Accessories:AddParagraph({
+
+Tabs.Accessories:CreateParagraph({
         Title = "Hand Accessories",
         Content = "Yes, Holdable Accessories"
     })
@@ -363,217 +324,200 @@ end
     {Name = "Terrible-Teddy", ID = 3339372724},
     {Name = "Frozen-Blaster", ID = 3013849063},
     {Name = "Infinity-Gauntlet", ID = 2988781799},
+    {Name = "Classic Sword Classic RIGHT", ID = 72563448587538},
+    {Name = "Firebrand Sword Red LEFT", ID = 103807649971342},
+    {Name = "Dual Venomshank Swords Green", ID = 72612615631590},
+    {Name = "Dual Darkheart Swords Black", ID = 127135045879692},
+    {Name = "Ghostwalker Sword RIGHT TRANSPARENT 75", ID = 86312248993609},
+    {Name = "Darkheart Sword Black LEFT", ID = 127604887527094},
+    {Name = "Darkheart Sword Black RIGHT", ID = 124312895586978},
+    {Name = "Classic Sword LEFT HAND", ID = 110239613631704},
 }
 
 
 
 for _, accessory in pairs(HandAccessories) do
-        Tabs.Accessories:AddButton({
-        Title = accessory.Name,
-        Description = "HandHeld - " .. accessory.Name,
+        Tabs.Accessories:CreateButton({
+        Name = accessory.Name,
         Callback = function()
-            Wear(accessory.ID)
+            WEAR(accessory.ID)
         end
     })
 end
 
-Tabs.Accessories:AddParagraph({
+Tabs.Accessories:CreateParagraph({
         Title = "Particles Whoa",
         Content = "Yes, Particles Accessories"
     })
 
 local ParticleAccessories = {
-    -- FIRE EFFECT
     {Name = "Doomsekkar", ID = 132809431},
     {Name = "Ghosdeeri", ID = 183468963},
-    {Name = "Dusekkar", ID = 1474657},
+    {Name = "Cursed Flames", ID = 3756389957},
     {Name = "Hiccup's Improved Viking Helmet", ID = 262669756},
     {Name = "Korblox Grand Marshal", ID = 233253311},
     {Name = "Flaming Mohawk", ID = 191101707},
     {Name = "Fiery Horns of the Netherworld", ID = 215718515},
     {Name = "Bluesteel Horns of Pwnage", ID = 233705354},
-
-    -- SPARKLE EFFECT
     {Name = "Boss White Hat", ID = 89171071},
-    {Name = "Gold Sparkle Time Banded Boss White Hat", ID = 173624651},
-    {Name = "Red Banded Boss White Hat", ID = 173624749},
-    {Name = "Blue Banded Boss White Hat", ID = 173624602},
-    {Name = "Purple Banded Boss White Hat", ID = 173624697},
-    {Name = "Binary Banded Boss White Hat", ID = 173624561},
-    {Name = "Egg of Destiny", ID = 153059501},
     {Name = "Spring Fairy", ID = 150381051},
     {Name = "Winter Fairy", ID = 141742418},
     {Name = "Fall Fairy", ID = 128217885},
     {Name = "St Patrick's Day Fairy", ID = 226189871},
     {Name = "Snow Queen's Necklace", ID = 187998056},
     {Name = "Sparkling Angel Wings", ID = 192557913},
-
-    -- SMOKE EFFECT
     {Name = "Rbadam's Smokestack Top Hat", ID = 169444515}
 }
 
 for _, accessory in pairs(ParticleAccessories) do
-    Tabs.Accessories:AddButton({
-        Title = accessory.Name,
-        Description = "Particle - " .. accessory.Name,
+    Tabs.Accessories:CreateButton({
+        Name = accessory.Name,
         Callback = function()
-            Wear(accessory.ID)
+            WEAR(accessory.ID)
         end
     })
 end
 
+local antiSitEnabled = false
 
-Tabs.Trolling:AddButton({
-        Title = "Get Coach",
-        Description = "Why everyone calling it sofa",
-        Callback = function()
-            Tool("Coach")
-        end
-    })
+Tabs.LocalPlayer:CreateButton({
+   Name = "Enable/Disable Anti Sit",
+   Callback = function()
+      antiSitEnabled = not antiSitEnabled
 
- Tabs.Bundles:AddButton({
-        Title = "Invisible",
-        Description = "Make Your Character Invisible",
-        Callback = function()
-            AvatarChanges("15312911732","14532583477","14532583469","14532583517","14532583483","134082579")
-        end
-    })
-    
-    Tabs.Bundles:AddButton({
-        Title = "No Arm",
-        Description = "Make Your Character No Arm",
-        Callback = function()
-            AvatarChanges("0","14532583477","14532583469","0","0","0")
-        end
-    })
-    
-    Tabs.Bundles:AddButton({
-        Title = "R6",
-        Description = "Make Your Character Turn R6",
-        Callback = function()
-            AvatarChanges("81500432784353","103452055306587","87202958751790","129699548221468","106411216404626")
-        end
-    })
-    
-    
-    Tabs.Bundles:AddButton({
-        Title = "R6 1x1x1x1x",
-        Description = "Ohh Hackerrr",
-        Callback = function()
-COPYACCESSORIES(game.Players.LocalPlayer)
-        Color("Lime green")
-            Wear(11320962276)
-wait(1)
-            Wear(2058582454)
-wait(1)
-            Wear(17653269247)
-wait(1)
-            Wear(18570894442)
-wait(1)
-            AvatarChanges("17662665021","103452055306587","87202958751790","129699548221468","106411216404626")
-            
-        end
-    })
-    
-    Tabs.Bundles:AddButton({
-        Title = "R6 - Female",
-        Description = "Make Your Character\nTurn R6 but female",
-        Callback = function()
-            AvatarChanges("17900050031","17900049887","17900050095","17900050108","17900050024")
-        end
-    })
-    
-    Tabs.Bundles:AddButton({
-        Title = "Red Outline",
-        Description = "Make Your Character\nHas Red Outline",
-        Callback = function()
-COPYACCESSORIES(game.Players.LocalPlayer)
-            AvatarChanges("14578962608","14578962586","14578962590","14578962604","14578958644","0")
-    Wear(16346671665)
-        end
-    })
+      local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+      if humanoid then
+         humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, not antiSitEnabled)
+      end
 
-  Tabs.House:AddInput("Input", {
-        Title = "",
-        Default = "",
-        Placeholder = "Get House Permission\nEnter House Number",
-        Numeric = true,
-        Finished = true,
-        Callback = function(Value)
-            Permission(Value)
-        end
-    })
-
-    
-end
-
-SaveManager:SetLibrary(Fluent)
-InterfaceManager:SetLibrary(Fluent)
-
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({})
-InterfaceManager:SetFolder("FluentScriptHub")
-SaveManager:SetFolder("FluentScriptHub/specific-game")
-
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
-
-Window:SelectTab(1)
-
-Fluent:Notify({
-    Title = "Fluent",
-    Content = "The script has been loaded.",
-    Duration = 8
+      Rayfield:Notify({
+         Title = "Anti Sit Status",
+         Content = antiSitEnabled and "Anti Sit is now ON" or "Anti Sit is now OFF",
+         Duration = 2
+      })
+   end,
 })
 
-SaveManager:LoadAutoloadConfig()
 
 
-local cloneref = cloneref or function(o) return o end
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "Toggleui"
-ScreenGui.Parent = cloneref(game.CoreGui)
-ScreenGui.ResetOnSpawn = false
+local UserWalkSpeed = 16
 
-local Toggle = Instance.new("TextButton")
-Toggle.Name = "Toggle"
-Toggle.Parent = ScreenGui
-Toggle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Toggle.BackgroundTransparency = 0.5
-Toggle.Position = UDim2.new(0, 0, 0.454706937, 0)
-Toggle.Size = UDim2.new(0, 50, 0, 50)
-Toggle.Font = Enum.Font.SourceSans
-Toggle.Text = ""
-Toggle.TextColor3 = Color3.fromRGB(248, 248, 248)
-Toggle.TextSize = 1
-Toggle.Draggable = true
-
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0.2, 0)
-Corner.Parent = Toggle
-
-local Image = Instance.new("ImageLabel")
-Image.Name = "Icon"
-Image.Parent = Toggle
-Image.Size = UDim2.new(1, 0, 1, 0)
-Image.BackgroundTransparency = 1
-Image.Image = "rbxassetid://137534367998088" 
-
-local Corner2 = Instance.new("UICorner")
-Corner2.CornerRadius = UDim.new(0.2, 0)
-Corner2.Parent = Image
-
-
-local function simulateKeyPress1()
-    local VirtualInputManager = game:GetService("VirtualInputManager")
-    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.LeftControl, false, game)
-    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.LeftControl, false, game)
-end
-
-
-Toggle.MouseButton1Click:Connect(function()
-    simulateKeyPress1()
+task.spawn(function()
+    while task.wait() do
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.WalkSpeed = UserWalkSpeed
+        end
+    end
 end)
 
 
+
+
+Tabs.LocalPlayer:CreateSlider({
+   Name = "WalkSpeed",
+   Range = {0, 300},
+   Increment = 1,
+   Suffix = "speed",
+   CurrentValue = UserWalkSpeed,
+   Callback = function(Value)
+      UserWalkSpeed = Value
+   end,
+})
+
+local UserJumpPower = 50 
+
+
+task.spawn(function()
+    while task.wait() do
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.JumpPower = UserJumpPower
+        end
+    end
+    
+end)
+
+
+Tabs.LocalPlayer:CreateSlider({
+   Name = "Jump Power",
+   Range = {0, 300},
+   Increment = 1,
+   Suffix = "jump",
+   CurrentValue = UserJumpPower,
+   Callback = function(Value)
+      UserJumpPower = Value
+   end,
+})
+
+-- ESP Button
+Tabs.LocalPlayer:CreateButton({
+   Name = "Enable ESP",
+   Callback = function()
+      local Players = game:GetService("Players")
+      local LocalPlayer = Players.LocalPlayer
+
+      for _, player in ipairs(Players:GetPlayers()) do
+         if player ~= LocalPlayer then
+            local character = player.Character or player.CharacterAdded:Wait()
+            if character then
+               local nameTag = Instance.new("BillboardGui", character.Head)
+               nameTag.Size = UDim2.new(0, 100, 0, 50)
+               nameTag.StudsOffset = Vector3.new(0, 1, 0)
+               nameTag.AlwaysOnTop = true
+
+               local label = Instance.new("TextLabel", nameTag)
+               label.Size = UDim2.new(1, 0, 1, 0)
+               label.BackgroundTransparency = 1
+               label.TextColor3 = Color3.fromRGB(255, 255, 255)
+               label.Font = Enum.Font.SourceSansBold
+               label.TextSize = 14
+               label.Text = player.Name
+            end
+         end
+      end
+   end,
+})
+
+
+
+
+Tabs.Credits:CreateParagraph({Title = "YouTube", Content = "https://www.youtube.com/@Gazer_HA"})
+
+
+
+
+
+Tabs.Credits:CreateParagraph({Title = "Skibidid Ligma", Content = "- Gaze"})
+Tabs.Credits:CreateParagraph({Title = "UI Library", Content = "- Rayfield"})
+
+Tabs.Credits:CreateButton({
+   Name = "Delete GUI",
+   Callback = function()
+      Rayfield:Destroy()
+   end,
+})
+
+
+
+Tabs.Troll:CreateButton({
+        Name = "Get Sofa / Couch",
+        Callback = function()
+            TOOL("Couch")
+        end
+    })
+    
+    
+    Tabs.Troll:CreateButton({
+        Name = "Teleport To Staging Server",
+        Callback = function()
+            game:GetService("TeleportService"):Teleport(92106543276146, game.Players.LocalPlayer)
+        end
+    }) 
+
+Rayfield:Notify({
+   Title = "Script Loaded",
+   Content = "GooGooGaaGaa",
+   Duration = 5,
+})

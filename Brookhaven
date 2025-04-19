@@ -26,7 +26,7 @@ coreGui.CallDialogScreen.Enabled = false
 
 -- Create Main Window
 local Window = Rayfield:CreateWindow({
-   Name = "Glazed Hub Keyless ( Brookhaven 🏡 ) v 1.2",
+   Name = "Glazed Hub Keyless ( Brookhaven 🏡 ) v 1.3",
    LoadingTitle = "Glazed ahh",
    LoadingSubtitle = "by Gaze",
    ConfigurationSaving = {
@@ -316,7 +316,6 @@ local ParticleAccessories = {
     {Name = "Cursed Flames", ID = 3756389957},
     {Name = "Hiccup's Improved Viking Helmet", ID = 262669756},
     {Name = "Korblox Grand Marshal", ID = 233253311},
-    {Name = "Flaming Mohawk", ID = 191101707},
     {Name = "Fiery Horns of the Netherworld", ID = 215718515},
     {Name = "Bluesteel Horns of Pwnage", ID = 233705354},
     {Name = "Boss White Hat", ID = 89171071},

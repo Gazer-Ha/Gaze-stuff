@@ -6,16 +6,23 @@ local callDialog = coreGui.CallDialogScreen.CallDialog.AlertContents
 local title = callDialog.TitleContainer.TitleArea.Title
 local bodyText = callDialog.MiddleContent.Content.BodyText
 local button1 = callDialog.Footer.Buttons["1"]
+local button1Text = button1.ButtonContent.ButtonMiddleContent.Text
 
 title.Size = UDim2.new(0, 100, 0, 26)
-title.Text = "Glazed Hub"
+title.Text = "Gaze Stuff"
 title.TextScaled = true
 bodyText.Text = "Made By Gaze"
 
+local titleTextSize = title.TextSize
+
+
+button1Text.Text = "Continue"
+button1Text.TextSize = bodyText.TextSize
+button1Text.Size = button1.Size
+
+
 button1.MouseButton1Click:Wait()
 coreGui.CallDialogScreen.Enabled = false
-
-print("Button clicked, continuing...")
 
 -- Create Main Window
 local Window = Rayfield:CreateWindow({
@@ -35,6 +42,8 @@ game:GetService("ReplicatedStorage").RE["1Too1l"]:InvokeServer("PickingTools",na
 end
 
 
+
+
 local function RESET()
     game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Avata1rOrigina1l"):FireServer(
         "CharacterChange",
@@ -44,39 +53,44 @@ local function RESET()
 end
 
 local function WEAR(id)
-game:GetService("ReplicatedStorage").RE:FindFirstChild("1Updat1eAvata1r"):FireServer("wear", id) end
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(id) end
 local function COLOR(name)
-    game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Updat1eAvata1r"):FireServer("skintone", name) end
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeBodyColor"):FireServer(name) end
 local function ASK(id)
 pcall(function()
     game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Clothe1s"):FireServer("AskIfIdAvailable", id) end) end
 
 local cooldown = false
+
 local function AvatarChanges(torso, rarm, larm, rleg, lleg, head)
     if cooldown then
         Rayfield:Notify({
-            Title = "Cooldown",
-            Content = "AvatarChanges is on cooldown, please wait!",
-            Duration = 3
+            Title = "Wait..",
+            Content = "Please wait before trying again!",
+            Duration = 2
         })
         return
     end
+
     cooldown = true
+
     pcall(function()
-    game:GetService("ReplicatedStorage").RE:FindFirstChild("1Avata1rOrigina1l"):FireServer("CharacterChange", {torso , rarm , larm , rleg , lleg , head }, "Gaze")
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeCharacterBody"):InvokeServer({torso, rarm, larm, rleg, lleg, head})
     end)
+
     Rayfield:Notify({
-        Title = "Wait..",
-        Content = "Avatar Changes...",
-        Duration = 7
+        Title = "Avatar Changes...",
+        Content = "Applying changes...",
+        Duration = 1
     })
-    task.delay(7, function()
+
+    task.delay(1, function()
         cooldown = false
         Rayfield:Notify({
-        Title = "Success",
-        Content = "Avatar changed successfully!",
-        Duration = 3
-    })
+            Title = "Success",
+            Content = "Avatar changed successfully!",
+            Duration = 2
+        })
     end)
 end
 
@@ -192,46 +206,42 @@ Tabs.Avatar:CreateParagraph({
 Tabs.Avatar:CreateButton({
    Name = "Headless",
    Callback = function()
-           AvatarChanges(1, 1, 1, 1, 1, 134082579)
+           AvatarChanges(0, 0, 0, 0, 0, 134082579)
    end,
 })
-
 
 Tabs.Avatar:CreateButton({
    Name = "BlazeBurner Head",
    Callback = function()
-           AvatarChanges(1, 1, 1, 1, 1, 3210773801)
+           AvatarChanges(0, 0, 0, 0, 0, 3210773801)
    end,
 })
-
 
 Tabs.Avatar:CreateButton({
    Name = "DeathWalker Head",
    Callback = function()
-           AvatarChanges(1, 1, 1, 1, 1, 16580493236)
+           AvatarChanges(0, 0, 0, 0, 0, 16580493236)
    end,
 })
 
 Tabs.Avatar:CreateParagraph({
         Title = "Legs",
-        Content = "Stick Leg ahh, You Look Cringe"
+        Content = "I mean,\nwho wouldn’t want to walk around looking like they’ve never seen a gym in their life? \nTruly, you're setting new trends."
     })
-
 
 Tabs.Avatar:CreateButton({
    Name = "Korblox Right Leg",
    Callback = function()
-           AvatarChanges(1, 1, 1, 139607718, 1, 1)
+           AvatarChanges(0, 0, 0, 139607718, 0, 0)
    end,
 })
 
 Tabs.Avatar:CreateButton({
    Name = "Korblox Left Leg",
    Callback = function()
-           AvatarChanges(1, 1, 1, 1, 139607718, 1)
+           AvatarChanges(0, 0, 0, 0, 139607718, 0)
    end,
 })
-
 
 
 
@@ -448,6 +458,108 @@ Tabs.Credits:CreateButton({
       Rayfield:Destroy()
    end,
 })
+
+
+
+Tabs.Animation:CreateParagraph({Title = "Animation Set", Content = "Such Lazy Things To do"})
+local Animations = {
+    -- Idle Animations
+    {Category = "Idle", Name = "Borock Idle", Id = 3710007708},
+    {Category = "Idle", Name = "Ud'zal Idle", Id = 3307605825},
+    {Category = "Idle", Name = "R15 Idle", Id = 4211409027},
+    {Category = "Idle", Name = "Long Idle", Id = 18308506919},
+    {Category = "Idle", Name = "Bold Idle", Id = 16744209868},
+    {Category = "Idle", Name = "Realistic Idle", Id = 11600321661},
+    {Category = "Idle", Name = "Adidas Sports Idle", Id = 18538150608},
+    {Category = "Idle", Name = "NFL Idle", Id = 101094325978637},
+    {Category = "Idle", Name = "Catwalk Glam Idle", Id = 101279640971758},
+    {Category = "Idle", Name = "Mr. Toilet Idle", Id = 4418326547},
+    {Category = "Idle", Name = "No Boundaries Idle", Id = 18755930927},
+
+    -- Walk Animations
+    {Category = "Walk", Name = "No Boundaries Walk", Id = 18755942776},
+    {Category = "Walk", Name = "Catwalk Glam Walk", Id = 103190462987721},
+    {Category = "Walk", Name = "Bold Walk", Id = 16744219182},
+
+    -- Run Animations
+    {Category = "Run", Name = "Rthro Heavy Run", Id = 3236849826},
+    {Category = "Run", Name = "Adidas Sports Run", Id = 18538133604},
+    {Category = "Run", Name = "Catwalk Glam Run", Id = 75036746190467},
+    {Category = "Run", Name = "Bold Run", Id = 16744214662},
+    {Category = "Run", Name = "NFL Run", Id = 84823630062362},
+    {Category = "Run", Name = "Mr. Toilet Run", Id = 4418324223},
+    {Category = "Run", Name = "No Boundaries Run", Id = 18755933883},
+
+    -- Jump Animations
+    {Category = "Jump", Name = "No Boundaries Jump", Id = 18755925411},
+    {Category = "Jump", Name = "Catwalk Glam Jump", Id = 138641066989023},
+    {Category = "Jump", Name = "Bold Jump", Id = 16744214662},
+    {Category = "Jump", Name = "Wicked Jump", Id = 130373407996664},
+
+    -- Fall Animations
+    {Category = "Fall", Name = "No Boundaries Fall", Id = 18755922352},
+    {Category = "Fall", Name = "Catwalk Glam Fall", Id = 72706690305027},
+        {Category = "Fall", Name = "Adidas Fall", Id = 18538164337},
+    {Category = "Fall", Name = "Bold Fall", Id = 16744207822},
+    
+    --climb
+    {Category = "Climb", Name = "Adidas Climb", Id = 18538170170},
+    {Category = "Climb", Name = "Adidas Climb", Id = 18538170170},
+}
+
+-- Function to generate dropdown for a specific category
+local function CreateAnimationDropdown(category)
+    local options = {}
+    local map = {}
+
+    for _, anim in ipairs(Animations) do
+        if anim.Category == category then
+            table.insert(options, anim.Name)
+            map[anim.Name] = anim.Id
+        end
+    end
+
+    if #options == 0 then return end -- skip empty categories
+
+    Tabs.Animation:CreateDropdown({
+        Name = category .. " Animation",
+        Options = options,
+        CurrentOption = {options[1]},
+        MultipleOptions = false,
+        Flag = category .. "Dropdown",
+        Callback = function(opt)
+            local selectedName = opt[1]
+            local animId = map[selectedName]
+
+            WEAR(animId)
+            Rayfield:Notify({
+                Title = "Applying " .. category .. " Animation...",
+                Content = "Hold on while we switch your style.",
+                Duration = 1
+            })
+
+            task.delay(1, function()
+                local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum:ChangeState(Enum.HumanoidStateType.Landed)
+                end
+                Rayfield:Notify({
+                    Title = category .. " Animation Applied",
+                    Content = "If you don't see it, lag might be messing with it.",
+                    Duration = 1
+                })
+            end)
+        end
+    })
+end
+
+-- Create dropdowns for each category
+CreateAnimationDropdown("Idle")
+CreateAnimationDropdown("Walk")
+CreateAnimationDropdown("Run")
+CreateAnimationDropdown("Jump")
+CreateAnimationDropdown("Fall")
+CreateAnimationDropdown("Climb")
 
 
 

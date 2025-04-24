@@ -357,7 +357,7 @@ Tabs.LocalPlayer:CreateButton({
    end,
 })
 
-
+task.wait(1)
 
 
 local UserWalkSpeed = 16
@@ -457,6 +457,8 @@ Tabs.Credits:CreateButton({
       Rayfield:Destroy()
    end,
 })
+
+
 
 
 
@@ -571,14 +573,231 @@ Tabs.Troll:CreateButton({
     
     
     Tabs.Troll:CreateButton({
-        Name = "Teleport To Staging Server",
+        Name = "Get Fire Paperbag",
         Callback = function()
-            game:GetService("TeleportService"):Teleport(92106543276146, game.Players.LocalPlayer)
+            TOOL("PaperbagFire")
         end
-    }) 
+    })
+    
+    local p = game:GetService("Players").LocalPlayer
+local saved = nil
+local specialID = "14532583477"
+
+local function toggleAvatar()
+    local char = p.Character or p.CharacterAdded:Wait()
+    local hum = char:WaitForChild("Humanoid")
+    local desc = hum:GetAppliedDescription()
+
+    local t, ra, la, rl, ll, h = tostring(desc.Torso), tostring(desc.RightArm), tostring(desc.LeftArm), tostring(desc.RightLeg), tostring(desc.LeftLeg), tostring(desc.Head)
+
+    if ra == specialID then
+        if saved then
+            AvatarChanges(unpack(saved))
+        end
+    else
+        saved = {t, ra, la, rl, ll, h}
+        AvatarChanges("0", specialID, "0", "0", "0", "0")
+    end
+end
+
+
+
+
+
+
+
+    
+local player = game.Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local storingTools = false
+local originalCFrame
+local seatedDisabled = false -- Track if we disabled it
+
+RunService.PreSimulation:Connect(function()
+    local character = player.Character
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+    if storingTools then
+        if not humanoid or not character:FindFirstChild("HumanoidRootPart") then return end
+
+        local root = character.HumanoidRootPart
+        local backpack = player:FindFirstChild("Backpack")
+
+        if humanoid and not seatedDisabled then
+            humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+            seatedDisabled = true
+        end
+
+        if not originalCFrame then
+            originalCFrame = root.CFrame
+        end
+        root.Velocity = Vector3.zero
+        root.RotVelocity = Vector3.zero
+        root.CFrame = originalCFrame
+
+        if backpack then
+            -- Loop equip tools
+            for _, tool in ipairs(backpack:GetChildren()) do
+                if tool:IsA("Tool") then
+                    tool.Parent = character
+                end
+            end
+        end
+
+        -- Hide tool visuals
+        for _, tool in ipairs(character:GetChildren()) do
+            if tool:IsA("Tool") and tool:FindFirstChild("Handle") then
+                local voidPos = Vector3.new(0, -99999, 0)
+                if tool.GripPos ~= voidPos then
+                    tool.GripPos = voidPos
+                end
+            end
+        end
+    elseif seatedDisabled and humanoid then
+        -- Re-enable Seated state when storingTools stops
+        humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+        seatedDisabled = false
+        originalCFrame = nil
+    end
+end)
+
+-- Toggle under Tabs.Troll
+local Toggle = Tabs.Troll:CreateToggle({
+    Name = "Dupe Tools",
+    CurrentValue = false,
+    Flag = "Toggle1",
+    Callback = function(Value)
+        storingTools = Value
+        if not Value then
+            originalCFrame = nil
+            local char = player.Character
+            if char and char:FindFirstChildOfClass("Humanoid") then
+                char:FindFirstChildOfClass("Humanoid").Health = 0
+            end
+        end
+    end,
+})
+
+-- Toggle under Tabs.Troll
+
+    
+    
+
+math.randomseed(tick())
+
+local funFacts = {
+    "Honey never spoils. Archaeologists found 3,000-year-old honey that's still edible.",
+    "Octopuses have three hearts and blue blood.",
+    "Bananas are berries, but strawberries aren't.",
+    "A single strand of spaghetti is called a 'spaghetto'.",
+    "Sloths can hold their breath longer than dolphins can.",
+    "Sharks existed before trees.",
+    "Scotland’s national animal is the unicorn.",
+    "There are more stars in the universe than grains of sand on Earth.",
+    "The Eiffel Tower can grow more than 6 inches in summer due to heat expansion.",
+    "Your brain uses around 20% of your body's energy even at rest.",
+    "Some turtles can breathe through their butts.",
+    "The moon has moonquakes.",
+    "Cows have best friends and get stressed when separated.",
+    "Wombat poop is cube-shaped.",
+    "A day on Venus is longer than a year on Venus.",
+    -- Additions below
+    "A group of flamingos is called a 'flamboyance'.",
+    "The unicorn is the national animal of Scotland.",
+    "A group of lizards is called a 'lounge'.",
+    "Pangolins are the only mammals with scales.",
+    "A snail can have over 25,000 teeth.",
+    "Cumulus clouds can weigh more than 1 million pounds.",
+    "Octopus skin can detect light.",
+    "Termites chew faster when listening to rock music.",
+    "Grasshoppers hear with their stomachs.",
+    "The praying mantis is the only insect that can turn its head.",
+    "Babies have taste buds all over their mouths.",
+    "Tigers squint instead of purring to show affection.",
+    "The word 'snirtle' means to laugh and snort at the same time.",
+    "Giraffes give birth standing up, and calves fall about 6 feet.",
+    "Bronze medalists are often happier than silver medalists.",
+    "Reading books can extend your lifespan by up to two years.",
+    "Bananas glow blue under black lights.",
+    "Ketchup was once used as a medicine in the 1830s.",
+    "The word 'daisy' comes from 'day's eye'.",
+    "Moonflowers bloom at night and smell like lemons.",
+    "You can hear a blue whale’s heartbeat from over two miles away.",
+    "An astronaut's height increases in space due to lack of gravity.",
+    "A chef’s hat traditionally has 100 pleats to represent 100 ways to cook an egg.",
+    "Butterflies taste with their feet.",
+    "Turtles can breathe through their butts — it’s called cloacal respiration.",
+    "Sharks are older than trees by at least 200 million years.",
+    "A blob of toothpaste is called a 'nurdle'.",
+    "There are more fake flamingos in the world than real ones.",
+    "A bolt of lightning contains enough energy to toast 100,000 slices of bread.",
+    "A 'moment' technically means 90 seconds.",
+    "The smell of freshly-cut grass is actually a plant distress call.",
+    "A blue whale’s tongue weighs as much as an elephant.",
+    "Hot water freezes faster than cold water under certain conditions (Mpemba effect).",
+    "Koalas have fingerprints that are almost indistinguishable from humans.",
+    "The inventor of the Frisbee was turned into a Frisbee after he died.",
+    "Cats can’t taste sweetness.",
+    "The first oranges weren’t orange — they were green.",
+    "Slugs have four noses.",
+    "Most wasabi served in restaurants is actually horseradish dyed green.",
+    "An apple, potato, and onion all taste the same if you eat them with your nose plugged.",
+    "Tigers have striped skin, not just striped fur.",
+    "Elephants can't jump.",
+    "Sea otters hold hands while sleeping so they don’t drift apart.",
+    "Banging your head against a wall burns 150 calories an hour — but not recommended!",
+    "A jiffy is a real unit of time — 1/100th of a second.",
+    "Coca-Cola would be green without coloring.",
+    "Oxford University is older than the Aztec Empire.",
+    "Nintendo was founded in 1889 as a playing card company.",
+    "The hashtag symbol is technically called an 'octothorpe'.",
+    "The dot over a lowercase 'i' is called a 'tittle'.",
+    "M&M's were created in 1941 for soldiers in WWII to carry chocolate without melting.",
+    "The average person walks the equivalent of five times around the world in their lifetime.",
+    "The longest hiccuping spree lasted 68 years.",
+    "The word 'robot' comes from a Czech word meaning 'forced labor'.",
+    "Humans share about 60% of their DNA with bananas.",
+    "You can’t hum while holding your nose.",
+    "A crocodile can't stick its tongue out.",
+    "Polar bear fur is actually transparent, not white.",
+    "Chewing gum while chopping onions will keep you from crying.",
+    "The inventor of the microwave only received $2 for his discovery.",
+    "A small child could swim through the veins of a blue whale.",
+    "The average cloud weighs about 1.1 million pounds.",
+    "You burn more calories sleeping than watching TV.",
+    "Most lipsticks contain fish scales.",
+    "A shrimp’s heart is in its head.",
+    "Spiders can’t fly, but some use silk threads to 'balloon' through the air.",
+    "The total weight of all ants on Earth equals the total weight of all humans.",
+    "Some cats are allergic to humans.",
+    "Sunsets on Mars are blue.",
+    "Water can boil and freeze at the same time (triple point).",
+    "The moon is slowly drifting away from Earth — about 1.5 inches per year.",
+    "Avocados never ripen on the tree — only after picking.",
+    "An octopus has nine brains — one for each arm and one central brain.",
+    "You’re taller in the morning than at night.",
+    "A sneeze travels about 100 mph.",
+    "In Switzerland, it's illegal to own just one guinea pig — they need social companions.",
+    "Pineapples take two years to grow.",
+    "The average pencil can draw a line 35 miles long.",
+    "Bees can recognize human faces.",
+    "The inventor of Pringles is buried in a Pringles can.",
+    "Most dust in your home is made of dead skin cells.",
+    "A day on Earth is not exactly 24 hours — it’s 23.934 hours.",
+    "Cats have fewer toes on their back paws.",
+    "Octopuses taste with their arms.",
+    "Butterflies remember being caterpillars.",
+    "A cockroach can live a week without its head.",
+    "Goats have rectangular pupils.",
+    "Jellyfish are 95% water.",
+    "The world’s quietest room is -9 decibels — too quiet for comfort.",
+}
+
+local randomFact = funFacts[math.random(1, #funFacts)]
 
 Rayfield:Notify({
    Title = "Script Loaded",
-   Content = "GooGooGaaGaa",
+   Content = randomFact,
    Duration = 5,
 })

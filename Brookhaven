@@ -1,4 +1,8 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- Load Luna UI instead of Rayfield
+local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/main/source.lua", true))()
+
+-- Display intro screen manually (Luna has no direct screen-based UI like Rayfield)
 local coreGui = cloneref(game:GetService("CoreGui"))
 coreGui.CallDialogScreen.Enabled = true
 
@@ -13,61 +17,68 @@ title.Text = "Gaze Stuff"
 title.TextScaled = true
 bodyText.Text = "Made By Gaze"
 
-local titleTextSize = title.TextSize
-
-
 button1Text.Text = "Continue"
 button1Text.TextSize = bodyText.TextSize
 button1Text.Size = button1.Size
 
-
 button1.MouseButton1Click:Wait()
 coreGui.CallDialogScreen.Enabled = false
 
--- Create Main Window
-local Window = Rayfield:CreateWindow({
-   Name = "Glazed Hub Keyless ( Brookhaven 🏡 ) v 1.3",
-   LoadingTitle = "Glazed ahh",
-   LoadingSubtitle = "by Gaze",
-   ConfigurationSaving = {
-      Enabled = false,
-   }
+-- Create Luna UI Main Window
+local Window = Luna:CreateWindow({
+	Name = "Glazed Hub Keyless ( Brookhaven 🏡 ) v 1.4", -- This Is Title Of Your Window
+	Subtitle = nil, -- A Gray Subtitle next To the main title.
+	LogoID = "17842067503", -- The Asset ID of your logo. Set to nil if you do not have a logo for Luna to use.
+	LoadingEnabled = true, -- Whether to enable the loading animation. Set to false if you do not want the loading screen or have your own custom one.
+	LoadingTitle = "Loading.", -- Header for loading screen
+	LoadingSubtitle = "Brrbrbrbrrbrbbbuhhh", -- Subtitle for loading screen
+
+	ConfigSettings = {
+		RootFolder = nil, -- The Root Folder Is Only If You Have A Hub With Multiple Game Scripts and u may remove it. DO NOT ADD A SLASH
+		ConfigFolder = "Glazed Hub" -- The Name Of The Folder Where Luna Will Store Configs For This Script. DO NOT ADD A SLASH
+	},
+
+	KeySystem = false, -- As Of Beta 6, Luna Has officially Implemented A Key System!
+	KeySettings = {
+		Title = "Example Key that i didn't use",
+		Subtitle = "Key System",
+		Note = "Buusjsjsjajaja",
+		SaveInRoot = false, -- Enabling will save the key in your RootFolder (YOU MUST HAVE ONE BEFORE ENABLING THIS OPTION)
+		SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+		Key = {"Example Key"}, -- List of keys that will be accepted by the system, please use a system like Pelican or Luarmor that provide key strings based on your HWID since putting a simple string is very easy to bypass
+		SecondAction = {
+			Enabled = true, -- Set to false if you do not want a second action,
+			Type = "Link", -- Link / Discord.
+			Parameter = "" -- If Type is Discord, then put your invite link (DO NOT PUT DISCORD.GG/). Else, put the full link of your key system here.
+		}
+	}
 })
 
 
 --// Function
 
 local function TOOL(name)
-game:GetService("ReplicatedStorage").RE["1Too1l"]:InvokeServer("PickingTools",name)
-end
-
-
-
-
-local function RESET()
-    game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Avata1rOrigina1l"):FireServer(
-        "CharacterChange",
-        0, 0, 0, 0, 0, 0, 
-        "AllBlocky"
-    )
+    game:GetService("ReplicatedStorage").RE["1Too1l"]:InvokeServer("PickingTools", name)
 end
 
 local function WEAR(id)
-game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(id) end
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(id)
+end
+
 local function COLOR(name)
-    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeBodyColor"):FireServer(name) end
-local function ASK(id)
-pcall(function()
-    game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Clothe1s"):FireServer("AskIfIdAvailable", id) end) end
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeBodyColor"):FireServer(name)
+end
+
 
 local cooldown = false
 
 local function AvatarChanges(torso, rarm, larm, rleg, lleg, head)
     if cooldown then
-        Rayfield:Notify({
-            Title = "Wait..",
-            Content = "Please wait before trying again!",
-            Duration = 2
+        Luna:Notification({
+            Title = "Wait...",
+            Icon = "hourglass_empty",
+            ImageSource = "Material",
+            Content = "Please wait before trying again!"
         })
         return
     end
@@ -78,180 +89,215 @@ local function AvatarChanges(torso, rarm, larm, rleg, lleg, head)
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ChangeCharacterBody"):InvokeServer({torso, rarm, larm, rleg, lleg, head})
     end)
 
-    Rayfield:Notify({
+    Luna:Notification({
         Title = "Avatar Changes...",
-        Content = "Applying changes...",
-        Duration = 1
+        Icon = "autorenew",
+        ImageSource = "Material",
+        Content = "Applying changes..."
     })
 
     task.delay(1, function()
         cooldown = false
-        Rayfield:Notify({
+        Luna:Notification({
             Title = "Success",
-            Content = "Avatar changed successfully!",
-            Duration = 2
+            Icon = "check_circle",
+            ImageSource = "Material",
+            Content = "Avatar changed successfully!"
         })
     end)
 end
 
 
+
 local Tabs = {
-Accessories = Window:CreateTab("Accessories"),
-Bundles = Window:CreateTab("Bundles"),
-LocalPlayer = Window:CreateTab("Local Player"),
-Avatar = Window:CreateTab("Avatar"),
-Animation = Window:CreateTab("Animation"),
-Troll = Window:CreateTab("Troll n stuff"),
-Credits = Window:CreateTab("Credits")
+    Accessories = Window:CreateTab({
+        Name = "Accessories",
+        Icon = "checkroom",
+        ImageSource = "Material",
+        ShowTitle = true
+    }),
+    Bundles = Window:CreateTab({
+        Name = "Bundles",
+        Icon = "people",
+        ImageSource = "Material",
+        ShowTitle = true
+    }),
+    LocalPlayer = Window:CreateTab({
+        Name = "Local Player",
+        Icon = "person",
+        ImageSource = "Material",
+        ShowTitle = true
+    }),
+    Avatar = Window:CreateTab({
+        Name = "Avatar",
+        Icon = "face_retouching_natural",
+        ImageSource = "Material",
+        ShowTitle = true
+    }),
+    Animation = Window:CreateTab({
+        Name = "Animation",
+        Icon = "animation",
+        ImageSource = "Material",
+        ShowTitle = true
+    }),
+    Troll = Window:CreateTab({
+        Name = "Troll n stuff",
+        Icon = "mood_bad",
+        ImageSource = "Material",
+        ShowTitle = true
+    }),
+    Credits = Window:CreateTab({
+        Name = "Credits",
+        Icon = "emoji_events",
+        ImageSource = "Material",
+        ShowTitle = true
+    })
 }
 
 
+Tabs.Bundles:CreateParagraph({
+    Title = "Info",
+    Text = "Default scale is recommended\nfor R6 And Minecraft Bundle\nTutorial: https://youtu.be/KYQgwKYT4lk"
+})
+
+Tabs.Bundles:CreateButton({
+    Name = "Copy Link",
+    Callback = function()
+        setclipboard("https://youtu.be/KYQgwKYT4lk")
+    end
+})
 
 Tabs.Bundles:CreateParagraph({
-        Title = "Info",
-        Content = "Default scale is reccomended\nfor R6 And Minecraft Bundle\nTutorial: https://youtu.be/KYQgwKYT4lk"
-    })
-    
-    Tabs.Bundles:CreateButton({
-   Name = "copy link",
-   Callback = function()
-      setclipboard("https://youtu.be/KYQgwKYT4lk")
-   end,
-})
-
-Tabs.Bundles:CreateParagraph({
-        Title = "Bundles",
-        Content = "Funny Bundles"
-    })
-
-Tabs.Bundles:CreateButton({
-   Name = "Minecraft",
-   Callback = function()
-      AvatarChanges(14976595538, 14976595831, 14976595559, 14976595617, 14976595675, 134082579)
-   end,
-})
-
-
-
-
-Tabs.Bundles:CreateButton({
-   Name = "R6 - Male",
-   Callback = function()
-      AvatarChanges(81500432784353, 103452055306587, 87202958751790, 129699548221468, 106411216404626, 0)
-   end,
-})
-
-
-Tabs.Bundles:CreateButton({
-   Name = "R6 - Female",
-   Callback = function()
-      AvatarChanges(124225564167965, 103452055306587, 87202958751790, 129699548221468, 106411216404626, 0)
-   end,
-})
-
-
-
-Tabs.Bundles:CreateButton({
-   Name = "Classic R6",
-   Callback = function()
-      AvatarChanges(17675630775, 17675630666, 17675630763, 17675630677, 17675630636, 0)
-   end,
+    Title = "Bundles",
+    Text = "Funny Bundles"
 })
 
 Tabs.Bundles:CreateButton({
-   Name = "Invisible",
-   Callback = function()
-           AvatarChanges("15312911732","14532583477","14532583469","14532583517","14532583483","134082579")
-   end,
+    Name = "Minecraft",
+    Callback = function()
+        AvatarChanges(14976595538, 14976595831, 14976595559, 14976595617, 14976595675, 134082579)
+    end
 })
 
 Tabs.Bundles:CreateButton({
-   Name = "Void Red Outline",
-   Callback = function()
--- torso, rarm, larm, rleg, lleg, head  (Forgor To Remov)
-AvatarChanges(107664305832755, 118439782321955, 102394541963166, 139086821056857, 130029826352306, 134082579)
-      wait(2)
-    WEAR(16346671665)
-    WEAR(12146169621)
-   end,
+    Name = "R6 - Male",
+    Callback = function()
+        AvatarChanges(81500432784353, 103452055306587, 87202958751790, 129699548221468, 106411216404626, 0)
+    end
 })
 
-
-Tabs.Avatar:CreateParagraph({
-        Title = "Colors",
-        Content = "Some Exclusive Color That Didnt Appear In Color UI"
-    })
-    
-    Tabs.Avatar:CreateButton({
-   Name = "Pastel Yellow",
-   Callback = function()
-           COLOR("Pastel yellow")
-   end,
+Tabs.Bundles:CreateButton({
+    Name = "R6 - Female",
+    Callback = function()
+        AvatarChanges(124225564167965, 103452055306587, 87202958751790, 129699548221468, 106411216404626, 0)
+    end
 })
 
-Tabs.Avatar:CreateButton({
-   Name = "Noob Yellow",
-   Callback = function()
-           COLOR("Bright yellow")
-   end,
-})
-    
-
-Tabs.Avatar:CreateParagraph({
-        Title = "Heads",
-        Content = "Yeah Just Some Head Like Headless"
-    })
-
-
-Tabs.Avatar:CreateButton({
-   Name = "Headless",
-   Callback = function()
-           AvatarChanges(0, 0, 0, 0, 0, 134082579)
-   end,
+Tabs.Bundles:CreateButton({
+    Name = "Classic R6",
+    Callback = function()
+        AvatarChanges(17675630775, 17675630666, 17675630763, 17675630677, 17675630636, 0)
+    end
 })
 
-Tabs.Avatar:CreateButton({
-   Name = "BlazeBurner Head",
-   Callback = function()
-           AvatarChanges(0, 0, 0, 0, 0, 3210773801)
-   end,
-})
-
-Tabs.Avatar:CreateButton({
-   Name = "DeathWalker Head",
-   Callback = function()
-           AvatarChanges(0, 0, 0, 0, 0, 16580493236)
-   end,
+Tabs.Bundles:CreateButton({
+    Name = "Invisible",
+    Callback = function()
+        AvatarChanges("15312911732", "14532583477", "14532583469", "14532583517", "14532583483", "134082579")
+    end
 })
 
 Tabs.Avatar:CreateParagraph({
-        Title = "Legs",
-        Content = "I mean,\nwho wouldn’t want to walk around looking like they’ve never seen a gym in their life? \nTruly, you're setting new trends."
-    })
-
-Tabs.Avatar:CreateButton({
-   Name = "Korblox Right Leg",
-   Callback = function()
-           AvatarChanges(0, 0, 0, 139607718, 0, 0)
-   end,
+    Title = "Colors",
+    Text = "Some Exclusive Color That Didn't Appear In Color UI"
 })
 
 Tabs.Avatar:CreateButton({
-   Name = "Korblox Left Leg",
-   Callback = function()
-           AvatarChanges(0, 0, 0, 0, 139607718, 0)
-   end,
+    Name = "Pastel Yellow",
+    Callback = function()
+        COLOR("Pastel yellow")
+    end
 })
 
+Tabs.Avatar:CreateButton({
+    Name = "Noob Yellow",
+    Callback = function()
+        COLOR("Bright yellow")
+    end
+})
 
+Tabs.Avatar:CreateParagraph({
+    Title = "Heads",
+    Text = "Yeah Just Some Head Like Headless"
+})
+
+Tabs.Avatar:CreateButton({
+    Name = "Headless",
+    Callback = function()
+        AvatarChanges(0, 0, 0, 0, 0, 134082579)
+    end
+})
+
+Tabs.Avatar:CreateButton({
+    Name = "BlazeBurner Head",
+    Callback = function()
+        AvatarChanges(0, 0, 0, 0, 0, 3210773801)
+    end
+})
+
+Tabs.Avatar:CreateButton({
+    Name = "DeathWalker Head",
+    Callback = function()
+        AvatarChanges(0, 0, 0, 0, 0, 16580493236)
+    end
+})
+
+Tabs.Avatar:CreateParagraph({
+    Title = "Legs",
+    Text = "I mean,\nwho wouldn’t want to walk around looking like they’ve never seen a gym in their life?\nTruly, you're setting new trends."
+})
+
+Tabs.Avatar:CreateButton({
+    Name = "Korblox Right Leg",
+    Callback = function()
+        AvatarChanges(0, 0, 0, 139607718, 0, 0)
+    end
+})
+
+Tabs.Avatar:CreateButton({
+    Name = "Korblox Left Leg",
+    Callback = function()
+        AvatarChanges(0, 0, 0, 0, 139607718, 0)
+    end
+})
+
+Tabs.LocalPlayer:CreateToggle({
+    Name = "Anti Sit",
+    StartingState = false,
+    Callback = function(state)
+        local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, not state)
+        end
+
+        local TheContent = state and "Anti Sit is now ON" or "Anti Sit is now OFF"
+
+        Luna:Notification({
+            Title = "Anti Sit Status",
+            Icon = "airline_seat_legroom_reduced",
+            ImageSource = "Material",
+            Content = TheContent
+        })
+    end
+})
 
 
 Tabs.Accessories:CreateParagraph({
-        Title = "Sound Accessories",
-        Content = "Yes, Accessories with sound."
-    })
-    
-    local SoundAccessories = {
+    Title = "Sound Accessories",
+    Text = "Yes, Accessories with sound."
+})
+
+local SoundAccessories = {
     {Name = "Witches Brew Hat", ID = 305888394},
     {Name = "Transient-Harmonica", ID = 33070696},
     {Name = "Chicken-Suit", ID = 24112667},
@@ -268,12 +314,13 @@ for _, accessory in pairs(SoundAccessories) do
 end
 
 
+
 Tabs.Accessories:CreateParagraph({
-        Title = "Hand Accessories",
-        Content = "Yes, Holdable Accessories"
-    })
-    
-    local HandAccessories = {
+    Title = "Hand Accessories",
+    Text = "Yes, Holdable Accessories"
+})
+
+local HandAccessories = {
     {Name = "Ambris-Lum-Sword", ID = 5722175994},
     {Name = "Atlantean-Trident", ID = 3241238974},
     {Name = "Barbarian-Battleaxe", ID = 3131064293},
@@ -294,10 +341,8 @@ Tabs.Accessories:CreateParagraph({
     {Name = "Classic Sword LEFT HAND", ID = 110239613631704},
 }
 
-
-
 for _, accessory in pairs(HandAccessories) do
-        Tabs.Accessories:CreateButton({
+    Tabs.Accessories:CreateButton({
         Name = accessory.Name,
         Callback = function()
             WEAR(accessory.ID)
@@ -305,10 +350,11 @@ for _, accessory in pairs(HandAccessories) do
     })
 end
 
+
 Tabs.Accessories:CreateParagraph({
-        Title = "Particles Whoa",
-        Content = "Yes, Particles Accessories"
-    })
+    Title = "Particles Whoa",
+    Text = "Yes, Particles Accessories"
+})
 
 local ParticleAccessories = {
     {Name = "Doomsekkar", ID = 132809431},
@@ -337,132 +383,7 @@ for _, accessory in pairs(ParticleAccessories) do
     })
 end
 
-local antiSitEnabled = false
 
-Tabs.LocalPlayer:CreateButton({
-   Name = "Enable/Disable Anti Sit",
-   Callback = function()
-      antiSitEnabled = not antiSitEnabled
-
-      local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-      if humanoid then
-         humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, not antiSitEnabled)
-      end
-
-      Rayfield:Notify({
-         Title = "Anti Sit Status",
-         Content = antiSitEnabled and "Anti Sit is now ON" or "Anti Sit is now OFF",
-         Duration = 2
-      })
-   end,
-})
-
-task.wait(1)
-
-
-local UserWalkSpeed = 16
-
-task.spawn(function()
-    while task.wait() do
-        local player = game.Players.LocalPlayer
-        if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-            player.Character.Humanoid.WalkSpeed = UserWalkSpeed
-        end
-    end
-end)
-
-
-
-
-Tabs.LocalPlayer:CreateSlider({
-   Name = "WalkSpeed",
-   Range = {0, 300},
-   Increment = 1,
-   Suffix = "speed",
-   CurrentValue = UserWalkSpeed,
-   Callback = function(Value)
-      UserWalkSpeed = Value
-   end,
-})
-
-local UserJumpPower = 50 
-
-
-task.spawn(function()
-    while task.wait() do
-        local player = game.Players.LocalPlayer
-        if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-            player.Character.Humanoid.JumpPower = UserJumpPower
-        end
-    end
-    
-end)
-
-
-Tabs.LocalPlayer:CreateSlider({
-   Name = "Jump Power",
-   Range = {0, 300},
-   Increment = 1,
-   Suffix = "jump",
-   CurrentValue = UserJumpPower,
-   Callback = function(Value)
-      UserJumpPower = Value
-   end,
-})
-
--- ESP Button
-Tabs.LocalPlayer:CreateButton({
-   Name = "Enable ESP",
-   Callback = function()
-      local Players = game:GetService("Players")
-      local LocalPlayer = Players.LocalPlayer
-
-      for _, player in ipairs(Players:GetPlayers()) do
-         if player ~= LocalPlayer then
-            local character = player.Character or player.CharacterAdded:Wait()
-            if character then
-               local nameTag = Instance.new("BillboardGui", character.Head)
-               nameTag.Size = UDim2.new(0, 100, 0, 50)
-               nameTag.StudsOffset = Vector3.new(0, 1, 0)
-               nameTag.AlwaysOnTop = true
-
-               local label = Instance.new("TextLabel", nameTag)
-               label.Size = UDim2.new(1, 0, 1, 0)
-               label.BackgroundTransparency = 1
-               label.TextColor3 = Color3.fromRGB(255, 255, 255)
-               label.Font = Enum.Font.SourceSansBold
-               label.TextSize = 14
-               label.Text = player.Name
-            end
-         end
-      end
-   end,
-})
-
-
-
-
-Tabs.Credits:CreateParagraph({Title = "YouTube", Content = "https://www.youtube.com/@Gazer_HA"})
-
-
-
-
-
-Tabs.Credits:CreateParagraph({Title = "Skibidid Ligma", Content = "- Gaze"})
-Tabs.Credits:CreateParagraph({Title = "UI Library", Content = "- Rayfield"})
-
-Tabs.Credits:CreateButton({
-   Name = "Delete GUI",
-   Callback = function()
-      Rayfield:Destroy()
-   end,
-})
-
-
-
-
-
-Tabs.Animation:CreateParagraph({Title = "Animation Set", Content = "Such Lazy Things To do"})
 local Animations = {
     -- Idle Animations
     {Category = "Idle", Name = "Borock Idle", Id = 3710007708},
@@ -505,108 +426,40 @@ local Animations = {
     
     --climb
     {Category = "Climb", Name = "Adidas Climb", Id = 18538170170},
-    {Category = "Climb", Name = "Adidas Climb", Id = 18538170170},
+    {Category = "Climb", Name = "Adidas2 Climb", Id = 18538170170},
 }
 
--- Function to generate dropdown for a specific category
-local function CreateAnimationDropdown(category)
-    local options = {}
-    local map = {}
 
-    for _, anim in ipairs(Animations) do
-        if anim.Category == category then
-            table.insert(options, anim.Name)
-            map[anim.Name] = anim.Id
-        end
-    end
-
-    if #options == 0 then return end -- skip empty categories
-
-    Tabs.Animation:CreateDropdown({
-        Name = category .. " Animation",
-        Options = options,
-        CurrentOption = {options[1]},
-        MultipleOptions = false,
-        Flag = category .. "Dropdown",
-        Callback = function(opt)
-            local selectedName = opt[1]
-            local animId = map[selectedName]
-
-            WEAR(animId)
-            Rayfield:Notify({
-                Title = "Applying " .. category .. " Animation...",
-                Content = "Hold on while we switch your style.",
-                Duration = 1
+-- Loop through Animations
+for _, anim in ipairs(Animations) do
+    local Button = Tabs.Animation:CreateButton({
+        Name = anim.Category .. " - " .. anim.Name,
+        Description = nil, -- Optional: you could set a short tip here
+        Callback = function()
+            -- First notification: applying
+            Luna:Notification({
+                Title = "Applying " .. anim.Category .. " Animation...",
+                Icon = "autorenew", -- Loading icon
+                ImageSource = "Material",
+                Content = "Hold on while we switch your style."
             })
 
+            -- Wear the animation
+            WEAR(anim.Id)
+
+            -- After 1 second, notify applied
             task.delay(1, function()
-                local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum:ChangeState(Enum.HumanoidStateType.Landed)
-                end
-                Rayfield:Notify({
-                    Title = category .. " Animation Applied",
-                    Content = "If you don't see it, lag might be messing with it.",
-                    Duration = 1
+                Luna:Notification({
+                    Title = anim.Category .. " Animation Applied",
+                    Icon = "check_circle", -- Success icon
+                    ImageSource = "Material",
+                    Content = "If you don't see it, lag might be messing with it."
                 })
             end)
         end
     })
 end
 
--- Create dropdowns for each category
-CreateAnimationDropdown("Idle")
-CreateAnimationDropdown("Walk")
-CreateAnimationDropdown("Run")
-CreateAnimationDropdown("Jump")
-CreateAnimationDropdown("Fall")
-CreateAnimationDropdown("Climb")
-
-
-
-Tabs.Troll:CreateButton({
-        Name = "Get Sofa / Couch",
-        Callback = function()
-            TOOL("Couch")
-        end
-    })
-    
-    
-    Tabs.Troll:CreateButton({
-        Name = "Get Fire Paperbag",
-        Callback = function()
-            TOOL("PaperbagFire")
-        end
-    })
-    
-    local p = game:GetService("Players").LocalPlayer
-local saved = nil
-local specialID = "14532583477"
-
-local function toggleAvatar()
-    local char = p.Character or p.CharacterAdded:Wait()
-    local hum = char:WaitForChild("Humanoid")
-    local desc = hum:GetAppliedDescription()
-
-    local t, ra, la, rl, ll, h = tostring(desc.Torso), tostring(desc.RightArm), tostring(desc.LeftArm), tostring(desc.RightLeg), tostring(desc.LeftLeg), tostring(desc.Head)
-
-    if ra == specialID then
-        if saved then
-            AvatarChanges(unpack(saved))
-        end
-    else
-        saved = {t, ra, la, rl, ll, h}
-        AvatarChanges("0", specialID, "0", "0", "0", "0")
-    end
-end
-
-
-
-
-
-
-
-    
 local player = game.Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
@@ -662,13 +515,16 @@ RunService.PreSimulation:Connect(function()
     end
 end)
 
--- Toggle under Tabs.Troll
-local Toggle = Tabs.Troll:CreateToggle({
-    Name = "Dupe Tools",
-    CurrentValue = false,
-    Flag = "Toggle1",
+
+
+local Toggle = Tabs.LocalPlayer:CreateToggle({
+    Name = "Dupe Tools",              -- Toggle name
+    Description = nil,                -- Optional: you can add a description if desired
+    CurrentValue = false,             -- Default state (false = off, true = on)
     Callback = function(Value)
         storingTools = Value
+
+        -- If toggle is turned off
         if not Value then
             originalCFrame = nil
             local char = player.Character
@@ -676,128 +532,13 @@ local Toggle = Tabs.Troll:CreateToggle({
                 char:FindFirstChildOfClass("Humanoid").Health = 0
             end
         end
-    end,
-})
+    end
+}, "DupeToolsToggle")  -- Unique flag identifier for configuration saving
 
--- Toggle under Tabs.Troll
 
-    
-    
-
-math.randomseed(tick())
-
-local funFacts = {
-    "Honey never spoils. Archaeologists found 3,000-year-old honey that's still edible.",
-    "Octopuses have three hearts and blue blood.",
-    "Bananas are berries, but strawberries aren't.",
-    "A single strand of spaghetti is called a 'spaghetto'.",
-    "Sloths can hold their breath longer than dolphins can.",
-    "Sharks existed before trees.",
-    "Scotland’s national animal is the unicorn.",
-    "There are more stars in the universe than grains of sand on Earth.",
-    "The Eiffel Tower can grow more than 6 inches in summer due to heat expansion.",
-    "Your brain uses around 20% of your body's energy even at rest.",
-    "Some turtles can breathe through their butts.",
-    "The moon has moonquakes.",
-    "Cows have best friends and get stressed when separated.",
-    "Wombat poop is cube-shaped.",
-    "A day on Venus is longer than a year on Venus.",
-    -- Additions below
-    "A group of flamingos is called a 'flamboyance'.",
-    "The unicorn is the national animal of Scotland.",
-    "A group of lizards is called a 'lounge'.",
-    "Pangolins are the only mammals with scales.",
-    "A snail can have over 25,000 teeth.",
-    "Cumulus clouds can weigh more than 1 million pounds.",
-    "Octopus skin can detect light.",
-    "Termites chew faster when listening to rock music.",
-    "Grasshoppers hear with their stomachs.",
-    "The praying mantis is the only insect that can turn its head.",
-    "Babies have taste buds all over their mouths.",
-    "Tigers squint instead of purring to show affection.",
-    "The word 'snirtle' means to laugh and snort at the same time.",
-    "Giraffes give birth standing up, and calves fall about 6 feet.",
-    "Bronze medalists are often happier than silver medalists.",
-    "Reading books can extend your lifespan by up to two years.",
-    "Bananas glow blue under black lights.",
-    "Ketchup was once used as a medicine in the 1830s.",
-    "The word 'daisy' comes from 'day's eye'.",
-    "Moonflowers bloom at night and smell like lemons.",
-    "You can hear a blue whale’s heartbeat from over two miles away.",
-    "An astronaut's height increases in space due to lack of gravity.",
-    "A chef’s hat traditionally has 100 pleats to represent 100 ways to cook an egg.",
-    "Butterflies taste with their feet.",
-    "Turtles can breathe through their butts — it’s called cloacal respiration.",
-    "Sharks are older than trees by at least 200 million years.",
-    "A blob of toothpaste is called a 'nurdle'.",
-    "There are more fake flamingos in the world than real ones.",
-    "A bolt of lightning contains enough energy to toast 100,000 slices of bread.",
-    "A 'moment' technically means 90 seconds.",
-    "The smell of freshly-cut grass is actually a plant distress call.",
-    "A blue whale’s tongue weighs as much as an elephant.",
-    "Hot water freezes faster than cold water under certain conditions (Mpemba effect).",
-    "Koalas have fingerprints that are almost indistinguishable from humans.",
-    "The inventor of the Frisbee was turned into a Frisbee after he died.",
-    "Cats can’t taste sweetness.",
-    "The first oranges weren’t orange — they were green.",
-    "Slugs have four noses.",
-    "Most wasabi served in restaurants is actually horseradish dyed green.",
-    "An apple, potato, and onion all taste the same if you eat them with your nose plugged.",
-    "Tigers have striped skin, not just striped fur.",
-    "Elephants can't jump.",
-    "Sea otters hold hands while sleeping so they don’t drift apart.",
-    "Banging your head against a wall burns 150 calories an hour — but not recommended!",
-    "A jiffy is a real unit of time — 1/100th of a second.",
-    "Coca-Cola would be green without coloring.",
-    "Oxford University is older than the Aztec Empire.",
-    "Nintendo was founded in 1889 as a playing card company.",
-    "The hashtag symbol is technically called an 'octothorpe'.",
-    "The dot over a lowercase 'i' is called a 'tittle'.",
-    "M&M's were created in 1941 for soldiers in WWII to carry chocolate without melting.",
-    "The average person walks the equivalent of five times around the world in their lifetime.",
-    "The longest hiccuping spree lasted 68 years.",
-    "The word 'robot' comes from a Czech word meaning 'forced labor'.",
-    "Humans share about 60% of their DNA with bananas.",
-    "You can’t hum while holding your nose.",
-    "A crocodile can't stick its tongue out.",
-    "Polar bear fur is actually transparent, not white.",
-    "Chewing gum while chopping onions will keep you from crying.",
-    "The inventor of the microwave only received $2 for his discovery.",
-    "A small child could swim through the veins of a blue whale.",
-    "The average cloud weighs about 1.1 million pounds.",
-    "You burn more calories sleeping than watching TV.",
-    "Most lipsticks contain fish scales.",
-    "A shrimp’s heart is in its head.",
-    "Spiders can’t fly, but some use silk threads to 'balloon' through the air.",
-    "The total weight of all ants on Earth equals the total weight of all humans.",
-    "Some cats are allergic to humans.",
-    "Sunsets on Mars are blue.",
-    "Water can boil and freeze at the same time (triple point).",
-    "The moon is slowly drifting away from Earth — about 1.5 inches per year.",
-    "Avocados never ripen on the tree — only after picking.",
-    "An octopus has nine brains — one for each arm and one central brain.",
-    "You’re taller in the morning than at night.",
-    "A sneeze travels about 100 mph.",
-    "In Switzerland, it's illegal to own just one guinea pig — they need social companions.",
-    "Pineapples take two years to grow.",
-    "The average pencil can draw a line 35 miles long.",
-    "Bees can recognize human faces.",
-    "The inventor of Pringles is buried in a Pringles can.",
-    "Most dust in your home is made of dead skin cells.",
-    "A day on Earth is not exactly 24 hours — it’s 23.934 hours.",
-    "Cats have fewer toes on their back paws.",
-    "Octopuses taste with their arms.",
-    "Butterflies remember being caterpillars.",
-    "A cockroach can live a week without its head.",
-    "Goats have rectangular pupils.",
-    "Jellyfish are 95% water.",
-    "The world’s quietest room is -9 decibels — too quiet for comfort.",
-}
-
-local randomFact = funFacts[math.random(1, #funFacts)]
-
-Rayfield:Notify({
-   Title = "Script Loaded",
-   Content = randomFact,
-   Duration = 5,
-})
+Luna:Notification({
+                    Title = "Script Loaded" .. " Animation Applied",
+                    Icon = "check_circle", -- Success icon
+                    ImageSource = "Material",
+                    Content = "i hate gay peopel"
+                })

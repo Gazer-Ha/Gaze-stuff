@@ -189,7 +189,7 @@ end
 local fireOnceBtn = createBtn("Fire Once", 0.025, 290, Color3.fromRGB(60, 120, 220))
 fireOnceBtn.Parent = frame
 
-local loopBtn = createBtn("Loop One", 0.525, 290, Color3.fromRGB(50, 150, 50))
+local loopBtn = createBtn("Loop", 0.525, 290, Color3.fromRGB(50, 150, 50))
 loopBtn.Parent = frame
 
 local looping = false
@@ -242,7 +242,7 @@ loopBtn.MouseButton1Click:Connect(function()
 			end
 		end)
 	else
-		loopBtn.Text = "Loop One"
+		loopBtn.Text = "Loop"
 		loopBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
 	end
 end)

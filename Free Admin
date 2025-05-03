@@ -12,7 +12,7 @@ sGui.Parent = cg
 local frame = Instance.new("Frame")
 frame.Size = UDim2.new(0, 400, 0, 400)
 frame.Position = UDim2.new(0.5, -200, 0.5, -200)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BackgroundColor3 = Color3.fromRGB(40, 45, 50)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
@@ -23,20 +23,20 @@ frameCorner.CornerRadius = UDim.new(0, 8)
 
 local stroke = Instance.new("UIStroke", frame)
 stroke.Thickness = 1
-stroke.Color = Color3.fromRGB(100, 100, 100)
+stroke.Color = Color3.fromRGB(70, 80, 80)
 
 local title = Instance.new("TextLabel", frame)
 title.Text = "Gaze Admin Abuser"
 title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundTransparency = 1
-title.TextColor3 = Color3.new(1, 1, 1)
+title.TextColor3 = Color3.new(0.8235, 0.8235, 0.8235)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 22
 
 local titleUnderline = Instance.new("Frame", frame)
 titleUnderline.Size = UDim2.new(1, -20, 0, 1)
 titleUnderline.Position = UDim2.new(0, 10, 0, 30)
-titleUnderline.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+titleUnderline.BackgroundColor3 = Color3.fromRGB(70, 80, 80)
 titleUnderline.BorderSizePixel = 0
 
 local function roundify(obj, radius)
@@ -51,8 +51,8 @@ cmdBox.Size = UDim2.new(0.45, -10, 0, 35)
 cmdBox.Position = UDim2.new(0.025, 0, 0, 40)
 cmdBox.Text = ""
 cmdBox.ClearTextOnFocus = false
-cmdBox.TextColor3 = Color3.new(1, 1, 1)
-cmdBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+cmdBox.TextColor3 = Color3.new(0.8235, 0.8235, 0.8235)
+cmdBox.BackgroundColor3 = Color3.fromRGB(25, 30, 30)
 cmdBox.Font = Enum.Font.GothamBold
 cmdBox.TextSize = 18
 cmdBox.TextXAlignment = Enum.TextXAlignment.Left
@@ -64,8 +64,8 @@ extraBox.Size = UDim2.new(0.45, -10, 0, 35)
 extraBox.Position = UDim2.new(0.525, 0, 0, 40)
 extraBox.Text = ""
 extraBox.ClearTextOnFocus = false
-extraBox.TextColor3 = Color3.new(1, 1, 1)
-extraBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+extraBox.TextColor3 = Color3.new(0.8235, 0.8235, 0.8235)
+extraBox.BackgroundColor3 = Color3.fromRGB(25, 30, 30)
 extraBox.Font = Enum.Font.GothamBold
 extraBox.TextSize = 18
 extraBox.TextXAlignment = Enum.TextXAlignment.Left
@@ -77,7 +77,7 @@ delayBox.Size = UDim2.new(0.2, 0, 0, 30)
 delayBox.Position = UDim2.new(0.025, 0, 0, 80)
 delayBox.BackgroundTransparency = 1
 delayBox.Text = "1"
-delayBox.TextColor3 = Color3.new(1, 1, 1)
+delayBox.TextColor3 = Color3.new(0.8235, 0.8235, 0.8235)
 delayBox.Font = Enum.Font.GothamBold
 delayBox.TextSize = 18
 delayBox.ClearTextOnFocus = false
@@ -89,7 +89,7 @@ local underline = Instance.new("Frame", delayBox)
 underline.Size = UDim2.new(0.9, 0, 0, 1) -- makes it slightly shorter than full box width
 underline.Position = UDim2.new(0.05, 0, 1, -2) -- centers the underline nicely
 
-underline.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+underline.BackgroundColor3 = Color3.fromRGB(70, 80, 80)
 underline.BorderSizePixel = 0
 
 
@@ -97,7 +97,7 @@ underline.BorderSizePixel = 0
 local scroll = Instance.new("ScrollingFrame", frame)
 scroll.Size = UDim2.new(0.95, 0, 0, 140)
 scroll.Position = UDim2.new(0.025, 0, 0, 120)
-scroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+scroll.BackgroundColor3 = Color3.fromRGB(25, 30, 30)
 scroll.BorderSizePixel = 0
 scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 scroll.ScrollBarThickness = 6
@@ -118,14 +118,14 @@ local function createCheckbox(player)
 	local checkbox = Instance.new("ImageButton")
 	checkbox.Size = UDim2.new(0, 20, 0, 20)
 	checkbox.Position = UDim2.new(0, 0, 0.5, -10)
-	checkbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	checkbox.BackgroundColor3 = Color3.fromRGB(25, 30, 30)
 	checkbox.BorderSizePixel = 0
 	checkbox.Image = ""
 	checkbox.Parent = container
 
 	local cbStroke = Instance.new("UIStroke", checkbox)
 	cbStroke.Thickness = 1
-	cbStroke.Color = Color3.fromRGB(100, 100, 100)
+	cbStroke.Color = Color3.fromRGB(70, 80, 80)
 
 	local cbCorner = Instance.new("UICorner", checkbox)
 	cbCorner.CornerRadius = UDim.new(0, 4)
@@ -135,7 +135,7 @@ local function createCheckbox(player)
 	nameLabel.Position = UDim2.new(0, 30, 0, 0)
 	nameLabel.Size = UDim2.new(1, -30, 1, 0)
 	nameLabel.BackgroundTransparency = 1
-	nameLabel.TextColor3 = Color3.new(1, 1, 1)
+	nameLabel.TextColor3 = Color3.new(0.8235, 0.8235, 0.8235)
 	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
 	nameLabel.Font = Enum.Font.GothamBold
 	nameLabel.TextSize = 18
@@ -143,7 +143,7 @@ local function createCheckbox(player)
 
 	local function updateCheckboxVisual()
 		local isSelected = selectedTargets[player.Name] == true
-		checkbox.BackgroundColor3 = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(50, 50, 50)
+		checkbox.BackgroundColor3 = isSelected and Color3.fromRGB(210, 210, 210) or Color3.fromRGB(25, 30, 30)
 	end
 	updateCheckboxVisual()
 
@@ -170,7 +170,14 @@ end
 end
 
 Players.PlayerAdded:Connect(refreshPlayerList)
-Players.PlayerRemoving:Connect(refreshPlayerList)
+Players.PlayerRemoving:Connect(function(player)
+	selectedTargets[player.Name] = nil
+	local existing = scroll:FindFirstChild(player.Name)
+	if existing then
+		existing:Destroy()
+	end
+	scroll.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 30)
+end)
 refreshPlayerList()
 
 local function createBtn(text, posX, posY, color)
@@ -179,17 +186,17 @@ local function createBtn(text, posX, posY, color)
 	btn.Size = UDim2.new(0.45, -5, 0, 35)
 	btn.Position = UDim2.new(posX, 0, 0, posY)
 	btn.BackgroundColor3 = color
-	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.TextColor3 = Color3.new(0.8235, 0.8235, 0.8235)
 	btn.Font = Enum.Font.GothamBold
 	btn.TextSize = 18
 	roundify(btn, 6)
 	return btn
 end
 
-local fireOnceBtn = createBtn("Fire Once", 0.025, 290, Color3.fromRGB(60, 120, 220))
+local fireOnceBtn = createBtn("Fire", 0.025, 290, Color3.fromRGB(60, 120, 220))
 fireOnceBtn.Parent = frame
 
-local loopBtn = createBtn("Loop", 0.525, 290, Color3.fromRGB(50, 150, 50))
+local loopBtn = createBtn("Loop One", 0.525, 290, Color3.fromRGB(50, 150, 50))
 loopBtn.Parent = frame
 
 local looping = false
@@ -242,7 +249,7 @@ loopBtn.MouseButton1Click:Connect(function()
 			end
 		end)
 	else
-		loopBtn.Text = "Loop"
+		loopBtn.Text = "Loop One"
 		loopBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
 	end
 end)
@@ -253,7 +260,7 @@ allBtn.Text = "All"
 allBtn.Size = UDim2.new(0.2, 0, 0, 30)
 allBtn.Position = UDim2.new(0.725, 0, 0, 80)
 allBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-allBtn.TextColor3 = Color3.new(1, 1, 1)
+allBtn.TextColor3 = Color3.new(0.8235, 0.8235, 0.8235)
 allBtn.Font = Enum.Font.GothamBold
 allBtn.TextSize = 16
 roundify(allBtn, 6)
@@ -263,7 +270,7 @@ otherBtn.Text = "Other"
 otherBtn.Size = UDim2.new(0.2, 0, 0, 30)
 otherBtn.Position = UDim2.new(0.5, 0, 0, 80)
 otherBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-otherBtn.TextColor3 = Color3.new(1, 1, 1)
+otherBtn.TextColor3 = Color3.new(0.8235, 0.8235, 0.8235)
 otherBtn.Font = Enum.Font.GothamBold
 otherBtn.TextSize = 16
 roundify(otherBtn, 6)
@@ -289,7 +296,7 @@ clearBtn.Text = "Clear"
 clearBtn.Size = UDim2.new(0.2, 0, 0, 30)
 clearBtn.Position = UDim2.new(0.275, 0, 0, 80)
 clearBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-clearBtn.TextColor3 = Color3.new(1, 1, 1)
+clearBtn.TextColor3 = Color3.new(0.8235, 0.8235, 0.8235)
 clearBtn.Font = Enum.Font.GothamBold
 clearBtn.TextSize = 16
 roundify(clearBtn, 6)
@@ -301,4 +308,69 @@ clearBtn.MouseButton1Click:Connect(function()
 	refreshPlayerList()
 end)
 
+for _, child in ipairs(frame:GetChildren()) do
+	if child:IsA("GuiObject") then
+		child.Position = UDim2.new(
+			child.Position.X.Scale, child.Position.X.Offset,
+			child.Position.Y.Scale, child.Position.Y.Offset + 10
+		)
+	end
+end
 
+
+local TweenService = cloneref(game:GetService("TweenService"))
+
+local minimized = false
+local isTweening = false
+local originalSize = frame.Size
+
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 30, 0, 20)
+minimizeBtn.Position = UDim2.new(1, -35, 0, 10)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(25, 30, 30)
+minimizeBtn.Text = "-"
+minimizeBtn.TextColor3 = Color3.new(0.8235, 0.8235, 0.8235)
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 18
+minimizeBtn.Parent = frame
+minimizeBtn.BackgroundTransparency = 1
+
+
+
+
+local titleYDefault = title.Position.Y.Offset
+local titleTween
+
+local function toggleMinimize()
+	if isTweening then return end
+	isTweening = true
+
+	minimized = not minimized
+	minimizeBtn.Text = minimized and "+" or "-"
+
+	for _, child in ipairs(frame:GetChildren()) do
+		if child:IsA("GuiObject") and child ~= title and child ~= minimizeBtn and child ~= titleUnderline then
+			child.Visible = not minimized
+		end
+	end
+
+	local targetSize = minimized and UDim2.new(0, 400, 0, 40) or originalSize
+	local targetTitlePos = minimized and UDim2.new(0, 0, 0, titleYDefault - 5) or UDim2.new(0, 0, 0, titleYDefault)
+
+	local frameTween = TweenService:Create(frame, TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut), {
+		Size = targetSize
+	})
+
+	if titleTween then titleTween:Cancel() end
+	titleTween = TweenService:Create(title, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+		Position = targetTitlePos
+	})
+
+	titleTween:Play()
+	frameTween:Play()
+	frameTween.Completed:Wait()
+
+	isTweening = false
+end
+
+minimizeBtn.MouseButton1Click:Connect(toggleMinimize)

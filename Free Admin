@@ -1,0 +1,304 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local localPlayer = Players.LocalPlayer
+local cg = cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
+
+-- GUI Setup
+local sGui = Instance.new("ScreenGui")
+sGui.Name = "CmdLooper"
+sGui.ResetOnSpawn = false
+sGui.Parent = cg
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 400, 0, 400)
+frame.Position = UDim2.new(0.5, -200, 0.5, -200)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = sGui
+
+local frameCorner = Instance.new("UICorner", frame)
+frameCorner.CornerRadius = UDim.new(0, 8)
+
+local stroke = Instance.new("UIStroke", frame)
+stroke.Thickness = 1
+stroke.Color = Color3.fromRGB(100, 100, 100)
+
+local title = Instance.new("TextLabel", frame)
+title.Text = "Gaze Admin Abuser"
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 22
+
+local titleUnderline = Instance.new("Frame", frame)
+titleUnderline.Size = UDim2.new(1, -20, 0, 1)
+titleUnderline.Position = UDim2.new(0, 10, 0, 30)
+titleUnderline.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+titleUnderline.BorderSizePixel = 0
+
+local function roundify(obj, radius)
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, radius)
+	corner.Parent = obj
+end
+
+local cmdBox = Instance.new("TextBox", frame)
+cmdBox.PlaceholderText = "Command (e.g. spin)"
+cmdBox.Size = UDim2.new(0.45, -10, 0, 35)
+cmdBox.Position = UDim2.new(0.025, 0, 0, 40)
+cmdBox.Text = ""
+cmdBox.ClearTextOnFocus = false
+cmdBox.TextColor3 = Color3.new(1, 1, 1)
+cmdBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+cmdBox.Font = Enum.Font.GothamBold
+cmdBox.TextSize = 18
+cmdBox.TextXAlignment = Enum.TextXAlignment.Left
+roundify(cmdBox, 6)
+
+local extraBox = Instance.new("TextBox", frame)
+extraBox.PlaceholderText = "Extra (e.g. 999)"
+extraBox.Size = UDim2.new(0.45, -10, 0, 35)
+extraBox.Position = UDim2.new(0.525, 0, 0, 40)
+extraBox.Text = ""
+extraBox.ClearTextOnFocus = false
+extraBox.TextColor3 = Color3.new(1, 1, 1)
+extraBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+extraBox.Font = Enum.Font.GothamBold
+extraBox.TextSize = 18
+extraBox.TextXAlignment = Enum.TextXAlignment.Left
+roundify(extraBox, 6)
+
+local delayBox = Instance.new("TextBox", frame)
+delayBox.PlaceholderText = "Delay (sec)"
+delayBox.Size = UDim2.new(0.2, 0, 0, 30)
+delayBox.Position = UDim2.new(0.025, 0, 0, 80)
+delayBox.BackgroundTransparency = 1
+delayBox.Text = "1"
+delayBox.TextColor3 = Color3.new(1, 1, 1)
+delayBox.Font = Enum.Font.GothamBold
+delayBox.TextSize = 18
+delayBox.ClearTextOnFocus = false
+delayBox.BorderSizePixel = 0
+delayBox.TextXAlignment = Enum.TextXAlignment.Left
+roundify(delayBox, 6)
+
+local underline = Instance.new("Frame", delayBox)
+underline.Size = UDim2.new(0.9, 0, 0, 1) -- makes it slightly shorter than full box width
+underline.Position = UDim2.new(0.05, 0, 1, -2) -- centers the underline nicely
+
+underline.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+underline.BorderSizePixel = 0
+
+
+
+local scroll = Instance.new("ScrollingFrame", frame)
+scroll.Size = UDim2.new(0.95, 0, 0, 140)
+scroll.Position = UDim2.new(0.025, 0, 0, 120)
+scroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+scroll.BorderSizePixel = 0
+scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+scroll.ScrollBarThickness = 6
+roundify(scroll, 6)
+
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0, 4)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local selectedTargets = {}
+
+local function createCheckbox(player)
+	local container = Instance.new("Frame")
+	container.Size = UDim2.new(1, -10, 0, 25)
+	container.BackgroundTransparency = 1
+	container.Name = player.Name
+
+	local checkbox = Instance.new("ImageButton")
+	checkbox.Size = UDim2.new(0, 20, 0, 20)
+	checkbox.Position = UDim2.new(0, 0, 0.5, -10)
+	checkbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	checkbox.BorderSizePixel = 0
+	checkbox.Image = ""
+	checkbox.Parent = container
+
+	local cbStroke = Instance.new("UIStroke", checkbox)
+	cbStroke.Thickness = 1
+	cbStroke.Color = Color3.fromRGB(100, 100, 100)
+
+	local cbCorner = Instance.new("UICorner", checkbox)
+	cbCorner.CornerRadius = UDim.new(0, 4)
+
+	local nameLabel = Instance.new("TextLabel")
+	nameLabel.Text = player == localPlayer and player.Name .. " (you)" or player.Name
+	nameLabel.Position = UDim2.new(0, 30, 0, 0)
+	nameLabel.Size = UDim2.new(1, -30, 1, 0)
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.TextColor3 = Color3.new(1, 1, 1)
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.Font = Enum.Font.GothamBold
+	nameLabel.TextSize = 18
+	nameLabel.Parent = container
+
+	local function updateCheckboxVisual()
+		local isSelected = selectedTargets[player.Name] == true
+		checkbox.BackgroundColor3 = isSelected and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(50, 50, 50)
+	end
+	updateCheckboxVisual()
+
+	checkbox.MouseButton1Click:Connect(function()
+		selectedTargets[player.Name] = not selectedTargets[player.Name]
+		updateCheckboxVisual()
+	end)
+
+	container.Parent = scroll
+end
+
+local function refreshPlayerList()
+	for _, child in ipairs(scroll:GetChildren()) do
+		if child:IsA("Frame") and child.Name ~= "UIListLayout" then
+			child:Destroy()
+		end
+	end
+
+for _, player in ipairs(Players:GetPlayers()) do
+	createCheckbox(player)
+end
+
+	scroll.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 30)
+end
+
+Players.PlayerAdded:Connect(refreshPlayerList)
+Players.PlayerRemoving:Connect(refreshPlayerList)
+refreshPlayerList()
+
+local function createBtn(text, posX, posY, color)
+	local btn = Instance.new("TextButton", frame)
+	btn.Text = text
+	btn.Size = UDim2.new(0.45, -5, 0, 35)
+	btn.Position = UDim2.new(posX, 0, 0, posY)
+	btn.BackgroundColor3 = color
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 18
+	roundify(btn, 6)
+	return btn
+end
+
+local fireOnceBtn = createBtn("Fire Once", 0.025, 290, Color3.fromRGB(60, 120, 220))
+fireOnceBtn.Parent = frame
+
+local loopBtn = createBtn("Loop One", 0.525, 290, Color3.fromRGB(50, 150, 50))
+loopBtn.Parent = frame
+
+local looping = false
+
+fireOnceBtn.MouseButton1Click:Connect(function()
+	local cmd, extra = cmdBox.Text, extraBox.Text
+	if cmd == "" then return end
+
+	local fired = false
+	for name, isSelected in pairs(selectedTargets) do
+		if isSelected then
+			local fullCmd = ":" .. cmd .. " " .. name .. (extra ~= "" and (" " .. extra) or "")
+			ReplicatedStorage:WaitForChild("HDAdminClient"):WaitForChild("Signals"):WaitForChild("RequestCommand"):InvokeServer(fullCmd)
+			fired = true
+		end
+	end
+
+	if not fired then
+		local fullCmd = ":" .. cmd .. (extra ~= "" and (" " .. extra) or "")
+		ReplicatedStorage:WaitForChild("HDAdminClient"):WaitForChild("Signals"):WaitForChild("RequestCommand"):InvokeServer(fullCmd)
+	end
+end)
+
+loopBtn.MouseButton1Click:Connect(function()
+	looping = not looping
+	if looping then
+		loopBtn.Text = "Stop Loop"
+		loopBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+
+		task.spawn(function()
+			while looping do
+				local cmd, extra = cmdBox.Text, extraBox.Text
+				local delay = tonumber(delayBox.Text) or 1
+
+				local fired = false
+				for name, isSelected in pairs(selectedTargets) do
+					if isSelected then
+						local fullCmd = ":" .. cmd .. " " .. name .. (extra ~= "" and (" " .. extra) or "")
+						ReplicatedStorage:WaitForChild("HDAdminClient"):WaitForChild("Signals"):WaitForChild("RequestCommand"):InvokeServer(fullCmd)
+						fired = true
+					end
+				end
+
+				if not fired then
+					local fullCmd = ":" .. cmd .. (extra ~= "" and (" " .. extra) or "")
+					ReplicatedStorage:WaitForChild("HDAdminClient"):WaitForChild("Signals"):WaitForChild("RequestCommand"):InvokeServer(fullCmd)
+				end
+
+				task.wait(delay)
+			end
+		end)
+	else
+		loopBtn.Text = "Loop One"
+		loopBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+	end
+end)
+
+
+local allBtn = Instance.new("TextButton", frame)
+allBtn.Text = "All"
+allBtn.Size = UDim2.new(0.2, 0, 0, 30)
+allBtn.Position = UDim2.new(0.725, 0, 0, 80)
+allBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+allBtn.TextColor3 = Color3.new(1, 1, 1)
+allBtn.Font = Enum.Font.GothamBold
+allBtn.TextSize = 16
+roundify(allBtn, 6)
+
+local otherBtn = Instance.new("TextButton", frame)
+otherBtn.Text = "Other"
+otherBtn.Size = UDim2.new(0.2, 0, 0, 30)
+otherBtn.Position = UDim2.new(0.5, 0, 0, 80)
+otherBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+otherBtn.TextColor3 = Color3.new(1, 1, 1)
+otherBtn.Font = Enum.Font.GothamBold
+otherBtn.TextSize = 16
+roundify(otherBtn, 6)
+
+
+allBtn.MouseButton1Click:Connect(function()
+	for _, player in ipairs(Players:GetPlayers()) do
+		selectedTargets[player.Name] = true
+	end
+	refreshPlayerList()
+end)
+
+otherBtn.MouseButton1Click:Connect(function()
+	for _, player in ipairs(Players:GetPlayers()) do
+		selectedTargets[player.Name] = player ~= localPlayer
+	end
+	selectedTargets[localPlayer.Name] = false
+	refreshPlayerList()
+end)
+
+local clearBtn = Instance.new("TextButton", frame)
+clearBtn.Text = "Clear"
+clearBtn.Size = UDim2.new(0.2, 0, 0, 30)
+clearBtn.Position = UDim2.new(0.275, 0, 0, 80)
+clearBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+clearBtn.TextColor3 = Color3.new(1, 1, 1)
+clearBtn.Font = Enum.Font.GothamBold
+clearBtn.TextSize = 16
+roundify(clearBtn, 6)
+
+clearBtn.MouseButton1Click:Connect(function()
+	for _, player in ipairs(Players:GetPlayers()) do
+		selectedTargets[player.Name] = false
+	end
+	refreshPlayerList()
+end)
+
+

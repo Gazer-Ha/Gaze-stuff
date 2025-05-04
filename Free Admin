@@ -414,7 +414,7 @@ local sound = Instance.new("Sound")
 sound.SoundId = "rbxassetid://6895079853"
 sound.Volume = 1
 sound.Parent = cloneref(game:GetService("SoundService"))
-
+task.wait(1)
 for _, descendant in pairs(frame:GetDescendants()) do
 	if descendant:IsA("TextButton") or descendant:IsA("ImageButton") then
 		descendant.MouseButton1Click:Connect(function()

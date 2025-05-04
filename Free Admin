@@ -3,6 +3,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local localPlayer = Players.LocalPlayer
 local cg = cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
 
+
+local function getPrefix()
+	return Players.LocalPlayer.PlayerGui:WaitForChild("HDAdminGUIs")
+		:WaitForChild("MainFrame"):WaitForChild("Pages")
+		:WaitForChild("Settings"):WaitForChild("Custom")
+		:WaitForChild("AE1 Prefix"):WaitForChild("SettingValue")
+		:WaitForChild("TextBox").Text
+end
+
 -- GUI Setup
 local sGui = Instance.new("ScreenGui")
 sGui.Name = "CmdLooper"
@@ -193,11 +202,20 @@ local function createBtn(text, posX, posY, color)
 	return btn
 end
 
+local buttonDivider = Instance.new("Frame", frame)
+buttonDivider.Size = UDim2.new(0.95, 0, 0, 1)
+buttonDivider.Position = UDim2.new(0.025, 0, 0, 280) -- 280 Y is just above the buttons (at 290)
+buttonDivider.BackgroundColor3 = Color3.fromRGB(70, 80, 80)
+buttonDivider.BorderSizePixel = 0
+
 local fireOnceBtn = createBtn("Fire", 0.025, 290, Color3.fromRGB(60, 120, 220))
 fireOnceBtn.Parent = frame
 
 local loopBtn = createBtn("Loop One", 0.525, 290, Color3.fromRGB(50, 150, 50))
 loopBtn.Parent = frame
+
+local musicBtn = createBtn("Music", 0.025, 330, Color3.fromRGB(140, 100, 200))
+musicBtn.Parent = frame
 
 local looping = false
 
@@ -208,17 +226,20 @@ fireOnceBtn.MouseButton1Click:Connect(function()
 	local fired = false
 	for name, isSelected in pairs(selectedTargets) do
 		if isSelected then
-			local fullCmd = ":" .. cmd .. " " .. name .. (extra ~= "" and (" " .. extra) or "")
+			local fullCmd = getPrefix() .. cmd .. " " .. name .. (extra ~= "" and (" " .. extra) or "")
 			ReplicatedStorage:WaitForChild("HDAdminClient"):WaitForChild("Signals"):WaitForChild("RequestCommand"):InvokeServer(fullCmd)
 			fired = true
 		end
 	end
 
 	if not fired then
-		local fullCmd = ":" .. cmd .. (extra ~= "" and (" " .. extra) or "")
+		local fullCmd = getPrefix() .. cmd .. (extra ~= "" and (" " .. extra) or "")
 		ReplicatedStorage:WaitForChild("HDAdminClient"):WaitForChild("Signals"):WaitForChild("RequestCommand"):InvokeServer(fullCmd)
 	end
 end)
+
+
+
 
 loopBtn.MouseButton1Click:Connect(function()
 	looping = not looping
@@ -234,14 +255,14 @@ loopBtn.MouseButton1Click:Connect(function()
 				local fired = false
 				for name, isSelected in pairs(selectedTargets) do
 					if isSelected then
-						local fullCmd = ":" .. cmd .. " " .. name .. (extra ~= "" and (" " .. extra) or "")
+						local fullCmd = getPrefix() .. cmd .. " " .. name .. (extra ~= "" and (" " .. extra) or "")
 						ReplicatedStorage:WaitForChild("HDAdminClient"):WaitForChild("Signals"):WaitForChild("RequestCommand"):InvokeServer(fullCmd)
 						fired = true
 					end
 				end
 
 				if not fired then
-					local fullCmd = ":" .. cmd .. (extra ~= "" and (" " .. extra) or "")
+					local fullCmd = getPrefix() .. cmd .. (extra ~= "" and (" " .. extra) or "")
 					ReplicatedStorage:WaitForChild("HDAdminClient"):WaitForChild("Signals"):WaitForChild("RequestCommand"):InvokeServer(fullCmd)
 				end
 
@@ -254,6 +275,17 @@ loopBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+local musicIds = {
+	"1848028342",
+	"9045766377"
+}
+
+musicBtn.MouseButton1Click:Connect(function()
+	local randomId = musicIds[math.random(1, #musicIds)]
+	local fullCmd = getPrefix() .. "music " .. randomId
+
+	ReplicatedStorage:WaitForChild("HDAdminClient"):WaitForChild("Signals"):WaitForChild("RequestCommand"):InvokeServer(fullCmd)
+end)
 
 local allBtn = Instance.new("TextButton", frame)
 allBtn.Text = "All"
@@ -374,3 +406,19 @@ local function toggleMinimize()
 end
 
 minimizeBtn.MouseButton1Click:Connect(toggleMinimize)
+
+
+
+
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxassetid://6895079853"
+sound.Volume = 1
+sound.Parent = cloneref(game:GetService("SoundService"))
+
+for _, descendant in pairs(frame:GetDescendants()) do
+	if descendant:IsA("TextButton") or descendant:IsA("ImageButton") then
+		descendant.MouseButton1Click:Connect(function()
+			sound:Play()
+		end)
+	end
+end

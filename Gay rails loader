@@ -39,4 +39,7 @@ end
 
 
 
-Load("https://raw.githubusercontent.com/Gazer-Ha/Forsakontol/refs/heads/main/Do%20generator")
+Load("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Get%20cannon")
+task.wait(27)
+Load("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Bondie%20farmy")
+

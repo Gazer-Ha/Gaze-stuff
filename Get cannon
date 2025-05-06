@@ -45,6 +45,8 @@ connection = RunService.RenderStepped:Connect(function()
 					seat:Sit(humanoid)
 
 					task.delay(1, function()
+                                         humanoid.JumpPower = 0
+	                                humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
 						-- Unsit
 						if humanoid.Sit then
 							humanoid.Sit = false

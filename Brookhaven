@@ -179,6 +179,9 @@ Tabs.Bundles:CreateButton({
     end
 })
 
+
+
+
 Tabs.Bundles:CreateButton({
     Name = "R6 - Male",
     Callback = function()
@@ -197,6 +200,15 @@ Tabs.Bundles:CreateButton({
     Name = "Classic R6",
     Callback = function()
         AvatarChanges(17675630775, 17675630666, 17675630763, 17675630677, 17675630636, 0)
+    end
+})
+
+
+
+Tabs.Bundles:CreateButton({
+    Name = "Robloxian V2 R6",
+    Callback = function()
+        AvatarChanges("76647226869628", "105638394824015", "139039414452825", "79885522911494", "81311062776381", "0")
     end
 })
 

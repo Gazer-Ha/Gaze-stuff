@@ -1,4 +1,4 @@
---those script are obfuscated dont read (no its not)
+--those script are broken dont read (no its not)
 
 local ws = cloneref(game:GetService("Workspace"))
 
@@ -40,6 +40,6 @@ end
 
 
 Load("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Get%20cannon")
-task.wait(23)
+task.wait(25)
 Load("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Bondie%20farmy")
 

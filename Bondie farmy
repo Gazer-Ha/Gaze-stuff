@@ -149,3 +149,6 @@ while (zStep < 0 and z >= zEnd) or (zStep > 0 and z <= zEnd) do
 	z += zStep
 	direction *= -1
 end
+
+task.wait(2)
+Players.LocalPlayer:Kick("Autofarm Completed, Total Bond: " .. bondCount)

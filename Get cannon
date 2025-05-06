@@ -1,5 +1,3 @@
---Please Patch This too op.
-
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
@@ -45,14 +43,11 @@ connection = RunService.RenderStepped:Connect(function()
 					seat:Sit(humanoid)
 
 					task.delay(1, function()
-                                         
+						-- Unsit
 						if humanoid.Sit then
 							humanoid.Sit = false
 							humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 						end
-humanoid.JumpPower = 0
-	                                humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-					
 
 						task.delay(1, function()
 							-- Sit again
@@ -74,3 +69,4 @@ humanoid.JumpPower = 0
 		end
 	end
 end)
+

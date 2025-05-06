@@ -40,6 +40,6 @@ end
 
 
 Load("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Get%20cannon")
-task.wait(25)
+task.wait(21)
 Load("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Bondie%20farmy")
 

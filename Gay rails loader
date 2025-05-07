@@ -40,6 +40,8 @@ end
 
 
 Load("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Get%20cannon")
-task.wait(21)
+while not _G.CannonFound do
+    task.wait()
+end
 Load("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Bondie%20farmy")
 

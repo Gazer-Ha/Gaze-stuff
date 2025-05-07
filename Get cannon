@@ -1,72 +1,71 @@
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local hrp = character:WaitForChild("HumanoidRootPart")
-local humanoid = character:WaitForChild("Humanoid")
+local ts = game:GetService("TweenService")
+local rs = game:GetService("RunService")
+local plr = game.Players.LocalPlayer
+local char = plr.Character or plr.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local hum = char:WaitForChild("Humanoid")
+local startCF = hrp.CFrame
 
--- Save initial position
-local initialCFrame = hrp.CFrame
-
-local function isModelUnanchored(model)
-	for _, part in pairs(model:GetDescendants()) do
-		if part:IsA("BasePart") and not part.Anchored then
+local function isUnanchored(m)
+	for _, p in pairs(m:GetDescendants()) do
+		if p:IsA("BasePart") and not p.Anchored then
 			return true
 		end
 	end
 	return false
 end
 
--- Tween far away
-local goal = { CFrame = CFrame.new(-9, 3, -50000) }
-local tweenInfo = TweenInfo.new(20, Enum.EasingStyle.Linear)
-local tween = TweenService:Create(hrp, tweenInfo, goal)
+local function findCannon()
+	local exclude = nil
+	local fort = workspace:FindFirstChild("FortConstitution")
+	if fort then
+		exclude = fort:FindFirstChild("Cannon", true)
+	end
+
+	for _, d in ipairs(workspace:GetDescendants()) do
+		if d:IsA("Model") and d.Name == "Cannon" and d ~= exclude then
+			return d
+		end
+	end
+	return nil
+end
+
+local tInfo = TweenInfo.new(20, Enum.EasingStyle.Linear)
+local tween = ts:Create(hrp, tInfo, { CFrame = CFrame.new(-9, 3, -50000) })
 tween:Play()
 
--- Monitor for Cannon
--- Monitor for Cannon
-local connection
-connection = RunService.RenderStepped:Connect(function()
-	local cannon = workspace:FindFirstChild("Cannon", true)
-	if cannon and cannon:IsA("Model") then
-		-- Wait 1 second to allow it to fully load or unanchor
-		task.wait(1)
-		
-		if isModelUnanchored(cannon) then
-			local seat = cannon:FindFirstChildWhichIsA("VehicleSeat", true)
+local conn
+conn = rs.RenderStepped:Connect(function()
+	local can = findCannon()
+	if can then
+
+		if isUnanchored(can) then
+			local seat = can:FindFirstChildWhichIsA("VehicleSeat", true)
 			if seat and not seat.Occupant then
 				tween:Cancel()
-				connection:Disconnect()
+				conn:Disconnect()
 
-				if hrp and humanoid then
-					hrp.CFrame = seat.CFrame
-					seat:Sit(humanoid)
+				hrp.CFrame = seat.CFrame
+				seat:Sit(hum)
+
+				task.delay(1, function()
+					if hum.Sit then
+						hum.Sit = false
+						hum:ChangeState(Enum.HumanoidStateType.Jumping)
+					end
 
 					task.delay(1, function()
-						-- Unsit
-						if humanoid.Sit then
-							humanoid.Sit = false
-							humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-						end
+						seat:Sit(hum)
 
 						task.delay(1, function()
-							-- Sit again
-							seat:Sit(humanoid)
-
-							task.delay(1, function()
-								if hrp then
-									hrp.CFrame = initialCFrame
-
-									-- Disable jumping
-									humanoid.JumpPower = 0
-									humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
-								end
-							end)
+							hrp.CFrame = startCF
+							hum.JumpPower = 0
+							hum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+							_G.CannonFound = true
 						end)
 					end)
-				end
+				end)
 			end
 		end
 	end
 end)
-

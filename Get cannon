@@ -61,6 +61,7 @@ conn = rs.RenderStepped:Connect(function()
 							hrp.CFrame = startCF
 							hum.JumpPower = 0
 							hum:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+task.wait(1)
 							_G.CannonFound = true
 						end)
 					end)

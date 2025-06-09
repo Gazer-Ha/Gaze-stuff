@@ -1,0 +1,155 @@
+local player = game.Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ApplyEmmiter = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ApplyEmmiter")
+local CoreGui = cloneref(game:GetService("CoreGui"))
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "ButtonGui"
+gui.ResetOnSpawn = false
+gui.Parent = CoreGui
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0.5, 0, 0.6, 0)
+frame.Position = UDim2.new(0.25, 0, 0.2, 0)
+frame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
+frame.BackgroundTransparency = 0.05
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.ClipsDescendants = true
+
+
+local frameCorner = Instance.new("UICorner", frame)
+frameCorner.CornerRadius = UDim.new(0, 12)
+
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "✨ Fe Particle Giver"
+title.TextColor3 = Color3.fromRGB(30, 30, 30)
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+
+
+local scroll = Instance.new("ScrollingFrame", frame)
+scroll.Position = UDim2.new(0, 10, 0, 50)
+scroll.Size = UDim2.new(1, -20, 1, -60)
+scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+scroll.ScrollingDirection = Enum.ScrollingDirection.Y
+scroll.BackgroundTransparency = 1
+scroll.BorderSizePixel = 0
+scroll.ScrollBarThickness = 8
+
+
+local grid = Instance.new("UIGridLayout", scroll)
+grid.CellSize = UDim2.new(0, 90, 0, 90)
+grid.CellPadding = UDim2.new(0, 10, 0, 10)
+grid.SortOrder = Enum.SortOrder.LayoutOrder
+
+
+local function makeButton(name, assetId)
+	local btn = Instance.new("ImageButton")
+	btn.Name = name
+	btn.Size = UDim2.new(0, 90, 0, 90)
+	btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Image = assetId
+	btn.AutoButtonColor = true
+
+	local btnCorner = Instance.new("UICorner", btn)
+	btnCorner.CornerRadius = UDim.new(0, 10)
+
+	local uiStroke = Instance.new("UIStroke", btn)
+	uiStroke.Color = Color3.fromRGB(200, 200, 200)
+	uiStroke.Thickness = 1
+
+	btn.MouseButton1Click:Connect(function()
+		ApplyEmmiter:InvokeServer("gaze", name)
+	end)
+
+	btn.Parent = scroll
+end
+
+
+--Should i use table or nah?
+local buttons = {
+    {"0001Remove", "rbxassetid://18610639786"},
+    {"0002FreeWhite", "rbxassetid://18635845425"},
+    {"0003FreeYellow", "rbxassetid://18635841291"},
+    {"0004FreeOrange", "rbxassetid://18635859639"},
+    {"0005FreeGreen", "rbxassetid://18635848788"},
+    {"0006FreeBlue", "rbxassetid://18635847163"},
+    {"0007FreePurple", "rbxassetid://18635843697"},
+    {"0008FreePink", "rbxassetid://18635852477"},
+    {"0009FreeRed", "rbxassetid://18635837646"},
+    {"001HeartsYellow", "rbxassetid://18635672195"},
+    {"002HeartsGreen", "rbxassetid://18635727693"},
+    {"003HeartsBlue", "rbxassetid://18635732186"},
+    {"004HeartsPurple", "rbxassetid://18635723426"},
+    {"005HeartsPink", "rbxassetid://18635726250"},
+    {"006HeartsRed", "rbxassetid://18635729673"},
+    {"010DotsOrange", "rbxassetid://18637252424"},
+    {"011DotsYellow", "rbxassetid://18637263004"},
+    {"012DotsWhite", "rbxassetid://18637254199"},
+    {"013DotsGreen", "rbxassetid://18637265264"},
+    {"014DotsBlue", "rbxassetid://18637256859"},
+    {"015DotsPurple", "rbxassetid://18637261058"},
+    {"016DotsPink", "rbxassetid://18637259328"},
+    {"017DotsRed", "rbxassetid://18637267290"},
+    {"020TwinkleWhite", "rbxassetid://18637115654"},
+    {"021TwinkleYellow", "rbxassetid://18637118923"},
+    {"022TwinkleGreen", "rbxassetid://18637151114"},
+    {"023TwinklePurple", "rbxassetid://18637153880"},
+    {"024TwinklePink", "rbxassetid://18637157071"},
+    {"025TwinkleRed", "rbxassetid://18637155247"},
+    {"030FireWhite", "rbxassetid://18637074370"},
+    {"031FireOrange", "rbxassetid://18637025451"},
+    {"032FireGreen", "rbxassetid://18637078598"},
+    {"033FireBlue", "rbxassetid://18637076370"},
+    {"034FirePurple", "rbxassetid://18637070174"},
+    {"035FireBlack", "rbxassetid://18637072603"},
+    {"040SmallHeartsYellow", "rbxassetid://18637339451"},
+    {"041SmallHeartsGreen", "rbxassetid://18637337576"},
+    {"042SmallHeartsBlue", "rbxassetid://18637345162"},
+    {"043SmallHeartsPurple", "rbxassetid://18637335865"},
+    {"044SmallHeartsPink", "rbxassetid://18637343416"},
+    {"045SmallHeartsRed", "rbxassetid://18637341847"},
+    {"050SparksWhite", "rbxassetid://18637383085"},
+    {"051SparksGreen", "rbxassetid://18637385236"},
+    {"052SparksBlue", "rbxassetid://18637386856"},
+    {"053SparksPurple", "rbxassetid://18637442447"},
+    {"054SparksPink", "rbxassetid://18637445897"},
+    {"055SparksRed", "rbxassetid://18637447550"},
+    {"060BubbleWhite", "rbxassetid://18637495023"},
+    {"061BubbleGreen", "rbxassetid://18637493072"},
+    {"062BubbleBlue", "rbxassetid://18637499282"},
+    {"063BubblePurple", "rbxassetid://18637497343"},
+    {"064BubbleRed", "rbxassetid://18637500927"},
+    {"070MusicWhite", "rbxassetid://18637675173"},
+    {"071MusicGreen", "rbxassetid://18637677789"},
+    {"072MusicBlue", "rbxassetid://18637680960"},
+    {"073MusicPurple", "rbxassetid://18637679384"},
+    {"074MusicRed", "rbxassetid://18637672698"},
+    {"080SmokeWhite", "rbxassetid://18637791748"},
+    {"081SmokeYellow", "rbxassetid://18637800482"},
+    {"082SmokeOrange", "rbxassetid://18637793920"},
+    {"083SmokeGreen", "rbxassetid://18637789299"},
+    {"084SmokeBlue", "rbxassetid://18637803021"},
+    {"085SmokePurple", "rbxassetid://18637813360"},
+    {"086SmokeRed", "rbxassetid://18637796598"},
+    {"087SmokeBlack", "rbxassetid://18637798529"},
+    {"090StarWhite", "rbxassetid://18637942956"},
+    {"091StarOrange", "rbxassetid://18637946172"},
+    {"092StarGreen", "rbxassetid://18637934500"},
+    {"093StarBlue", "rbxassetid://18637940338"},
+    {"094StarPurple", "rbxassetid://18637944796"},
+    {"095StarPink", "rbxassetid://18637947820"},
+    {"096StarRed", "rbxassetid://18637949457"},
+}
+
+for _, btn in ipairs(buttons) do
+    makeButton(btn[1], btn[2])
+    task.wait(0.25)
+end

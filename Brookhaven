@@ -2,7 +2,6 @@
 -- Load Luna UI instead of Rayfield
 local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/main/source.lua", true))()
 
--- Display intro screen manually (Luna has no direct screen-based UI like Rayfield)
 local coreGui = cloneref(game:GetService("CoreGui"))
 coreGui.CallDialogScreen.Enabled = true
 
@@ -188,6 +187,22 @@ Tabs.Bundles:CreateButton({
         AvatarChanges(81500432784353, 103452055306587, 87202958751790, 129699548221468, 106411216404626, 0)
     end
 })
+
+
+
+
+
+Tabs.Bundles:CreateButton({
+    Name = "R6 - 1x1x1x1",
+    Callback = function()
+        AvatarChanges(17662665021, 103452055306587, 87202958751790, 129699548221468, 106411216404626, 0)
+Wear(17521857429)
+wait(1)
+Wear(17617062232)
+    end
+})
+
+
 
 Tabs.Bundles:CreateButton({
     Name = "R6 - Female",

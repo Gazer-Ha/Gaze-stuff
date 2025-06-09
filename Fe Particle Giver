@@ -151,5 +151,5 @@ local buttons = {
 
 for _, btn in ipairs(buttons) do
     makeButton(btn[1], btn[2])
-    task.wait(0.25)
+    task.wait(0.1)
 end

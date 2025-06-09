@@ -174,7 +174,7 @@ Tabs.Bundles:CreateParagraph({
 Tabs.Bundles:CreateButton({
     Name = "Minecraft",
     Callback = function()
-        AvatarChanges(14976595538, 14976595831, 14976595559, 14976595617, 14976595675, 134082579)
+        AvatarChanges(14976595538, 14976595831, 14976595559, 14976595617, 14976595675, 14976598345)
     end
 })
 

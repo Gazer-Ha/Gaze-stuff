@@ -1,3 +1,7 @@
+coroutine.wrap(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Fe%20particle%20duper"))()
+end)()
+
 local player = game.Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ApplyEmmiter = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ApplyEmmiter")
@@ -155,6 +159,4 @@ for _, btn in ipairs(buttons) do
 end
 
 
-coroutine.wrap(function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/Fe%20particle%20duper"))()
-end)()
+

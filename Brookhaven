@@ -179,6 +179,18 @@ Tabs.Bundles:CreateButton({
 })
 
 
+Tabs.Bundles:CreateButton({
+    Name = "R6 - 1x1x1x1",
+    Callback = function()
+        AvatarChanges(17662225318, 103452055306587, 87202958751790, 129699548221468, 106411216404626, 0)
+WEAR(17521857429)
+wait(1)
+WEAR(17617062232)
+wait(1)
+COLOR("Black")
+    end
+})
+
 
 
 Tabs.Bundles:CreateButton({
@@ -192,15 +204,7 @@ Tabs.Bundles:CreateButton({
 
 
 
-Tabs.Bundles:CreateButton({
-    Name = "R6 - 1x1x1x1",
-    Callback = function()
-        AvatarChanges(17662665021, 103452055306587, 87202958751790, 129699548221468, 106411216404626, 0)
-Wear(17521857429)
-wait(1)
-Wear(17617062232)
-    end
-})
+
 
 
 

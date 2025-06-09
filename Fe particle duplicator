@@ -1,0 +1,122 @@
+local player = game.Players.LocalPlayer
+if game:GetService("CoreGui"):FindFirstChild("OutfitSpamGui") then return end
+
+local TweenService = game:GetService("TweenService")
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "OutfitSpamGui"
+gui.ResetOnSpawn = false
+gui.Parent = game:GetService("CoreGui")
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 200, 0, 200)
+frame.Position = UDim2.new(0.5, -100, 0.5, -100)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 20)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+title.Text = "Particle Duplicator"
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextScaled = true
+title.Font = Enum.Font.SourceSansBold
+
+local warnLabel = Instance.new("TextLabel", gui)
+warnLabel.Size = UDim2.new(0, 300, 0, 40)
+warnLabel.Position = UDim2.new(0.5, -150, 0.2, 0)
+warnLabel.BackgroundTransparency = 1
+warnLabel.Text = "⚠️ Loop Is Active"
+warnLabel.TextColor3 = Color3.new(1, 0.6, 0)
+warnLabel.TextScaled = true
+warnLabel.Font = Enum.Font.SourceSansBold
+warnLabel.TextTransparency = 1
+
+local function fadeLabel(label, alpha, time)
+	TweenService:Create(label, TweenInfo.new(time), {TextTransparency = alpha}):Play()
+end
+
+local function label(p, t, y)
+	local l = Instance.new("TextLabel", p)
+	l.Size = UDim2.new(1, 0, 0, 20)
+	l.Position = UDim2.new(0, 0, 0, y)
+	l.Text = t
+	l.TextColor3 = Color3.new(1, 1, 1)
+	l.BackgroundTransparency = 1
+	return l
+end
+
+local function box(p, ph, y)
+	local b = Instance.new("TextBox", p)
+	b.Size = UDim2.new(1, 0, 0, 25)
+	b.Position = UDim2.new(0, 0, 0, y)
+	b.Text = ""
+	b.PlaceholderText = ph
+	b.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+	b.TextColor3 = Color3.new(1, 1, 1)
+	return b
+end
+
+label(frame, "Slot Number:", 20)
+local slotBox = box(frame, "default (1)", 40)
+
+label(frame, "How many times:", 70)
+local timesBox = box(frame, "default (10)", 90)
+
+label(frame, "Delay (seconds):", 120)
+local delayBox = box(frame, "default (0.1)", 140)
+
+local fireButton = Instance.new("TextButton", frame)
+fireButton.Size = UDim2.new(0.5, -2, 0, 25)
+fireButton.Position = UDim2.new(0, 0, 0, 170)
+fireButton.Text = "Fire"
+fireButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+fireButton.TextColor3 = Color3.new(1, 1, 1)
+
+local loopButton = Instance.new("TextButton", frame)
+loopButton.Size = UDim2.new(0.5, -2, 0, 25)
+loopButton.Position = UDim2.new(0.5, 2, 0, 170)
+loopButton.Text = "Loop: OFF"
+loopButton.BackgroundColor3 = Color3.fromRGB(70, 30, 30)
+loopButton.TextColor3 = Color3.new(1, 1, 1)
+
+local looping = false
+local function fireOutfit(slot)
+	local r = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("LoadOutfit")
+	r:InvokeServer(unpack({slot}))
+end
+
+fireButton.MouseButton1Click:Connect(function()
+	local slot = tonumber(slotBox.Text) or 1
+	local times = tonumber(timesBox.Text) or 10
+	local delay = tonumber(delayBox.Text) or 0.1
+	fireButton.Visible = false
+	for i = 1, times do
+		fireOutfit(slot)
+		if delay > 0 then task.wait(delay) end
+	end
+	fireButton.Visible = true
+end)
+
+loopButton.MouseButton1Click:Connect(function()
+	looping = not looping
+	loopButton.Text = looping and "Loop: ON" or "Loop: OFF"
+	loopButton.BackgroundColor3 = looping and Color3.fromRGB(30, 70, 30) or Color3.fromRGB(70, 30, 30)
+	if looping then
+		fadeLabel(warnLabel, 0, 0)
+		fadeLabel(warnLabel, 0.1, 1.5)
+		task.spawn(function()
+			while looping do
+				local slot = tonumber(slotBox.Text) or 1
+				local delay = tonumber(delayBox.Text) or 0.1
+				fireOutfit(slot)
+				if delay > 0 then task.wait(delay) else task.wait() end
+			end
+		end)
+	else
+		fadeLabel(warnLabel, 1, 1.5)
+	end
+end)

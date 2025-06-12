@@ -272,6 +272,13 @@ Tabs.Avatar:CreateButton({
 })
 
 Tabs.Avatar:CreateButton({
+    Name = "Neko Head",
+    Callback = function()
+        AvatarChanges(0, 0, 0, 0, 0, 18112201695)
+    end
+})
+
+Tabs.Avatar:CreateButton({
     Name = "BlazeBurner Head",
     Callback = function()
         AvatarChanges(0, 0, 0, 0, 0, 3210773801)

@@ -46,12 +46,23 @@ local function splitByBypassedChunks(bypassed, maxLen)
 local CachedChannels = {}
 
 local function sendBypassedMessage(message, recipient)
-	local prefix, suffix = "\u{05BE}>ˑ\u{0008}", "ˑ\u{0008}"
-	local bypassed = bypassEncode(message):gsub(" ", "\b")
-	local chunks = splitByBypassedChunks(bypassed, 145)
+	local firstChar = message:sub(1, 1)
+	local skipEncoding = firstChar == "/" or firstChar == "-" or firstChar == ";" or firstChar == ":" or firstChar == "!"
 
-	for _, chunk in ipairs(chunks) do
-		local final = prefix .. chunk .. suffix
+	local finalMessages = {}
+
+	if skipEncoding then
+		table.insert(finalMessages, message) -- send plain message
+	else
+		local prefix, suffix = "\u{05BE}>ˑ\u{0008}", "ˑ\u{0008}"
+		local bypassed = bypassEncode(message):gsub(" ", "\b")
+		local chunks = splitByBypassedChunks(bypassed, 145)
+		for _, chunk in ipairs(chunks) do
+			table.insert(finalMessages, prefix .. chunk .. suffix)
+		end
+	end
+
+	for _, final in ipairs(finalMessages) do
 		local channel = nil
 
 		if recipient and recipient ~= "All" then
@@ -60,22 +71,21 @@ local function sendBypassedMessage(message, recipient)
 				or not channel:FindFirstChild(recipient)
 				or not channel:FindFirstChild(LocalPlayer.Name) then
 				CachedChannels[recipient] = nil
-				channel = nil end
+				channel = nil
+			end
 			if not channel then
 				for _, ch in pairs(TextChatService.TextChannels:GetChildren()) do
 					if ch.Name:find("RBXWhisper:") and ch:FindFirstChild(recipient) then
 						channel = ch
 						CachedChannels[recipient] = ch
 						break
-		        end end end end
+					end end end end
 
-		
 		if not channel then
 			channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
 				or TextChatService.TextChannels:FindFirstChild("General")
 		end
 
-		
 		if channel then
 			channel:SendAsync(final)
 		else
@@ -83,9 +93,10 @@ local function sendBypassedMessage(message, recipient)
 			if ev then
 				local say = ev:FindFirstChild("SayMessageRequest")
 				if say then say:FireServer(final, "All") end
-      end end
-	  	task.wait(0.3)
-	  end end
+			end end
+
+		task.wait(0.3)
+	end end
 
 local function Match(str, pattern)
 	return string.match(str, pattern)

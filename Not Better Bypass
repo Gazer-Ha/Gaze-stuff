@@ -141,6 +141,9 @@ task.spawn(function()
 		sendButton.MouseButton1Click:Connect(function()
 		if chatBox.Text ~= "" then
 				local msg = chatBox.Text
+               local lowered = msg:lower()
+                if lowered:find("nigg") or lowered:find("hitl") then
+                return end
 				local recipient = getTargetName(targetChip)
 				chatBox.Text = ""
 				task.defer(function()

@@ -134,6 +134,7 @@ task.spawn(function()
 		chatBox.Text = ""
                 local lowered = msg:lower()
                 if lowered:find("nigg") or lowered:find("hitl") then
+                Notify(Really?", "this word is blacklisted yeah Since they're black", 5)
                 return end
 		task.defer(function()
 		sendBypassedMessage(msg, recipient)
@@ -149,7 +150,8 @@ task.spawn(function()
 				chatBox.Text = ""
                                 local lowered = msg:lower()
                                 if lowered:find("nigg") or lowered:find("hitl") then
-                               return end
+                                Notify(Really?", "this word is blacklisted yeah Since they're black", 5)
+                                return end
 				task.defer(function()
 					sendBypassedMessage(msg, recipient)
 				end) end end) end end)

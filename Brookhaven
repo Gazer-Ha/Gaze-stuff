@@ -1,5 +1,4 @@
 
--- Load Luna UI instead of Rayfield
 local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/main/source.lua", true))()
 
 local coreGui = cloneref(game:GetService("CoreGui"))
@@ -263,6 +262,17 @@ Tabs.Avatar:CreateParagraph({
     Title = "Heads",
     Text = "Yeah Just Some Head Like Headless"
 })
+
+local Input = Tabs.Avatar:CreateInput({
+	Name = "Change Head ID",
+	PlaceholderText = "Enter Head ID",
+	CurrentValue = "",
+	Numeric = false,
+	Enter = true, -- Only trigger when Enter is pressed
+	Callback = function(Text)
+		AvatarChanges("1", "1", "1", "1", "1", Text)
+	end
+}, "HeadOnlyFlag")
 
 Tabs.Avatar:CreateButton({
     Name = "Headless",

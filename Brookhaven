@@ -266,6 +266,7 @@ Tabs.Avatar:CreateParagraph({
 
 local Input = Tabs.Avatar:CreateInput({
 	Name = "Head ID",
+	PlaceholderText = "", -- Empty placeholder
 	CurrentValue = "",
 	Numeric = true,
 	Enter = true,

@@ -52,11 +52,11 @@ local function sendBypassedMessage(message, recipient)
 	local finalMessages = {}
 
 	if skipEncoding then
-		table.insert(finalMessages, message) -- send plain message
+		table.insert(finalMessages, message) 
 	else
 		local prefix, suffix = "\u{05BE}>ˑ\u{0008}", "ˑ\u{0008}"
 		local bypassed = bypassEncode(message):gsub(" ", "\b")
-		local chunks = splitByBypassedChunks(bypassed, 145)
+		local chunks = splitByBypassedChunks(bypassed, 140)
 		for _, chunk in ipairs(chunks) do
 			table.insert(finalMessages, prefix .. chunk .. suffix)
 		end
@@ -145,7 +145,7 @@ task.spawn(function()
 		chatBox.Text = ""
                 local lowered = msg:lower()
 		task.defer(function()
-		sendBypassedMessage(msg, recipient)
+		sendBypassedMessage(lowered, recipient)
 		end) end end) end
 
 	
@@ -158,7 +158,7 @@ task.spawn(function()
 				chatBox.Text = ""
                                 local lowered = msg:lower()
 				task.defer(function()
-					sendBypassedMessage(msg, recipient)
+					sendBypassedMessage(lowered, recipient)
 				end) end end) end end)
 
 Notify("Better? Bypass", "Bypass active", 5)

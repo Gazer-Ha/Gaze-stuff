@@ -1,14 +1,100 @@
 local Players = game:GetService("Players")
 local TextChatService = game:GetService("TextChatService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local COREGUI = game:GetService("CoreGui")
+cloneref = cloneref or function(o) return o end
+local COREGUI = cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui") or game.Players.LocalPlayer:WaitForChild("PlayerGui")
 local LocalPlayer = Players.LocalPlayer
 
 
-function Notify(t, x, d)
-	pcall(function()
-		game.StarterGui:SetCore("SendNotification", {Title = t, Text = x, Duration = d})
-	end) end
+local Notifbro = {}
+
+function Notify(titletxt, text, time)
+    
+    coroutine.wrap(function()
+        local GUI = Instance.new("ScreenGui")
+        local Main = Instance.new("Frame", GUI)
+        local title = Instance.new("TextLabel", Main)
+        local message = Instance.new("TextLabel", Main)
+
+        GUI.Name = "BackgroundNotif"
+        GUI.Parent = COREGUI
+
+        local sw = workspace.CurrentCamera.ViewportSize.X
+        local sh = workspace.CurrentCamera.ViewportSize.Y
+        local nh = sh / 7
+        local nw = sw / 5
+
+        Main.Name = "MainFrame"
+        Main.BackgroundColor3 = Color3.new(0.156863, 0.156863, 0.156863)
+        Main.BackgroundTransparency = 0.2
+        Main.BorderSizePixel = 0
+        Main.Size = UDim2.new(0, nw, 0, nh)
+
+        title.BackgroundColor3 = Color3.new(0, 0, 0)
+        title.BackgroundTransparency = 0.9
+        title.Size = UDim2.new(1, 0, 0, nh / 2)
+        title.Font = Enum.Font.GothamBold
+        title.Text = titletxt
+        title.TextColor3 = Color3.new(1, 1, 1)
+        title.TextScaled = true
+
+        message.BackgroundColor3 = Color3.new(0, 0, 0)
+        message.BackgroundTransparency = 1
+        message.Position = UDim2.new(0, 0, 0, nh / 2)
+        message.Size = UDim2.new(1, 0, 1, -nh / 2)
+        message.Font = Enum.Font.Gotham
+        message.Text = text
+        message.TextColor3 = Color3.new(1, 1, 1)
+        message.TextScaled = true
+
+        local offset = 50
+        for _, notif in ipairs(Notifbro) do
+            offset = offset + notif.Size.Y.Offset + 10
+        end
+
+        Main.Position = UDim2.new(1, 5, 0, offset)
+        table.insert(Notifbro, Main)
+
+        task.wait(0.1)
+        Main:TweenPosition(UDim2.new(1, -nw, 0, offset), Enum.EasingDirection.Out, Enum.EasingStyle.Bounce, 0.5, true)
+        Main:TweenSize(UDim2.new(0, nw * 1.06, 0, nh * 1.06), Enum.EasingDirection.Out, Enum.EasingStyle.Elastic, 0.5, true)
+        task.wait(0.5)
+        Main:TweenSize(UDim2.new(0, nw, 0, nh), Enum.EasingDirection.Out, Enum.EasingStyle.Elastic, 0.2, true)
+
+        task.wait(time)
+
+        Main:TweenSize(UDim2.new(0, nw * 1.06, 0, nh * 1.06), Enum.EasingDirection.In, Enum.EasingStyle.Elastic, 0.2, true)
+        task.wait(0.2)
+        Main:TweenSize(UDim2.new(0, nw, 0, nh), Enum.EasingDirection.In, Enum.EasingStyle.Elastic, 0.2, true)
+        task.wait(0.2)
+        Main:TweenPosition(UDim2.new(1, 5, 0, offset), Enum.EasingDirection.In, Enum.EasingStyle.Bounce, 0.5, true)
+        task.wait(0.5)
+
+        GUI:Destroy()
+        for i, notif in ipairs(Notifbro) do
+            if notif == Main then
+                table.remove(Notifbro, i)
+                break
+            end
+        end
+
+        for i, notif in ipairs(Notifbro) do
+            local newOffset = 50 + (nh + 10) * (i - 1)
+            notif:TweenPosition(UDim2.new(1, -nw, 0, newOffset), Enum.EasingDirection.Out, Enum.EasingStyle.Bounce, 0.5, true)
+        end
+    end)()
+end
+
+local guiName = "NOT BETTER"
+
+if COREGUI:FindFirstChild(guiName) then
+    Notify("Error","Script Already Executed", 1)
+    return
+end
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = guiName
+screenGui.Parent = COREGUI
 
 
 local function bypassEncode(str)
@@ -149,16 +235,10 @@ task.spawn(function()
 		end) end end) end
 
 	
-	if sendButton and chatBox then
-		sendButton.MouseButton1Click:Connect(function()
-		if chatBox.Text ~= "" then
-				local msg = chatBox.Text
-             
-				local recipient = getTargetName(targetChip)
-				chatBox.Text = ""
-                                local lowered = msg:lower()
-				task.defer(function()
-					sendBypassedMessage(lowered, recipient)
-				end) end end) end end)
+	if sendButton then
+	sendButton:Destroy()
+end
+end)
 
 Notify("Better? Bypass", "Bypass active", 5)
+Notify("watch tutorial", "youtube.com/shorts/z1yCdkbXTi4", 60)

@@ -21,6 +21,8 @@ end
 
 
 
+
+
 task.spawn(function()
 	local CoreGui = cloneref(game:GetService("CoreGui"))
 	local TweenService = game:GetService("TweenService")
@@ -72,6 +74,44 @@ task.spawn(function()
 		screenGui:Destroy()
 end)
 end)
+
+local g = getinfo or debug.getinfo
+local d, h, x, y = false, {}, nil, nil
+setthreadidentity(2)
+
+for i, v in getgc(true) do
+	if typeof(v) == "table" then
+		local a, b = rawget(v, "Detected"), rawget(v, "Kill")
+		if typeof(a) == "function" and not x then
+			x = a
+			local z; z = hookfunction(x, function(c, f, n)
+				if c ~= "_" and d then warn(`Adonis AntiCheat flagged\nMethod: {c}\nInfo: {f}`) end
+				return true
+			end)
+			h[#h+1] = x
+		end
+		if rawget(v, "Variables") and rawget(v, "Process") and typeof(b) == "function" and not y then
+			y = b
+			local z; z = hookfunction(y, function(f)
+				if d then warn(`Adonis AntiCheat tried to kill (fallback): {f}`) end
+			end)
+			h[#h+1] = y
+		end
+	end
+end
+
+local z; z = hookfunction(getrenv().debug.info, newcclosure(function(...)
+	local a, f = ...
+	if x and a == x then
+		if d then warn("zins | adonis bypassed") end
+		return coroutine.yield(coroutine.running())
+	end
+	return z(...)
+end))
+
+setthreadidentity(7)
+task.wait(0.1)
+
 local Players = game:GetService("Players")
 local rs, ws = game:GetService("ReplicatedStorage"), workspace
 local player = Players.LocalPlayer

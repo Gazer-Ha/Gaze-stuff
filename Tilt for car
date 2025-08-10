@@ -4,32 +4,54 @@ end
 getgenv().TiltForCarLoaded = true
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
-local root = character:WaitForChild("HumanoidRootPart")
+local hrp = character:WaitForChild("HumanoidRootPart")
 
-local maxTilt = 15
-local tiltSpeed = 5
-local currentTiltX = 0
-local currentTiltZ = 0
+local predictionTime = 0.25
+local tiltSmoothness = 5
+local pitchStrength = 0.5
+local verticalDeadzone = 0.05
+local maxTiltSide = 15
+local sideSmoothness = 5
+
+local currentPitch = 0
+local currentSide = 0
 
 RunService.RenderStepped:Connect(function(dt)
-    local moveDir = humanoid.MoveDirection
-    local targetTiltX = 0
-    local targetTiltZ = 0
+    if not character or not hrp then return end
 
+    local moveDir = humanoid.MoveDirection
+    local targetSide = 0
     if moveDir.Magnitude > 0 then
-        local localMove = root.CFrame:VectorToObjectSpace(moveDir)
-        targetTiltX = -localMove.X * maxTilt
-        targetTiltZ = localMove.Z * maxTilt
+        local localMove = hrp.CFrame:VectorToObjectSpace(moveDir)
+        targetSide = -localMove.X * maxTiltSide
+    end
+    currentSide += (targetSide - currentSide) * math.min(dt * sideSmoothness, 1)
+
+    local targetPitch = 0
+    if moveDir.Magnitude > 0 then
+        local currentPos = hrp.Position
+        local velocity = hrp.Velocity
+        local predictedPos = currentPos + (velocity * predictionTime)
+
+        local dy = predictedPos.Y - currentPos.Y
+        if math.abs(dy) > verticalDeadzone then
+            local flatLook = hrp.CFrame.LookVector
+            flatLook = Vector3.new(flatLook.X, 0, flatLook.Z).Unit
+            local flatDist = Vector3.new(predictedPos.X, currentPos.Y, predictedPos.Z) - currentPos
+            targetPitch = math.atan2(dy, flatDist.Magnitude) * pitchStrength
+        end
     end
 
-    currentTiltX += (targetTiltX - currentTiltX) * math.min(dt * tiltSpeed, 1)
-    currentTiltZ += (targetTiltZ - currentTiltZ) * math.min(dt * tiltSpeed, 1)
+    currentPitch += (targetPitch - currentPitch) * math.clamp(dt * tiltSmoothness, 0, 1)
 
-    local pos = root.Position
-    local facingRotation = CFrame.Angles(0, math.rad(root.Orientation.Y), 0)
-    local tiltRotation = CFrame.Angles(math.rad(currentTiltZ), 0, math.rad(currentTiltX))
-    root.CFrame = CFrame.new(pos) * facingRotation * tiltRotation
+    local yaw = math.rad(hrp.Orientation.Y)
+    local finalCF = CFrame.new(hrp.Position) *
+        CFrame.Angles(0, yaw, 0) *
+        CFrame.Angles(currentPitch, 0, math.rad(currentSide))
+
+    hrp.CFrame = finalCF
 end)

@@ -1,3 +1,7 @@
+if getgenv().TiltForCarLoaded then
+    return
+end
+getgenv().TiltForCarLoaded = true
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer

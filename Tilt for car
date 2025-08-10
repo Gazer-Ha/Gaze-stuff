@@ -1,8 +1,9 @@
 -- Prevent multiple executions
-if getgenv().TiltForCar then
-    warn("Tilt for car script is already running.")
+if getgenv().TiltForCar == true then
+warn("Already On")
     return
 end
+
 getgenv().TiltForCar = true
 
 local RunService = game:GetService("RunService")

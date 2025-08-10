@@ -1,4 +1,4 @@
--- Prevent multiple executions
+-- classic gaze getgenv stuff
 if getgenv().TiltForCar == true then
 warn("Already On")
     return

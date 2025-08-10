@@ -1,0 +1,31 @@
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local root = character:WaitForChild("HumanoidRootPart")
+
+local maxTilt = 15
+local tiltSpeed = 5
+local currentTiltX = 0
+local currentTiltZ = 0
+
+RunService.RenderStepped:Connect(function(dt)
+    local moveDir = humanoid.MoveDirection
+    local targetTiltX = 0
+    local targetTiltZ = 0
+
+    if moveDir.Magnitude > 0 then
+        local localMove = root.CFrame:VectorToObjectSpace(moveDir)
+        targetTiltX = -localMove.X * maxTilt
+        targetTiltZ = localMove.Z * maxTilt
+    end
+
+    currentTiltX += (targetTiltX - currentTiltX) * math.min(dt * tiltSpeed, 1)
+    currentTiltZ += (targetTiltZ - currentTiltZ) * math.min(dt * tiltSpeed, 1)
+
+    local pos = root.Position
+    local facingRotation = CFrame.Angles(0, math.rad(root.Orientation.Y), 0)
+    local tiltRotation = CFrame.Angles(math.rad(currentTiltZ), 0, math.rad(currentTiltX))
+    root.CFrame = CFrame.new(pos) * facingRotation * tiltRotation
+end)

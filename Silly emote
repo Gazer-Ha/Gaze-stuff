@@ -1,4 +1,5 @@
--- sybau blud ur not tuff define index n shit
+-- Oh, ho-ho... Poor Lagstrom... Ha-ha... You actually thought you could hide from me? 
+-- Sinister Gaze 2025
 function missing(t, f, fallback)
     if type(f) == t then return f end
     return fallback

@@ -1,4 +1,4 @@
--- fix ur bug already improveboy 😭🥀
+-- fix this bug already improveboy 😭🥀
 function missing(t, f, fallback)
     if type(f) == t then return f end
     return fallback

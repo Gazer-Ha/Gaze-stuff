@@ -1,10 +1,4 @@
--- ugh
-
-
-
-
-
-
+-- KILL ME KILL ME ARLEADY AHHGHRHRHEHEHEH- GAZE.EXE HERE 😈😈
 if getgenv().EmotesGay == true then
 return end
 getgenv().EmotesGay = true
@@ -261,18 +255,40 @@ end
 
 
  SoundPlay.CustomId = "rbxassetid://2084290015"
- DoNotif("Origin V 5.15","IM TRYING MY BEST TO FIX A LOT OF BUGS FR", 10)
+ DoNotif("Origin V 5.16","MASS BUG FIXED", 10)
 
 
 local LineStuff = {
-    "updat..zzzz",
-    "bugs..",
-    "lag fixed (probably not)",
-    "patch where nothing changed..",
-    "round of bugfixes, on the house",
-    "excuse to break more scripts",
-    "new typo speedrun",
-    "crash% any% WR attempt",
+    "applied duct tape..",
+    "99 new bugs shipped!",
+    "lag optimized (™ placebo)",
+    "patch v0.0.0.1.1.1b",
+    "free bugs DLC",
+    "oops all errors",
+    "syntax% any% WR attempt",
+    "fixed nothing, broke everything",
+    "hotfix for the hotfix of the hotfix",
+    "added new ways to crash",
+    "commit message: 'final_final_REALfix'",
+    "lag machine now 20% faster",
+    "deleted prod on accident..",
+    "balance patch (everything worse)",
+    "code works on my PC™",
+    "early access to more bugs",
+    "new feature: random crashes",
+    "speedrun to blue screen",
+    "patch notes redacted ",
+    "implemented spaghetti mode ",
+    "downgrade disguised as upgrade",
+    "half a fix, twice the issues",
+    "added bug multiplier",
+    "AI wrote this update, blame it",
+    "release notes missing",
+    "debug mode left on (oops)",
+    "typo patch (added new typo)",
+    "rollback simulator v2",
+    "minor fixes, major disasters",
+    "randomized everything for fun",
 }
 
 local function GazePain()

@@ -13,9 +13,9 @@ end end})
 
 function scale(axis, value)
 if axis== "X" then
-        return value * (Screen.Width / 1920) * 1.8
+        return value * (Screen.Width / 1920) * 2.2
     elseif axis== "Y" then
-        return value * (Screen.Height / 1080)  * 1.8
+        return value * (Screen.Height / 1080)  * 2.2
 end end
 
 

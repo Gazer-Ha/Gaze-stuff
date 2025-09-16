@@ -1197,7 +1197,7 @@ if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
 
 	local btn = Instance.new("TextButton")
 	btn.Parent = screenGui
-	btn.Text = "Toggle Lol"
+	btn.Text = "Toggle"
 	btn.Font = Enum.Font.GothamSemibold
 	btn.TextScaled = true
 	btn.Size = UDim2.new(0, 100, 0, 100)

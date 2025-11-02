@@ -1,0 +1,110 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ShiftLockUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+local shiftLockButton = Instance.new("ImageButton")
+shiftLockButton.Name = "ShiftLockButton"
+shiftLockButton.Size = UDim2.new(0, 60, 0, 60)
+shiftLockButton.Position = UDim2.new(1, -70, 1, -70)
+shiftLockButton.AnchorPoint = Vector2.new(0, 0)
+shiftLockButton.BackgroundTransparency = 1
+shiftLockButton.Image = "rbxassetid://105987953182009"
+shiftLockButton.Draggable = true
+shiftLockButton.Active = true
+shiftLockButton.Parent = screenGui
+
+local isShiftLockEnabled = false
+
+local function toggleShiftLock(forceState)
+    if forceState ~= nil then
+        isShiftLockEnabled = forceState
+    else
+        isShiftLockEnabled = not isShiftLockEnabled
+    end
+
+    if isShiftLockEnabled then
+        shiftLockButton.ImageColor3 = Color3.fromRGB(0, 170, 255)
+    else
+        shiftLockButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
+    end
+end
+
+local lastTapTime = 0
+local tapCount = 0
+local tapConnection = nil
+
+local function handleDoubleTap()
+    if shiftLockButton.Size == UDim2.new(0, 60, 0, 60) then
+        shiftLockButton.Size = UDim2.new(0, 30, 0, 30)
+    else
+        shiftLockButton.Size = UDim2.new(0, 60, 0, 60)
+    end
+end
+
+local function handleTripleTap()
+    shiftLockButton.Visible = false
+    isShiftLockEnabled = false
+    shiftLockButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
+end
+
+local function processTap()
+    local currentTime = tick()
+    if currentTime - lastTapTime > 0.5 then
+        tapCount = 1
+    else
+        tapCount += 1
+    end
+    lastTapTime = currentTime
+
+    if tapConnection then
+        tapConnection:Disconnect()
+        tapConnection = nil
+    end
+
+    tapConnection = RunService.Heartbeat:Connect(function()
+        if tick() - lastTapTime >= 0.3 then
+            tapConnection:Disconnect()
+            tapConnection = nil
+
+            if tapCount == 1 then
+                toggleShiftLock()
+            elseif tapCount == 2 then
+                handleDoubleTap()
+            elseif tapCount >= 3 then
+                handleTripleTap()
+            end
+            tapCount = 0
+        end
+    end)
+end
+
+shiftLockButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin then
+        processTap()
+    end
+end)
+
+RunService.Heartbeat:Connect(function()
+    if isShiftLockEnabled and player.Character then
+        local hrp = player.Character:FindFirstChild("HumanoidRootPart")
+        local cam = workspace.CurrentCamera
+        if hrp and cam then
+            local look = cam.CFrame.LookVector
+            hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(look.X, 0, look.Z).Unit)
+        end
+    end
+end)
+
+player.CharacterAdded:Connect(function()
+    isShiftLockEnabled = false
+    if screenGui then
+        screenGui:Destroy()
+    end
+end)

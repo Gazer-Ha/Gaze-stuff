@@ -1,3 +1,5 @@
+if (game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()):WaitForChild("Humanoid").RigType == Enum.HumanoidRigType.R15 then 
+
 local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
 local hum = char:WaitForChild("Humanoid")
 local animate = char:WaitForChild("Animate")
@@ -40,7 +42,7 @@ game:GetService("RunService").Heartbeat:Connect(function()
 	end
 end)
 
-
+end
 
 function missing(t, f, fallback)
     if type(f) == t then return f end

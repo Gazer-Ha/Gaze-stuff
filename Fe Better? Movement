@@ -1,3 +1,47 @@
+local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+local hum = char:WaitForChild("Humanoid")
+local animate = char:WaitForChild("Animate")
+animate.idle.Animation1.AnimationId = "rbxassetid://0"
+animate.idle.Animation2.AnimationId = "rbxassetid://0"
+task.wait()
+animate.idle.Animation1.AnimationId = "rbxassetid://16738333868"
+animate.idle.Animation2.AnimationId = "rbxassetid://16738334710"
+
+
+local anim1 = Instance.new("Animation")
+anim1.AnimationId = "rbxassetid://138665010911335"
+local track1 = hum:LoadAnimation(anim1)
+
+local anim2 = Instance.new("Animation")
+anim2.AnimationId = "rbxassetid://140131631438778"
+local track2 = hum:LoadAnimation(anim2)
+
+game:GetService("RunService").Heartbeat:Connect(function()
+	local root = char:FindFirstChild("HumanoidRootPart")
+	if not root then return end
+	local moving = root.Velocity.Magnitude > 1
+
+	if not moving then
+		if not track1.IsPlaying then
+			track1:Play()
+		end
+		if not track2.IsPlaying then
+			track2:Play()
+		end
+		track1:AdjustWeight(0.9)
+		track2:AdjustWeight(0.5)
+	else
+		if track1.IsPlaying then
+			track1:Stop()
+		end
+		if track2.IsPlaying then
+			track2:Stop()
+		end
+	end
+end)
+
+
+
 function missing(t, f, fallback)
     if type(f) == t then return f end
     return fallback
@@ -56,14 +100,14 @@ for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
 end
 
 StarterGui:SetCore("SendNotification", {
-    Title = "FE Better? Movement 0.3",
+    Title = "FE Better? Movement 0.5",
     Text = "Respawn/die To Reset Anim",
     Duration = 5
 })
 
 StarterGui:SetCore("SendNotification", {
-    Title = "FE Better? Movement 0.3",
-    Text = "now AnimSpeed Adjustable Based on Velocity",
+    Title = "FE Better? Movement 0.5",
+    Text = "Better Backward Animation Added Idle Anim",
     Duration = 5
 })
 
@@ -79,13 +123,10 @@ local sideAnim = Instance.new("Animation")
     sideTrack.Priority = Enum.AnimationPriority.Movement
     
     local Animate = c:FindFirstChild("Animate")
-    local RUNId = Animate and Animate.run and Animate.run.RunAnim and Animate.run.RunAnim.AnimationId or nil
+    
     local backAnim = Instance.new("Animation")
-    if RUNId and RUNId ~= "" then
-        backAnim.AnimationId = RUNId
-    else
-        backAnim.AnimationId = "rbxassetid://913376220"
-    end
+   
+        backAnim.AnimationId = "rbxassetid://16738337225"
     backwardTrack = humanoid:LoadAnimation(backAnim)
     backwardTrack.Priority = Enum.AnimationPriority.Movement
 end
@@ -174,3 +215,4 @@ end
    
     end)
 end
+

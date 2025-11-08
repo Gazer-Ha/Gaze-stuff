@@ -165,7 +165,7 @@ end
 RunService.Heartbeat:Connect(function(dt)
     if not c or not c.Parent then return end
     local moveDir = getMoveDirection()
-    local speed = hrp1.VelilityMagnitude
+    local speed = hrp1.Velocity.Magnitude
     local targetTiltX, targetTiltZ = 0, 0
     local state = humanoid:GetState()
 

@@ -1,31 +1,4 @@
-local CoreGui = game:GetService("CoreGui")
-local btn = CoreGui:WaitForChild("RobloxGui"):WaitForChild("SettingsClippingShield"):WaitForChild("SettingsShield"):WaitForChild("MenuContainer"):WaitForChild("Page"):WaitForChild("PageViewClipper"):WaitForChild("PageView"):WaitForChild("PageViewInnerFrame"):WaitForChild("ResetCharacter"):WaitForChild("ResetCharacterText"):WaitForChild("ResetButtonContainer"):WaitForChild("ResetCharacterButton")
-local speaker = game.Players.LocalPlayer
-
-local function kill()
-	local char = speaker.Character or speaker.CharacterAdded:Wait()
-	local hum = char:FindFirstChildOfClass("Humanoid")
-	if hum then
-		hum:ChangeState(Enum.HumanoidStateType.Dead)
-	end
-end
-
-task.spawn(function()
-	while task.wait(0.2) do
-		local char = speaker.Character
-		if char then
-			local hum = char:FindFirstChildOfClass("Humanoid")
-			if hum and hum.Health < 1 then
-				hum:ChangeState(Enum.HumanoidStateType.Dead)
-			end
-		end
-	end
-end)
-
-pcall(function() btn.MouseButton1Click:Connect(kill) end)
-pcall(function() btn.Activated:Connect(kill) end)
-
-if (game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()):WaitForChild("Humanoid").RigType == Enum.HumanoidRigType.R15 then
+if (game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()):WaitForChild("Humanoid").RigType == Enum.HumanoidRigType.R15 then 
 
 local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
 local hum = char:WaitForChild("Humanoid")
@@ -35,6 +8,7 @@ animate.idle.Animation2.AnimationId = "rbxassetid://0"
 task.wait()
 animate.idle.Animation1.AnimationId = "rbxassetid://16738333868"
 animate.idle.Animation2.AnimationId = "rbxassetid://16738334710"
+
 
 local anim1 = Instance.new("Animation")
 anim1.AnimationId = "rbxassetid://138665010911335"
@@ -59,12 +33,16 @@ game:GetService("RunService").Heartbeat:Connect(function()
 		track1:AdjustWeight(0.9)
 		track2:AdjustWeight(0.5)
 	else
-		if track1.IsPlaying then track1:Stop() end
-		if track2.IsPlaying then track2:Stop() end
+		if track1.IsPlaying then
+			track1:Stop()
+		end
+		if track2.IsPlaying then
+			track2:Stop()
+		end
 	end
 end)
 
-end -- ***INI YANG KAMU KURANG***
+end
 
 function missing(t, f, fallback)
     if type(f) == t then return f end
@@ -142,23 +120,26 @@ end)()
 local sideTrack, backwardTrack
 if not isR6 then
 local sideAnim = Instance.new("Animation")
-sideAnim.AnimationId = "rbxassetid://132218385473651"
-sideTrack = humanoid:LoadAnimation(sideAnim)
-sideTrack.Priority = Enum.AnimationPriority.Movement
+    sideAnim.AnimationId = "rbxassetid://132218385473651"
+    sideTrack = humanoid:LoadAnimation(sideAnim)
+    sideTrack.Priority = Enum.AnimationPriority.Movement
     
-local Animate = c:FindFirstChild("Animate")
+    local Animate = c:FindFirstChild("Animate")
     
-local backAnim = Instance.new("Animation")
-backAnim.AnimationId = "rbxassetid://16738337225"
-backwardTrack = humanoid:LoadAnimation(backAnim)
-backwardTrack.Priority = Enum.AnimationPriority.Movement
+    local backAnim = Instance.new("Animation")
+   
+        backAnim.AnimationId = "rbxassetid://16738337225"
+    backwardTrack = humanoid:LoadAnimation(backAnim)
+    backwardTrack.Priority = Enum.AnimationPriority.Movement
 end
 
 local lastRightDot, lastTimePos = 0, 0
 
 local function getMoveDirection()
     local dir = humanoid.MoveDirection
-    if dir.Magnitude > 0 then return dir.Unit end
+    if dir.Magnitude > 0 then
+        return dir.Unit
+    end
     return Vector3.zero
 end
 
@@ -193,45 +174,46 @@ RunService.Heartbeat:Connect(function(dt)
 end)
 
 if not isR6 then
-RunService.PreSimulation:Connect(function()
-    local state = humanoid:GetState()
-    local moveDir = humanoid.MoveDirection
-    local velocity = hrp1.Velocity
-    local actualSpeed = Vector3.new(velocity.X,0,velocity.Z).Magnitude
+    RunService.PreSimulation:Connect(function()
+        local state = humanoid:GetState()
+        local moveDir = humanoid.MoveDirection
+        local velocity = hrp1.Velocity
+        local actualSpeed = Vector3.new(velocity.X,0,velocity.Z).Magnitude
 
-    if sideTrack.IsPlaying then lastTimePos = sideTrack.TimePosition end
+        if sideTrack.IsPlaying then lastTimePos = sideTrack.TimePosition end
 
-    if state == Enum.HumanoidStateType.Jumping or state == Enum.HumanoidStateType.Freefall or actualSpeed < 0.1 then
-        if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
-        if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
-        return
-    end
-
-    local forwardDot = moveDir:Dot(hrp1.CFrame.LookVector)
-    local rightDot = moveDir:Dot(hrp1.CFrame.RightVector)
-
-    if math.abs(rightDot) > math.abs(forwardDot) then
-        if not sideTrack.IsPlaying then
-            sideTrack:Play(0.2)
-            sideTrack.TimePosition = lastTimePos
+        if state == Enum.HumanoidStateType.Jumping or state == Enum.HumanoidStateType.Freefall or actualSpeed < 0.1 then
+            if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
+            if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
+            return
         end
-        local alpha = actualSpeed / 15
-        sideTrack:AdjustWeight(math.clamp(0.5 + 0.5*alpha, 0, 1))
-        sideTrack:AdjustSpeed(1.5 * alpha * (rightDot >= 0 and -1 or 1))
-        if (rightDot > 0 and lastRightDot < 0) or (rightDot < 0 and lastRightDot > 0) then
-            sideTrack.TimePosition = lastTimePos
-        end
-    else
-        if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
-    end
 
-    if forwardDot <= -0.5 then
-        if not backwardTrack.IsPlaying then backwardTrack:Play() end
-        local alpha = actualSpeed / 15
-        backwardTrack:AdjustWeight(math.clamp(alpha, 0, 1))
-        backwardTrack:AdjustSpeed(-1.3 * alpha)
-    else
-        if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
+        local forwardDot = moveDir:Dot(hrp1.CFrame.LookVector)
+        local rightDot = moveDir:Dot(hrp1.CFrame.RightVector)
+
+        if math.abs(rightDot) > math.abs(forwardDot) then
+    if not sideTrack.IsPlaying then
+        sideTrack:Play(0.2)
+        sideTrack.TimePosition = lastTimePos
     end
-end)
+    local alpha = actualSpeed / 15
+    sideTrack:AdjustWeight(math.clamp(0.5 + 0.5*alpha, 0, 1))
+    sideTrack:AdjustSpeed(1.5 * alpha * (rightDot >= 0 and -1 or 1))
+    if (rightDot > 0 and lastRightDot < 0) or (rightDot < 0 and lastRightDot > 0) then
+        sideTrack.TimePosition = lastTimePos
+    end
+else
+    if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
+end
+
+if forwardDot <= -0.5 then
+    if not backwardTrack.IsPlaying then backwardTrack:Play() end
+    local alpha = actualSpeed / 15
+    backwardTrack:AdjustWeight(math.clamp(alpha, 0, 1))
+    backwardTrack:AdjustSpeed(-1.3 * alpha)
+else
+    if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
+end
+   
+    end)
 end

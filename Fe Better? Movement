@@ -1,53 +1,24 @@
-if (game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()):WaitForChild("Humanoid").RigType == Enum.HumanoidRigType.R15 then 
-
-local char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+local lp = game.Players.LocalPlayer
+local char = lp.Character or lp.CharacterAdded:Wait()
 local hum = char:WaitForChild("Humanoid")
-local animate = char:WaitForChild("Animate")
-animate.idle.Animation1.AnimationId = "rbxassetid://0"
-animate.idle.Animation2.AnimationId = "rbxassetid://0"
-task.wait()
-animate.idle.Animation1.AnimationId = "rbxassetid://16738333868"
-animate.idle.Animation2.AnimationId = "rbxassetid://16738334710"
+local hrp = char:WaitForChild("HumanoidRootPart")
 
+local lastPos = hrp.Position
+local customVel = Vector3.zero
 
-local anim1 = Instance.new("Animation")
-anim1.AnimationId = "rbxassetid://138665010911335"
-local track1 = hum:LoadAnimation(anim1)
-
-local anim2 = Instance.new("Animation")
-anim2.AnimationId = "rbxassetid://140131631438778"
-local track2 = hum:LoadAnimation(anim2)
-
-game:GetService("RunService").Heartbeat:Connect(function()
-	local root = char:FindFirstChild("HumanoidRootPart")
-	if not root then return end
-	local moving = root.Velocity.Magnitude > 1
-
-	if not moving then
-		if not track1.IsPlaying then
-			track1:Play()
-		end
-		if not track2.IsPlaying then
-			track2:Play()
-		end
-		track1:AdjustWeight(0.9)
-		track2:AdjustWeight(0.5)
-	else
-		if track1.IsPlaying then
-			track1:Stop()
-		end
-		if track2.IsPlaying then
-			track2:Stop()
-		end
-	end
+game:GetService("RunService").Heartbeat:Connect(function(dt)
+    local pos = hrp.Position
+    customVel = (pos - lastPos) / dt
+    lastPos = pos
 end)
 
-end
+
 
 function missing(t, f, fallback)
     if type(f) == t then return f end
     return fallback
 end
+
 cloneref = missing("function", cloneref, function(...) return ... end)
 
 local Services = setmetatable({}, {
@@ -60,57 +31,95 @@ local Players = Services.Players
 local RunService = Services.RunService
 local StarterGui = Services.StarterGui
 
-local lp = Players.LocalPlayer
-local c = lp.Character or lp.CharacterAdded:Wait()
+local lp2 = Players.LocalPlayer
+local c = lp2.Character or lp2.CharacterAdded:Wait()
 local humanoid = c:WaitForChild("Humanoid")
 local hrp0 = c:WaitForChild("HumanoidRootPart")
 
+local lastP = hrp0.Position
+local vel = Vector3.zero
+
+RunService.Heartbeat:Connect(function(dt)
+    local p = hrp0.Position
+    vel = (p - lastP) / dt
+    lastP = p
+end)
+
+
+
+
 hrp0.Archivable = true
 local hrp1 = hrp0:Clone()
-c.Parent = nil
+
+local joint = hrp0:FindFirstChild("RootJoint") or hrp0:FindFirstChildWhichIsA("Motor6D")
+local oldPart0 = joint and joint.Part0
+
+char.Parent = nil
 hrp0.Parent = hrp1
-local rootJoint = hrp0:FindFirstChild("RootJoint") or hrp0:FindFirstChildWhichIsA("Motor6D")
-if rootJoint then rootJoint.Part0 = nil end
-hrp1.Parent = c
-c.Parent = workspace
+task.wait()
 
-hrp0.Transparency = 0.9
-hrp0.CanCollide = false
-hrp1.CanCollide = false
+if joint then
+    joint.Part0 = hrp1
+end
 
-local maxTilt = 40
+hrp1.Parent = char
+char.Parent = workspace
+
+task.spawn(function()
+    while hum and hum.Health do
+        if hum.Health < 1 then
+            if joint then
+                joint.Part0 = oldPart0
+            end
+            hrp0.Parent = char
+            hrp1:Destroy()
+            break
+        end
+        task.wait()
+    end
+end)
+
+
+
+hrp0.Transparency = 0.5
+hrp0.Shape = Enum.PartType.Ball
+
+
+
+local maxTilt = 30
 local fadeSpeed = 10
 local tiltMultiplier = 1.2
-local currentTiltX, currentTiltZ = 0, 0
+local currentTiltX = 0
+local currentTiltZ = 0
 local hrp1TiltFactor = 0.4
-local jumpTiltFactor = 1/3
-
+local jumpTiltFactor = 1/2
 local isR6 = humanoid.RigType == Enum.HumanoidRigType.R6
+
 if isR6 then
-    StarterGui:SetCore("SendNotification", {
-        Title = "FE Better? Movement 0.3",
-        Text = "R6 detected: no sideways anim, custom jump",
-        Duration = 10
+    StarterGui:SetCore("SendNotification",{
+        Title="FE Better? Movement 0.3",
+        Text="R6 detected: no sideways anim, custom jump",
+        Duration=10
     })
     coroutine.wrap(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/NOT-MINE/refs/heads/main/R6%20animation%20custe"))()
     end)()
 end
 
-for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
-    track:Stop()
+for _, tr in pairs(humanoid:GetPlayingAnimationTracks()) do
+    tr:Stop()
 end
 
-StarterGui:SetCore("SendNotification", {
-    Title = "FE Better? Movement 0.5",
-    Text = "Respawn/die To Reset Anim",
-    Duration = 5
+StarterGui:SetCore("SendNotification",{
+    Title="FE Better? Movement 0.5",
+    Text="Respawn/die To Reset Anim",
+    Duration=5
 })
 
-StarterGui:SetCore("SendNotification", {
-    Title = "FE Better? Movement 0.5",
-    Text = "Better Backward Animation Added Idle Anim",
-    Duration = 5
+StarterGui:SetCore("SendNotification",{
+    Title="FE Better? Movement 0.5",
+    Text="Added Jump Anim, Fixed Death lol",
+    Duration=5
 })
 
 coroutine.wrap(function()
@@ -118,102 +127,159 @@ coroutine.wrap(function()
 end)()
 
 local sideTrack, backwardTrack
+
 if not isR6 then
-local sideAnim = Instance.new("Animation")
-    sideAnim.AnimationId = "rbxassetid://132218385473651"
-    sideTrack = humanoid:LoadAnimation(sideAnim)
+    local sa = Instance.new("Animation")
+    sa.AnimationId = "rbxassetid://132218385473651"
+    sideTrack = humanoid:LoadAnimation(sa)
     sideTrack.Priority = Enum.AnimationPriority.Movement
-    
-    local Animate = c:FindFirstChild("Animate")
-    
-    local backAnim = Instance.new("Animation")
-   
-        backAnim.AnimationId = "rbxassetid://16738337225"
-    backwardTrack = humanoid:LoadAnimation(backAnim)
+
+    local ba = Instance.new("Animation")
+    ba.AnimationId = "rbxassetid://16738337225"
+    backwardTrack = humanoid:LoadAnimation(ba)
     backwardTrack.Priority = Enum.AnimationPriority.Movement
+    
+    
 end
 
-local lastRightDot, lastTimePos = 0, 0
+local lastRightDot = 0
+local lastTimePos = 0
 
-local function getMoveDirection()
-    local dir = humanoid.MoveDirection
-    if dir.Magnitude > 0 then
-        return dir.Unit
-    end
+local function getMoveDir()
+    local d = humanoid.MoveDirection
+    if d.Magnitude > 0 then return d.Unit end
     return Vector3.zero
 end
 
 RunService.Heartbeat:Connect(function(dt)
-    if not c or not c.Parent then return end
-    local moveDir = getMoveDirection()
-    local speed = hrp1.Velocity.Magnitude
-    local targetTiltX, targetTiltZ = 0, 0
+hrp0.CanCollide = false
+    local moveDir = getMoveDir()
+    local speed = Vector3.new(vel.X,0,vel.Z).Magnitude
     local state = humanoid:GetState()
+    local targetX = 0
+    local targetZ = 0
 
     if speed > 0.1 then
         local look = hrp1.CFrame.LookVector
-        targetTiltX = math.clamp(-moveDir:Dot(look) * tiltMultiplier * speed, -maxTilt, maxTilt)
-        targetTiltZ = math.clamp(-moveDir:Dot(hrp1.CFrame.RightVector) * tiltMultiplier * speed, -maxTilt, maxTilt)
+        targetX = math.clamp(-moveDir:Dot(look) * tiltMultiplier * speed, -maxTilt, maxTilt)
+        targetZ = math.clamp(-moveDir:Dot(hrp1.CFrame.RightVector) * tiltMultiplier * speed, -maxTilt, maxTilt)
     end
 
     if state == Enum.HumanoidStateType.Jumping or state == Enum.HumanoidStateType.Freefall then
-        targetTiltX = targetTiltX * jumpTiltFactor
-        targetTiltZ = targetTiltZ * jumpTiltFactor
+        targetX = targetX * jumpTiltFactor
+        targetZ = targetZ * jumpTiltFactor
     end
 
-    currentTiltX += (targetTiltX - currentTiltX) * dt * fadeSpeed
-    currentTiltZ += (targetTiltZ - currentTiltZ) * dt * fadeSpeed
+    currentTiltX += (targetX - currentTiltX) * dt * fadeSpeed
+    currentTiltZ += (targetZ - currentTiltZ) * dt * fadeSpeed
 
-    local baseCFrame = hrp1.CFrame
-    local tiltCFrame = CFrame.Angles(math.rad(currentTiltX), 0, math.rad(currentTiltZ))
-    local hrp1TiltCFrame = CFrame.Angles(math.rad(currentTiltX * hrp1TiltFactor), 0, math.rad(currentTiltZ * hrp1TiltFactor))
-    hrp1.CFrame = baseCFrame * hrp1TiltCFrame
-    hrp0.CFrame = baseCFrame * tiltCFrame
+    local base = hrp1.CFrame
+    local tiltA = CFrame.Angles(math.rad(currentTiltX * hrp1TiltFactor),0,math.rad(currentTiltZ * hrp1TiltFactor))
+    local tiltB = CFrame.Angles(math.rad(currentTiltX),0,math.rad(currentTiltZ))
+
+    hrp1.CFrame = base * tiltA
+    hrp0.CFrame = base * tiltB
     hrp0.Velocity = Vector3.zero
     hrp0.RotVelocity = Vector3.zero
 end)
-
+canPlayJump = true
 if not isR6 then
-    RunService.PreSimulation:Connect(function()
-        local state = humanoid:GetState()
-        local moveDir = humanoid.MoveDirection
-        local velocity = hrp1.Velocity
-        local actualSpeed = Vector3.new(velocity.X,0,velocity.Z).Magnitude
 
-        if sideTrack.IsPlaying then lastTimePos = sideTrack.TimePosition end
+local animate = char:WaitForChild("Animate")
+    animate.idle.Animation1.AnimationId = "rbxassetid://0"
+    animate.idle.Animation2.AnimationId = "rbxassetid://0"
+    task.wait()
+    animate.idle.Animation1.AnimationId = "rbxassetid://16738333868"
+    animate.idle.Animation2.AnimationId = "rbxassetid://16738334710"
 
-        if state == Enum.HumanoidStateType.Jumping or state == Enum.HumanoidStateType.Freefall or actualSpeed < 0.1 then
-            if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
-            if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
-            return
+    local a1 = Instance.new("Animation")
+    a1.AnimationId = "rbxassetid://138665010911335"
+    local t1 = hum:LoadAnimation(a1)
+
+    local a2 = Instance.new("Animation")
+    a2.AnimationId = "rbxassetid://140131631438778"
+    local t2 = hum:LoadAnimation(a2)
+    
+    
+
+    game:GetService("RunService").Heartbeat:Connect(function()
+        local moving = customVel.Magnitude > 1
+        if not moving then
+            if not t1.IsPlaying then t1:Play(0.1,0.9) end
+            if not t2.IsPlaying then t2:Play(0.1, 0.5) end
+        else
+            if t1.IsPlaying then t1:Stop(0.1) end
+            if t2.IsPlaying then t2:Stop(0.1) end
         end
-
-        local forwardDot = moveDir:Dot(hrp1.CFrame.LookVector)
-        local rightDot = moveDir:Dot(hrp1.CFrame.RightVector)
-
-        if math.abs(rightDot) > math.abs(forwardDot) then
-    if not sideTrack.IsPlaying then
-        sideTrack:Play(0.2)
-        sideTrack.TimePosition = lastTimePos
-    end
-    local alpha = actualSpeed / 15
-    sideTrack:AdjustWeight(math.clamp(0.5 + 0.5*alpha, 0, 1))
-    sideTrack:AdjustSpeed(1.5 * alpha * (rightDot >= 0 and -1 or 1))
-    if (rightDot > 0 and lastRightDot < 0) or (rightDot < 0 and lastRightDot > 0) then
-        sideTrack.TimePosition = lastTimePos
-    end
-else
-    if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
-end
-
-if forwardDot <= -0.5 then
-    if not backwardTrack.IsPlaying then backwardTrack:Play() end
-    local alpha = actualSpeed / 15
-    backwardTrack:AdjustWeight(math.clamp(alpha, 0, 1))
-    backwardTrack:AdjustSpeed(-1.3 * alpha)
-else
-    if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
-end
-   
     end)
+ jumpeyAnim = Instance.new("Animation")
+jumpeyAnim.AnimationId = "rbxassetid://127915306032185"
+ jumpeyTrack = hum:LoadAnimation(jumpeyAnim)
+jumpeyTrack.Priority = Enum.AnimationPriority.Action
+jumpeyTrack.Looped = false
+
+    RunService.PreSimulation:Connect(function()
+    local state = humanoid:GetState()
+    local moveDir = humanoid.MoveDirection
+    local actual = Vector3.new(vel.X,0,vel.Z).Magnitude
+    
+    humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+
+    if sideTrack.IsPlaying then lastTimePos = sideTrack.TimePosition end
+
+    if state == Enum.HumanoidStateType.Jumping or state == Enum.HumanoidStateType.Freefall then
+        if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
+        if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
+        if canPlayJump and not jumpeyTrack.IsPlaying then jumpeyTrack:Play(0.2)
+canPlayJump = false
 end
+        lastRightDot = moveDir:Dot(hrp1.CFrame.RightVector)
+        return
+    end
+
+    if state == Enum.HumanoidStateType.Landed then
+        if jumpeyTrack.IsPlaying then jumpeyTrack:Stop(0.2)
+        end
+        canPlayJump = true
+        return
+    end
+    
+    
+    
+
+
+
+    local forwardDot = moveDir:Dot(hrp1.CFrame.LookVector)
+    local rightDot = moveDir:Dot(hrp1.CFrame.RightVector)
+
+    if math.abs(rightDot) > math.abs(forwardDot) then
+        if not sideTrack.IsPlaying then
+            sideTrack:Play(0.2)
+            sideTrack.TimePosition = lastTimePos
+        end
+        local alpha = actual / 16
+        sideTrack:AdjustWeight(math.clamp(0.5 + 0.5 * alpha,0,1))
+        sideTrack:AdjustSpeed(1.5 * alpha * (rightDot >= 0 and -1 or 1))
+        if (rightDot > 0 and lastRightDot < 0) or (rightDot < 0 and lastRightDot > 0) then
+            sideTrack.TimePosition = lastTimePos
+        end
+    else
+        if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
+    end
+
+    if forwardDot <= -0.5 then
+        if not backwardTrack.IsPlaying then backwardTrack:Play() end
+        local alpha = actual / 16
+        backwardTrack:AdjustWeight(math.clamp(alpha,0,1))
+        backwardTrack:AdjustSpeed(-1.3 * alpha)
+    else
+        if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
+    end
+
+    lastRightDot = rightDot
+end)
+end
+
+
+
+print("hey")

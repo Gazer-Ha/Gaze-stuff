@@ -205,8 +205,8 @@ local animate = char:WaitForChild("Animate")
     game:GetService("RunService").Heartbeat:Connect(function()
         local moving = customVel.Magnitude > 1
         if not moving then
-            if not t1.IsPlaying then t1:Play(0.1,0.9) end
-            if not t2.IsPlaying then t2:Play(0.1, 0.5) end
+            if not t1.IsPlaying then t1:Play(0.1,0.9,1) end
+            if not t2.IsPlaying then t2:Play(0.1, 0.5,1) end
         else
             if t1.IsPlaying then t1:Stop(0.1) end
             if t2.IsPlaying then t2:Stop(0.1) end

@@ -42,7 +42,7 @@ local tapConnection = nil
 
 local function handleDoubleTap()
     if shiftLockButton.Size == UDim2.new(0, 60, 0, 60) then
-        shiftLockButton.Size = UDim2.new(0, 30, 0, 30)
+        shiftLockButton.Size = UDim2.new(0, 60, 0, 60)
     else
         shiftLockButton.Size = UDim2.new(0, 60, 0, 60)
     end

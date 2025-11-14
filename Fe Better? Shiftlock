@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -85,8 +86,20 @@ local function processTap()
     end)
 end
 
+-- Tap on mobile button
 shiftLockButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch and input.UserInputState == Enum.UserInputState.Begin then
+    if input.UserInputType == Enum.UserInputType.Touch 
+        and input.UserInputState == Enum.UserInputState.Begin then
+        processTap()
+    end
+end)
+
+-- Pressing Shift key also triggers tap
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+
+    if input.KeyCode == Enum.KeyCode.LeftShift 
+        or input.KeyCode == Enum.KeyCode.RightShift then
         processTap()
     end
 end)

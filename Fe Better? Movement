@@ -214,8 +214,9 @@ local animate = char:WaitForChild("Animate")
             if not t2.IsPlaying then t2:Play(0.08, 0.5,1) end
             if not t2.IsPlaying then t3:Play(0.08)
             t3:AdjustWeight(0.06)
+             t3:AdjustSpeed(0)
             t3.TimePosition = t3.Length * 0.98 end
-            t3:AdjustSpeed(0)
+            
         else
             if t1.IsPlaying then t1:Stop(0.08) end
             if t2.IsPlaying then t2:Stop(0.08) end
@@ -238,9 +239,9 @@ jumpeyTrack.Looped = false
     if sideTrack.IsPlaying then lastTimePos = sideTrack.TimePosition end
 
     if state == Enum.HumanoidStateType.Jumping or state == Enum.HumanoidStateType.Freefall then
-        if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
-        if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
-        if canPlayJump and not jumpeyTrack.IsPlaying then jumpeyTrack:Play(0.2)
+        if sideTrack.IsPlaying then sideTrack:Stop(0.08) end
+        if backwardTrack.IsPlaying then backwardTrack:Stop(0.08) end
+        if canPlayJump and not jumpeyTrack.IsPlaying then jumpeyTrack:Play(0.08)
 canPlayJump = false
 end
         lastRightDot = moveDir:Dot(hrp1.CFrame.RightVector)
@@ -248,7 +249,7 @@ end
     end
 
     if state == Enum.HumanoidStateType.Landed then
-        if jumpeyTrack.IsPlaying then jumpeyTrack:Stop(0.2)
+        if jumpeyTrack.IsPlaying then jumpeyTrack:Stop(0.08)
         end
         canPlayJump = true
         return
@@ -264,7 +265,7 @@ end
 
     if math.abs(rightDot) > math.abs(forwardDot) then
         if not sideTrack.IsPlaying then
-            sideTrack:Play(0.2)
+            sideTrack:Play(0.08)
             sideTrack.TimePosition = lastTimePos
         end
         local alpha = actual / 16
@@ -274,7 +275,7 @@ end
             sideTrack.TimePosition = lastTimePos
         end
     else
-        if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
+        if sideTrack.IsPlaying then sideTrack:Stop(0.08) end
     end
 
     if forwardDot <= -0.5 then
@@ -283,7 +284,7 @@ end
         backwardTrack:AdjustWeight(math.clamp(alpha,0,1))
         backwardTrack:AdjustSpeed(-1.3 * alpha)
     else
-        if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
+        if backwardTrack.IsPlaying then backwardTrack:Stop(0.08) end
     end
 
     lastRightDot = rightDot

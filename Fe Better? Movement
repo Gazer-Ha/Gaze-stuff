@@ -213,8 +213,9 @@ local animate = char:WaitForChild("Animate")
             if not t1.IsPlaying then t1:Play(0.08,0.9,1) end
             if not t2.IsPlaying then t2:Play(0.08, 0.5,1) end
             if not t2.IsPlaying then t3:Play(0.08)
-            t3.Weight = 0.06
+            t3:AdjustWeight(0.06)
             t3.TimePosition = t3.Length * 0.98 end
+            t3:AdjustSpeed(0)
         else
             if t1.IsPlaying then t1:Stop(0.08) end
             if t2.IsPlaying then t2:Stop(0.08) end

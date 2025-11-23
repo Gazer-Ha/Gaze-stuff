@@ -151,7 +151,7 @@ local function getMoveDir()
     if d.Magnitude > 0 then return d.Unit end
     return Vector3.zero
 end
-
+humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
 RunService.Heartbeat:Connect(function(dt)
 hrp0.CanCollide = false
     local moveDir = getMoveDir()
@@ -212,11 +212,10 @@ local animate = char:WaitForChild("Animate")
         if not moving then
             if not t1.IsPlaying then t1:Play(0.08,0.9,1) end
             if not t2.IsPlaying then t2:Play(0.08, 0.5,1) end
-            if not t2.IsPlaying then t3:Play(0.08)
+            if not t3.IsPlaying then t3:Play(0.08)
             t3:AdjustWeight(0.06)
              t3:AdjustSpeed(0)
-            t3.TimePosition = t3.Length * 0.98 end
-            
+            t3.TimePosition = t3.Length * 0.98 end   
         else
             if t1.IsPlaying then t1:Stop(0.08) end
             if t2.IsPlaying then t2:Stop(0.08) end

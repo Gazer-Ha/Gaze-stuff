@@ -204,21 +204,21 @@ local animate = char:WaitForChild("Animate")
     local a3 = Instance.new("Animation")
     a3.AnimationId = "rbxassetid://82261197744576"
     local t3 = hum:LoadAnimation(a3)
-    
-    
+        
     
 
     game:GetService("RunService").Heartbeat:Connect(function()
         local moving = customVel.Magnitude > 1
         if not moving then
-            if not t1.IsPlaying then t1:Play(0.05,0.9,1) end
-            if not t2.IsPlaying then t2:Play(0.05, 0.5,1) end
-            if not t2.IsPlaying then t3:Play(0.05,0.06,0)
+            if not t1.IsPlaying then t1:Play(0.08,0.9,1) end
+            if not t2.IsPlaying then t2:Play(0.08, 0.5,1) end
+            if not t2.IsPlaying then t3:Play(0.08)
+            t3.Weight = 0.06
             t3.TimePosition = t3.Length * 0.98 end
         else
-            if t1.IsPlaying then t1:Stop(0.05) end
-            if t2.IsPlaying then t2:Stop(0.05) end
-            if t3.IsPlaying then t3:Stop(0.05) end
+            if t1.IsPlaying then t1:Stop(0.08) end
+            if t2.IsPlaying then t2:Stop(0.08) end
+            if t3.IsPlaying then t3:Stop(0.08) end
         end
     end)
  jumpeyAnim = Instance.new("Animation")
@@ -232,7 +232,7 @@ jumpeyTrack.Looped = false
     local moveDir = humanoid.MoveDirection
     local actual = Vector3.new(vel.X,0,vel.Z).Magnitude
     
-    humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+    
 
     if sideTrack.IsPlaying then lastTimePos = sideTrack.TimePosition end
 

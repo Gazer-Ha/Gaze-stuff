@@ -1,18 +1,32 @@
 local AbilityWatcher = {}
 
-local RunService = game:GetService("RunService")
 local player = game:GetService("Players").LocalPlayer
+local RunService = game:GetService("RunService")
 local folder = player.PlayerGui:WaitForChild("MainUI"):WaitForChild("AbilityContainer")
 
-local active = {}
+local selected = {}
+local waiting = {}
 local clicks = {}
-local callback = nil
+local keywords = {}
+local onFire
+
+local function matchesKeyword(name)
+	local lower = name:lower()
+
+	for _, w in ipairs(keywords) do
+		if lower:find(w) then
+			return true
+		end
+	end
+
+	return false
+end
 
 local function hook(btn)
 	if clicks[btn] then
 		return
 	end
-	
+
 	if not btn:IsA("ImageButton") then
 		return
 	end
@@ -22,8 +36,15 @@ local function hook(btn)
 		return
 	end
 
+	-- auto select if name matches a keyword
+	if matchesKeyword(btn.Name) then
+		selected[btn.Name] = true
+	end
+
 	clicks[btn] = btn.MouseButton1Click:Connect(function()
-		active[btn] = true
+		if selected[btn.Name] then
+			waiting[btn] = true
+		end
 	end)
 end
 
@@ -32,25 +53,41 @@ RunService.Heartbeat:Connect(function()
 		hook(child)
 	end
 
-	for btn in pairs(active) do
+	for btn in pairs(waiting) do
 		if not btn.Parent then
-			active[btn] = nil
+			waiting[btn] = nil
 			clicks[btn] = nil
 			continue
 		end
 
 		local cd = btn:FindFirstChild("CooldownTime")
 		if cd and cd.Text == "" then
-			if callback then
-				callback(btn.Name)
+			if onFire then
+				onFire(btn.Name)
 			end
-			active[btn] = nil
+			waiting[btn] = nil
 		end
 	end
 end)
 
-function AbilityWatcher.OnAbilityUsed(func)
-	callback = func
+function AbilityWatcher.Select(name)
+	selected[name] = true
+end
+
+function AbilityWatcher.Unselect(name)
+	selected[name] = nil
+end
+
+function AbilityWatcher.SelectKeyword(word)
+	table.insert(keywords, word:lower())
+end
+
+function AbilityWatcher.ClearKeywords()
+	table.clear(keywords)
+end
+
+function AbilityWatcher.OnFired(func)
+	onFire = func
 end
 
 return AbilityWatcher

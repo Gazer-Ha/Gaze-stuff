@@ -1,0 +1,56 @@
+local AbilityWatcher = {}
+
+local RunService = game:GetService("RunService")
+local player = game:GetService("Players").LocalPlayer
+local folder = player.PlayerGui:WaitForChild("MainUI"):WaitForChild("AbilityContainer")
+
+local active = {}
+local clicks = {}
+local callback = nil
+
+local function hook(btn)
+	if clicks[btn] then
+		return
+	end
+	
+	if not btn:IsA("ImageButton") then
+		return
+	end
+
+	local cd = btn:FindFirstChild("CooldownTime")
+	if not cd then
+		return
+	end
+
+	clicks[btn] = btn.MouseButton1Click:Connect(function()
+		active[btn] = true
+	end)
+end
+
+RunService.Heartbeat:Connect(function()
+	for _, child in ipairs(folder:GetChildren()) do
+		hook(child)
+	end
+
+	for btn in pairs(active) do
+		if not btn.Parent then
+			active[btn] = nil
+			clicks[btn] = nil
+			continue
+		end
+
+		local cd = btn:FindFirstChild("CooldownTime")
+		if cd and cd.Text == "" then
+			if callback then
+				callback(btn.Name)
+			end
+			active[btn] = nil
+		end
+	end
+end)
+
+function AbilityWatcher.OnAbilityUsed(func)
+	callback = func
+end
+
+return AbilityWatcher

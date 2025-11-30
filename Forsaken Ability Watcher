@@ -10,11 +10,13 @@ local onFire
 
 local function matchesKeyword(name)
 	local lower = name:lower()
+
 	for _, w in ipairs(keywords) do
 		if lower:find(w) then
 			return true
 		end
 	end
+
 	return false
 end
 
@@ -22,6 +24,7 @@ local function hook(btn)
 	if clicks[btn] then
 		return
 	end
+
 	if not btn:IsA("ImageButton") then
 		return
 	end
@@ -40,75 +43,31 @@ local function hook(btn)
 			return
 		end
 
-		-- only fire when cooldown text is empty
-		if cd.Text == "" then
-			if onFire then
-				onFire(btn.Name)
-			end
+		-- check cooldown
+		local cd = btn:FindFirstChild("CooldownTime")
+		local onCooldown = cd and cd.Text ~= ""
+
+		if onCooldown then
+			-- ignore click
+			return
+		end
+
+		-- ready, fire callback
+		if onFire then
+			onFire(btn.Name)
 		end
 	end)
 end
 
-folder.ChildAdded:Connect(hook)
+-- hook any new buttons
+folder.ChildAdded:Connect(function(child)
+	hook(child)
+end)
+
+-- hook existing ones
 for _, child in ipairs(folder:GetChildren()) do
 	hook(child)
 end
-
-function AbilityWatcher.Select(name)
-	selected[name] = true
-end
-
-function AbilityWatcher.Unselect(name)
-	selected[name] = nil
-end
-
-function AbilityWatcher.SelectKeyword(word)
-	table.insert(keywords, word:lower())
-end
-
-function AbilityWatcher.ClearKeywords()
-	table.clear(keywords)
-end
-
-function AbilityWatcher.OnFired(func)
-	onFire = func
-end
-
-return AbilityWatcher	end
-
-	-- auto select if name matches a keyword
-	if matchesKeyword(btn.Name) then
-		selected[btn.Name] = true
-	end
-
-	clicks[btn] = btn.MouseButton1Click:Connect(function()
-		if selected[btn.Name] then
-			waiting[btn] = true
-		end
-	end)
-end
-
-RunService.Heartbeat:Connect(function()
-	for _, child in ipairs(folder:GetChildren()) do
-		hook(child)
-	end
-
-	for btn in pairs(waiting) do
-		if not btn.Parent then
-			waiting[btn] = nil
-			clicks[btn] = nil
-			continue
-		end
-
-		local cd = btn:FindFirstChild("CooldownTime")
-		if cd and cd.Text == "" then
-			if onFire then
-				onFire(btn.Name)
-			end
-			waiting[btn] = nil
-		end
-	end
-end)
 
 function AbilityWatcher.Select(name)
 	selected[name] = true

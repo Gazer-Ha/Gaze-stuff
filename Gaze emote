@@ -16,7 +16,7 @@ local Screen = workspace.CurrentCamera.ViewportSize
 function scale(axis, value)
     local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
     local baseWidth, baseHeight = 1920, 1080
-    local scaleFactor = isMobile and 2.2 or 1.5 -- smaller on PC
+    local scaleFactor = isMobile and 2 or 1.5
 
     if axis == "X" then
         return value * (Screen.X / baseWidth) * scaleFactor

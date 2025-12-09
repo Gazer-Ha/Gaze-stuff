@@ -1255,7 +1255,6 @@ local function toggleGui()
     targetGui.Enabled = not targetGui.Enabled
 end
 
-if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
     local screonGui = Instance.new("ScreenGui")
     screonGui.Name = "ToggleButtonGui"
     screonGui.ResetOnSpawn = false
@@ -1278,18 +1277,8 @@ if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
     corner.Parent = btn
     corner.CornerRadius = UDim.new(0, 12)
     btn.MouseButton1Click:Connect(toggleGui)
-else
-    UserInputService.InputBegan:Connect(function(input, gameProcessed)
-        if gameProcessed then return end
-        if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.G then
-            toggleGui()
-        end
-    end)
-end
 
-if not UserInputService.TouchEnabled then
-    if game.StarterGui:SetCore("SendNotification",{Title="Gaze Emote",Text="Press G To Toggle UI",Duration=math.huge,Button1="Close"})=="Close" then game.StarterGui:SetCore("SendNotification",{Title="",Text="",Duration=0.1}) end
-end
+
 
 gui.Enabled = true
 

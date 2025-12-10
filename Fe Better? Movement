@@ -132,7 +132,7 @@ if not isR6 then
     local sa = Instance.new("Animation")
     sa.AnimationId = "rbxassetid://132218385473651"
     sideTrack = humanoid:LoadAnimation(sa)
-    sideTrack.Priority = Enum.AnimationPriority.Movement
+    sideTrack.Priority = Enum.AnimationPriority.Action3
 
     local ba = Instance.new("Animation")
     ba.AnimationId = "rbxassetid://16738337225"

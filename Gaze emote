@@ -1,6 +1,4 @@
-local UserInputService = game:GetService("UserInputService")
-
-if UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled then
+if replicatesignal then
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/GazeNew"))()
 else
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/GazeOld"))()

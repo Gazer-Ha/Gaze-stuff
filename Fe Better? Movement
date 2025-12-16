@@ -86,9 +86,9 @@ hrp0.Shape = Enum.PartType.Ball
 
 
 
-local maxTilt = 50
+local maxTilt = 30
 local fadeSpeed = 10
-local tiltMultiplier = 1.3
+local tiltMultiplier = 1.5
 local currentTiltX = 0
 local currentTiltZ = 0
 local hrp1TiltFactor = 0.4

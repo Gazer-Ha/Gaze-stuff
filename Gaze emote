@@ -1,5 +1,2 @@
-if replicatesignal then
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/GazeNew"))()
-else
+
 	loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Gaze-stuff/refs/heads/main/GazeOld"))()
-end

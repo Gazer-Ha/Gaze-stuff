@@ -1062,7 +1062,7 @@ nextBtn.MouseButton1Click:Connect(goNextPage)
 prevBtn.MouseButton1Click:Connect(goPrevPage)
 
 UserInputService.InputBegan:Connect(function(input)
-    print("Input detected:", input.UserInputType, input.KeyCode)
+    
     if input.KeyCode == Enum.KeyCode.Right then
         goNextPage()
     elseif input.KeyCode == Enum.KeyCode.Left then

@@ -1,6 +1,5 @@
 local CloneManager = {}
 
-local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
 local CloneFolder = workspace:FindFirstChild("AI_Clone_Storage") or Instance.new("Folder", workspace)
@@ -22,71 +21,74 @@ function CloneManager.Create()
     local CloneRoot = Clone:WaitForChild("HumanoidRootPart")
     local Humanoid = Clone:WaitForChild("Humanoid")
 
-    local function ApplyNoCollision()
-        if not Character or not Clone.Parent then return end
-        
-        local cloneParts = {}
-        local myParts = {}
-        
-        for _, p in pairs(Clone:GetDescendants()) do
-            if p:IsA("BasePart") then
-                table.insert(cloneParts, p)
-            end
-        end
-        
-        for _, p in pairs(Character:GetDescendants()) do
-            if p:IsA("BasePart") then
-                table.insert(myParts, p)
-            end
-        end
+    local cache = {}
 
-        for _, cp in ipairs(cloneParts) do
-            if cp and cp.Parent then
-                for _, mp in ipairs(myParts) do
-                    if mp and mp.Parent then
-                        local id = "NC_Player_" .. mp.Name
-                        if not cp:FindFirstChild(id) then
-                            local nc = Instance.new("NoCollisionConstraint")
-                            nc.Name = id
-                            nc.Part0 = cp
-                            nc.Part1 = mp
-                            nc.Parent = cp
-                        end
-                    end
-                end
+    local function pair(p0, p1, t)
+        if not (p0 and p1 and p0.Parent and p1.Parent) then return end
+        local key = p0:GetDebugId() .. "_" .. p1:GetDebugId() .. "_" .. t
+        if cache[key] then return end
+        local nc = Instance.new("NoCollisionConstraint")
+        nc.Name = key
+        nc.Part0 = p0
+        nc.Part1 = p1
+        nc.Parent = p0
+        cache[key] = nc
+    end
+
+    local function syncCloneWithCharacter(part)
+        if not part:IsA("BasePart") then return end
+        for _, mp in pairs(Character:GetDescendants()) do
+            if mp:IsA("BasePart") then
+                pair(part, mp, "P")
             end
         end
-
         for _, otherClone in pairs(CloneFolder:GetChildren()) do
-            if otherClone ~= Clone and otherClone and otherClone.Parent then
-                for _, cp in ipairs(cloneParts) do
-                    if cp and cp.Parent then
-                        for _, op in pairs(otherClone:GetDescendants()) do
-                            if op:IsA("BasePart") and op.Parent then
-                                local id = "NC_Clone_" .. otherClone.Name
-                                if not cp:FindFirstChild(id) then
-                                    local nc = Instance.new("NoCollisionConstraint")
-                                    nc.Name = id
-                                    nc.Part0 = cp
-                                    nc.Part1 = op
-                                    nc.Parent = cp
-                                end
-                            end
-                        end
+            if otherClone ~= Clone then
+                for _, op in pairs(otherClone:GetDescendants()) do
+                    if op:IsA("BasePart") then
+                        pair(part, op, "C")
                     end
                 end
             end
         end
     end
 
-    local collisionLoop = RunService.Stepped:Connect(function()
-        if not Clone or not Clone.Parent then return end
-        ApplyNoCollision()
+    local function syncCharacterWithClone(part)
+        if not part:IsA("BasePart") then return end
+        for _, cp in pairs(Clone:GetDescendants()) do
+            if cp:IsA("BasePart") then
+                pair(cp, part, "P")
+            end
+        end
+    end
+
+    for _, p in pairs(Clone:GetDescendants()) do
+        syncCloneWithCharacter(p)
+    end
+
+    for _, p in pairs(Character:GetDescendants()) do
+        syncCharacterWithClone(p)
+    end
+
+    Clone.DescendantAdded:Connect(syncCloneWithCharacter)
+    Character.DescendantAdded:Connect(syncCharacterWithClone)
+
+    CloneFolder.ChildAdded:Connect(function(otherClone)
+        if otherClone == Clone then return end
+        for _, cp in pairs(Clone:GetDescendants()) do
+            if cp:IsA("BasePart") then
+                for _, op in pairs(otherClone:GetDescendants()) do
+                    if op:IsA("BasePart") then
+                        pair(cp, op, "C")
+                    end
+                end
+            end
+        end
     end)
 
     task.spawn(function()
         local Torso = Clone:WaitForChild("Torso")
-        local currentAnimTrack = nil
+        local currentAnimTrack
         local animNames = {
             idle = "http://www.roblox.com/asset/?id=180435571",
             walk = "http://www.roblox.com/asset/?id=180426354",
@@ -107,7 +109,7 @@ function CloneManager.Create()
         while Clone.Parent do
             local state = Humanoid:GetState()
             local velocity = CloneRoot.Velocity.Magnitude
-            
+
             if state == Enum.HumanoidStateType.Freefall then
                 playAnimation(animNames.fall)
             elseif state == Enum.HumanoidStateType.Jumping then
@@ -122,8 +124,6 @@ function CloneManager.Create()
 
             task.wait(0.1)
         end
-
-        collisionLoop:Disconnect()
     end)
 
     return Humanoid

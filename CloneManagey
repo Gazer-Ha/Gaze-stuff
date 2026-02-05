@@ -1,0 +1,118 @@
+local CloneManager = {}
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+-- Folder to track all clones for inter-clone collision filtering
+local CloneFolder = workspace:FindFirstChild("AI_Clone_Storage") or Instance.new("Folder", workspace)
+CloneFolder.Name = "AI_Clone_Storage"
+
+function CloneManager.Create()
+    local LocalPlayer = Players.LocalPlayer
+    local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local UserId = LocalPlayer.UserId
+
+    -- 1. Create the Model
+    local Clone = Players:CreateHumanoidModelFromUserId(UserId)
+    Clone.Name = "Clone_" .. UserId
+    Clone.Parent = CloneFolder
+
+    local CloneRoot = Clone:WaitForChild("HumanoidRootPart")
+    local MyRoot = Character:WaitForChild("HumanoidRootPart")
+    local Humanoid = Clone:WaitForChild("Humanoid")
+
+    -- 2. No Collision Logic (Looping Check)
+    local function ApplyNoCollision()
+        if not Character or not Clone.Parent then return end
+        
+        -- Disable collision with Player
+        for _, p in pairs(Clone:GetDescendants()) do
+            if p:IsA("BasePart") then
+                -- Constraint against Player Root
+                if not p:FindFirstChild("NoCollidePlayer") then
+                    local nc = Instance.new("NoCollisionConstraint")
+                    nc.Name = "NoCollidePlayer"
+                    nc.Part0 = p
+                    nc.Part1 = MyRoot
+                    nc.Parent = p
+                end
+                
+                -- Constraint against other Clones in the folder
+                for _, otherClone in pairs(CloneFolder:GetChildren()) do
+                    if otherClone ~= Clone and otherClone:FindFirstChild("HumanoidRootPart") then
+                        local constraintName = "NoCollide_" .. theologicalClone.Name
+                        if not p:FindFirstChild(constraintName) then
+                            local nc = Instance.new("NoCollisionConstraint")
+                            nc.Name = constraintName
+                            nc.Part0 = p
+                            nc.Part1 = theologicalClone.HumanoidRootPart
+                            nc.Parent = p
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- Run the check every frame to ensure collisions stay disabled
+    local collisionLoop = RunService.Stepped:Connect(function()
+        if not Clone.Parent then 
+            return 
+        end
+        ApplyNoCollision()
+    end)
+
+    -- 3. Animation Logic (Stripped to Idle/Walk/Run/Jump/Fall/Climb)
+    task.spawn(function()
+        local Torso = Clone:WaitForChild("Torso")
+        local RightShoulder = Torso:WaitForChild("Right Shoulder")
+        local LeftShoulder = Torso:WaitForChild("Left Shoulder")
+        local RightHip = Torso:WaitForChild("Right Hip")
+        local LeftHip = Torso:WaitForChild("Left Hip")
+        
+        local currentAnimTrack = nil
+        local animTable = {}
+        local animNames = { 
+            idle = { { id = "http://www.roblox.com/asset/?id=180435571", weight = 1 } }, 
+            walk = { { id = "http://www.roblox.com/asset/?id=180426354", weight = 1 } }, 
+            jump = { { id = "http://www.roblox.com/asset/?id=125750702", weight = 1 } }, 
+            fall = { { id = "http://www.roblox.com/asset/?id=180436148", weight = 1 } },
+            climb = { { id = "http://www.roblox.com/asset/?id=180436334", weight = 1 } }
+        } 
+
+        local function playAnimation(name)
+            local id = animNames[name][1].id
+            if currentAnimTrack and currentAnimTrack.Animation.AnimationId == id then return end
+            if currentAnimTrack then currentAnimTrack:Stop() end
+            
+            local anim = Instance.new("Animation")
+            anim.AnimationId = id
+            currentAnimTrack = Humanoid:LoadAnimation(anim)
+            currentAnimTrack:Play()
+        end
+
+        while Clone.Parent do
+            local state = Humanoid:GetState()
+            local velocity = CloneRoot.Velocity.Magnitude
+            
+            if state == Enum.HumanoidStateType.Freefall then
+                playAnimation("fall")
+            elseif state == Enum.HumanoidStateType.Jumping then
+                playAnimation("jump")
+            elseif state == Enum.HumanoidStateType.Climbing then
+                playAnimation("climb")
+            elseif velocity > 0.1 then
+                playAnimation("walk")
+            else
+                playAnimation("idle")
+            end
+            task.wait(0.1)
+        end
+        collisionLoop:Disconnect() -- Clean up loop if clone is destroyed
+    end)
+
+    -- Return the Humanoid specifically
+    return Humanoid
+end
+
+return CloneManager

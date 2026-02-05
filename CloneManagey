@@ -3,7 +3,6 @@ local CloneManager = {}
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 
--- Folder to track all clones
 local CloneFolder = workspace:FindFirstChild("AI_Clone_Storage") or Instance.new("Folder", workspace)
 CloneFolder.Name = "AI_Clone_Storage"
 
@@ -12,58 +11,66 @@ function CloneManager.Create()
     local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local UserId = LocalPlayer.UserId
 
-    -- 1. Create the Model
+    LocalPlayer.CharacterAdded:Connect(function(c)
+        Character = c
+    end)
+
     local Clone = Players:CreateHumanoidModelFromUserId(UserId)
-    Clone.Name = "Clone_" .. tick() -- Unique name using timestamp
+    Clone.Name = "Clone_" .. tick()
     Clone.Parent = CloneFolder
 
     local CloneRoot = Clone:WaitForChild("HumanoidRootPart")
     local Humanoid = Clone:WaitForChild("Humanoid")
 
-    -- 2. Aggressive No-Collision Logic
     local function ApplyNoCollision()
         if not Character or not Clone.Parent then return end
         
         local cloneParts = {}
         local myParts = {}
         
-        -- Collect all parts from the current clone
         for _, p in pairs(Clone:GetDescendants()) do
-            if p:IsA("BasePart") then table.insert(cloneParts, p) end
+            if p:IsA("BasePart") then
+                table.insert(cloneParts, p)
+            end
         end
         
-        -- Collect all parts from your Character
         for _, p in pairs(Character:GetDescendants()) do
-            if p:IsA("BasePart") then table.insert(myParts, p) end
+            if p:IsA("BasePart") then
+                table.insert(myParts, p)
+            end
         end
 
-        -- A. Disable collision between Clone parts and Your parts
         for _, cp in ipairs(cloneParts) do
-            for _, mp in ipairs(myParts) do
-                local id = "NC_Player_" .. mp.Name
-                if not cp:FindFirstChild(id) then
-                    local nc = Instance.new("NoCollisionConstraint")
-                    nc.Name = id
-                    nc.Part0 = cp
-                    nc.Part1 = mp
-                    nc.Parent = cp
+            if cp and cp.Parent then
+                for _, mp in ipairs(myParts) do
+                    if mp and mp.Parent then
+                        local id = "NC_Player_" .. mp.Name
+                        if not cp:FindFirstChild(id) then
+                            local nc = Instance.new("NoCollisionConstraint")
+                            nc.Name = id
+                            nc.Part0 = cp
+                            nc.Part1 = mp
+                            nc.Parent = cp
+                        end
+                    end
                 end
             end
         end
 
-        -- B. Disable collision between this Clone and ALL other Clones
         for _, otherClone in pairs(CloneFolder:GetChildren()) do
-            if otherClone ~= Clone then
+            if otherClone ~= Clone and otherClone and otherClone.Parent then
                 for _, cp in ipairs(cloneParts) do
-                    for _, op in pairs(otherClone:GetDescendants()) do
-                        if op:IsA("BasePart") then
-                            local id = "NC_Clone_" .. otherClone.Name
-                            if not cp:FindFirstChild(id) then
-                                local nc = Instance.new("NoCollisionConstraint")
-                                nc.Name = id
-                                nc.Part0 = cp
-                                nc.Part1 = op
-                                nc.Parent = cp
+                    if cp and cp.Parent then
+                        for _, op in pairs(otherClone:GetDescendants()) do
+                            if op:IsA("BasePart") and op.Parent then
+                                local id = "NC_Clone_" .. otherClone.Name
+                                if not cp:FindFirstChild(id) then
+                                    local nc = Instance.new("NoCollisionConstraint")
+                                    nc.Name = id
+                                    nc.Part0 = cp
+                                    nc.Part1 = op
+                                    nc.Parent = cp
+                                end
                             end
                         end
                     end
@@ -72,25 +79,21 @@ function CloneManager.Create()
         end
     end
 
-    -- Loop to check for new parts (like tools being equipped or accessories loading)
     local collisionLoop = RunService.Stepped:Connect(function()
-        if not Clone or not Clone.Parent then 
-            return 
-        end
+        if not Clone or not Clone.Parent then return end
         ApplyNoCollision()
     end)
 
-    -- 3. Animation Logic
     task.spawn(function()
         local Torso = Clone:WaitForChild("Torso")
         local currentAnimTrack = nil
-        local animNames = { 
+        local animNames = {
             idle = "http://www.roblox.com/asset/?id=180435571",
             walk = "http://www.roblox.com/asset/?id=180426354",
             jump = "http://www.roblox.com/asset/?id=125750702",
             fall = "http://www.roblox.com/asset/?id=180436148",
             climb = "http://www.roblox.com/asset/?id=180436334"
-        } 
+        }
 
         local function playAnimation(id)
             if currentAnimTrack and currentAnimTrack.Animation.AnimationId == id then return end
@@ -116,8 +119,10 @@ function CloneManager.Create()
             else
                 playAnimation(animNames.idle)
             end
+
             task.wait(0.1)
         end
+
         collisionLoop:Disconnect()
     end)
 

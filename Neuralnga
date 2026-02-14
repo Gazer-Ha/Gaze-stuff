@@ -1,0 +1,108 @@
+local NeuralNetwork = {}
+NeuralNetwork.__index = NeuralNetwork
+
+local Math = {}
+function Math.sigmoid(x) return 1 / (1 + math.exp(-x)) end
+function Math.sigmoidDerivative(x) return x * (1 - x) end
+
+function NeuralNetwork.new(inputNodes, hiddenNodes, outputNodes, learningRate)
+	local self = setmetatable({}, NeuralNetwork)
+	self.inputNodes = inputNodes
+	self.hiddenNodes = hiddenNodes
+	self.outputNodes = outputNodes
+	self.learningRate = learningRate or 0.1
+	self.weightsIH = {}
+	self.weightsHO = {}
+	self:initializeWeights()
+	return self
+end
+
+function NeuralNetwork:initializeWeights()
+	for i = 1, self.inputNodes do
+		self.weightsIH[i] = {}
+		for j = 1, self.hiddenNodes do
+			self.weightsIH[i][j] = (math.random() * 2 - 1)
+		end
+	end
+	for i = 1, self.hiddenNodes do
+		self.weightsHO[i] = {}
+		for j = 1, self.outputNodes do
+			self.weightsHO[i][j] = (math.random() * 2 - 1)
+		end
+	end
+end
+
+function NeuralNetwork:feedForward(inputArray)
+	self.hiddenOutputs = {}
+	for j = 1, self.hiddenNodes do
+		local sum = 0
+		for i = 1, self.inputNodes do
+			sum = sum + (inputArray[i] * self.weightsIH[i][j])
+		end
+		self.hiddenOutputs[j] = Math.sigmoid(sum)
+	end
+	
+	self.outputs = {}
+	for k = 1, self.outputNodes do
+		local sum = 0
+		for j = 1, self.hiddenNodes do
+			sum = sum + (self.hiddenOutputs[j] * self.weightsHO[j][k])
+		end
+		self.outputs[k] = Math.sigmoid(sum)
+	end
+	return self.outputs
+end
+
+function NeuralNetwork:train(inputArray, targetArray)
+	local outputs = self:feedForward(inputArray)
+	
+	local outputErrors = {}
+	for k = 1, self.outputNodes do
+		local error = targetArray[k] - outputs[k]
+		outputErrors[k] = error * Math.sigmoidDerivative(outputs[k])
+	end
+	
+	local hiddenErrors = {}
+	for j = 1, self.hiddenNodes do
+		local error = 0
+		for k = 1, self.outputNodes do
+			error = error + (outputErrors[k] * self.weightsHO[j][k])
+		end
+		hiddenErrors[j] = error * Math.sigmoidDerivative(self.hiddenOutputs[j])
+	end
+	
+	for j = 1, self.hiddenNodes do
+		for k = 1, self.outputNodes do
+			self.weightsHO[j][k] = self.weightsHO[j][k] + (self.learningRate * outputErrors[k] * self.hiddenOutputs[j])
+		end
+	end
+	
+	for i = 1, self.inputNodes do
+		for j = 1, self.hiddenNodes do
+			self.weightsIH[i][j] = self.weightsIH[i][j] + (self.learningRate * hiddenErrors[j] * inputArray[i])
+		end
+	end
+end
+
+-- Serialization for file storage (uses HttpService)
+function NeuralNetwork:serialize()
+	local data = {
+		inputNodes = self.inputNodes,
+		hiddenNodes = self.hiddenNodes,
+		outputNodes = self.outputNodes,
+		learningRate = self.learningRate,
+		weightsIH = self.weightsIH,
+		weightsHO = self.weightsHO
+	}
+	return game:GetService("HttpService"):JSONEncode(data)
+end
+
+function NeuralNetwork:deserialize(jsonString)
+	local data = game:GetService("HttpService"):JSONDecode(jsonString)
+	local nn = NeuralNetwork.new(data.inputNodes, data.hiddenNodes, data.outputNodes, data.learningRate)
+	nn.weightsIH = data.weightsIH
+	nn.weightsHO = data.weightsHO
+	return nn
+end
+
+return NeuralNetwork

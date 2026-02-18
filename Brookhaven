@@ -2,27 +2,6 @@
 -- Load Luna UI instead of Rayfield
 local Luna = loadstring(game:HttpGet("https://raw.githubusercontent.com/Nebula-Softworks/Luna-Interface-Suite/main/source.lua", true))()
 
-local coreGui = cloneref(game:GetService("CoreGui"))
-coreGui.CallDialogScreen.Enabled = true
-
-local callDialog = coreGui.CallDialogScreen.CallDialog.AlertContents
-local title = callDialog.TitleContainer.TitleArea.Title
-local bodyText = callDialog.MiddleContent.Content.BodyText
-local button1 = callDialog.Footer.Buttons["1"]
-local button1Text = button1.ButtonContent.ButtonMiddleContent.Text
-
-title.Size = UDim2.new(0, 100, 0, 26)
-title.Text = "Gaze Stuff"
-title.TextScaled = true
-bodyText.Text = "Made By Gaze"
-
-button1Text.Text = "Continue"
-button1Text.TextSize = bodyText.TextSize
-button1Text.Size = button1.Size
-
-button1.MouseButton1Click:Wait()
-coreGui.CallDialogScreen.Enabled = false
-
 -- Create Luna UI Main Window
 local Window = Luna:CreateWindow({
 	Name = "Glazed Hub Keyless ( Brookhaven 🏡 ) v 1.4", -- This Is Title Of Your Window

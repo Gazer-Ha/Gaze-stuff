@@ -1,6 +1,76 @@
-local Screen= setmetatable({}, { __index= function(_, key) local cam= workspace.CurrentCamera local size= cam and cam.ViewportSize or Vector2.new(1920, 1080) if key== "Width" then return size.X elseif key== "Height" then return size.Y elseif key== "Size" then return size end end}) local UserInputService = game:GetService("UserInputService") local Screen = workspace.CurrentCamera.ViewportSize function scale(axis, value) local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled local baseWidth, baseHeight = 1920, 1080 local scaleFactor = isMobile and 2 or 1.5 if axis == "X" then return value * (Screen.X / baseWidth) * scaleFactor elseif axis == "Y" then return value * (Screen.Y / baseHeight) * scaleFactor end end function missing(t, f, fallback) if type(f) == t then return f end return fallback end cloneref = missing("function", cloneref, function(...) return ... end) local Services = setmetatable({}, { __index = function(_, name) return cloneref(game:GetService(name)) end }) local Players = Services.Players local RunService = Services.RunService local UserInputService = Services.UserInputService local TweenService = Services.TweenService local HttpService = Services.HttpService local player = Players.LocalPlayer local character = player.Character or player.CharacterAdded:Wait() local humanoid = character:WaitForChild("Humanoid") local lastPosition = character.PrimaryPart and character.PrimaryPart.Position or Vector3.new() player.CharacterAdded:Connect(function(newCharacter) character = newCharacter humanoid = newCharacter:WaitForChild("Humanoid") lastPosition = character.PrimaryPart and character.PrimaryPart.Position or Vector3.new() end) local Settings = {} Settings["Stop Emote When Moving"] = true Settings["Fade In"] = 0.1 Settings["Fade Out"] = 0.1 Settings["Weight"] = 1 Settings["Speed"] = 1 Settings["Allow Invisible "] = true Settings["Time Position"] = 0 Settings["Freeze On Finish"] = false Settings["Looped"] = true Settings["Stop Other Animations On Play"] = true
+local Screen = setmetatable({}, {
+	__index = function(_, key)
+		local cam = workspace.CurrentCamera
+		local size = cam and cam.ViewportSize or Vector2.new(1920, 1080)
+		if key == "Width" then
+			return size.X
+		elseif key == "Height" then
+			return size.Y
+		elseif key == "Size" then
+			return size
+		end
+	end
+})
 
--- Load emotes from emotes.json (scraper format)
+local UserInputService = game:GetService("UserInputService")
+local Screen = workspace.CurrentCamera.ViewportSize
+
+function scale(axis, value)
+	local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+	local baseWidth, baseHeight = 1920, 1080
+	local scaleFactor = isMobile and 2 or 1.5
+	if axis == "X" then
+		return value * (Screen.X / baseWidth) * scaleFactor
+	elseif axis == "Y" then
+		return value * (Screen.Y / baseHeight) * scaleFactor
+	end
+end
+
+function missing(t, f, fallback)
+	if type(f) == t then
+		return f
+	end
+	return fallback
+end
+
+cloneref = missing("function", cloneref, function(...)
+	return ...
+end)
+
+local Services = setmetatable({}, {
+	__index = function(_, name)
+		return cloneref(game:GetService(name))
+	end
+})
+
+local Players = Services.Players
+local RunService = Services.RunService
+local UserInputService = Services.UserInputService
+local TweenService = Services.TweenService
+local HttpService = Services.HttpService
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local lastPosition = character.PrimaryPart and character.PrimaryPart.Position or Vector3.new()
+
+player.CharacterAdded:Connect(function(newCharacter)
+	character = newCharacter
+	humanoid = newCharacter:WaitForChild("Humanoid")
+	lastPosition = character.PrimaryPart and character.PrimaryPart.Position or Vector3.new()
+end)
+
+local Settings = {}
+Settings["Stop Emote When Moving"] = true
+Settings["Fade In"] = 0.1
+Settings["Fade Out"] = 0.1
+Settings["Weight"] = 1
+Settings["Speed"] = 1
+Settings["Allow Invisible "] = true
+Settings["Time Position"] = 0
+Settings["Freeze On Finish"] = false
+Settings["Looped"] = true
+Settings["Stop Other Animations On Play"] = true-- Load emotes from emotes.json (scraper format)
 local emotesData = {}
 local EMOTES_FILE = "emotes.json"
 

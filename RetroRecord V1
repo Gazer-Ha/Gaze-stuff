@@ -1,0 +1,1213 @@
+--
+
+
+--dont cry its down here
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local SAVE_FILE = "RetroRecord_seen.txt"
+local alreadySeen = isfile and isfile(SAVE_FILE) or false
+
+local function fadeIn(frame, duration, startAlpha, endAlpha, callback)
+	frame.BackgroundTransparency = startAlpha
+	local tween = TweenService:Create(frame, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = endAlpha})
+	tween:Play()
+	if callback then
+		tween.Completed:Connect(callback)
+	end
+end
+
+local function fadeLabel(label, duration, startAlpha, endAlpha, callback)
+	label.TextTransparency = startAlpha
+	local tween = TweenService:Create(label, TweenInfo.new(duration, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = endAlpha})
+	tween:Play()
+	if callback then
+		tween.Completed:Connect(callback)
+	end
+end
+
+local CUSTOM_FONT = Font.fromId(12187371840)
+local CUSTOM_FONT_BOLD = Font.fromId(12187371840, Enum.FontWeight.Bold)
+
+local persistentBlack
+local pbFrame
+
+local function showIntro(callback)
+	local introGui = Instance.new("ScreenGui", playerGui)
+	introGui.DisplayOrder = 9998
+	introGui.IgnoreGuiInset = true
+	introGui.ResetOnSpawn = false
+	introGui.Name = "IntroGui"
+
+	local bg = Instance.new("Frame", introGui)
+	bg.Size = UDim2.new(1, 0, 1, 0)
+	bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	bg.BackgroundTransparency = 0
+	bg.BorderSizePixel = 0
+
+	local topBar = Instance.new("Frame", bg)
+	topBar.Size = UDim2.new(1, 0, 0, 0)
+	topBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	topBar.BorderSizePixel = 0
+	topBar.ZIndex = 5
+
+	local botBar = Instance.new("Frame", bg)
+	botBar.AnchorPoint = Vector2.new(0, 1)
+	botBar.Position = UDim2.new(0, 0, 1, 0)
+	botBar.Size = UDim2.new(1, 0, 0, 0)
+	botBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	botBar.BorderSizePixel = 0
+	botBar.ZIndex = 5
+
+	TweenService:Create(topBar, TweenInfo.new(1.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0.09, 0)}):Play()
+	TweenService:Create(botBar, TweenInfo.new(1.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0.09, 0)}):Play()
+
+	local lines = {
+		"INSPIRED FROM RETRORASTER BY ETHANTHEGRAND14",
+		"",
+		"Retro Record",
+		"BY GAZER_HA",
+		"",
+		"CLICK TO CONTINUE.",
+	}
+
+	local labels = {}
+	local targetPositions = {}
+	local totalH = #lines * 36
+	local startY = (1 - (totalH / 600)) / 2
+	local SLIDE_OFFSET = 0.045
+
+	for i, line in ipairs(lines) do
+		local lbl = Instance.new("TextLabel", bg)
+		lbl.Size = UDim2.new(0.9, 0, 0, 34)
+		lbl.AnchorPoint = Vector2.new(0.5, 0)
+		local targetY = startY + (i - 1) * (34 + 4) / 600
+		targetPositions[i] = UDim2.new(0.5, 0, targetY, 0)
+		lbl.Position = UDim2.new(0.5, 0, targetY + SLIDE_OFFSET, 0)
+		lbl.BackgroundTransparency = 1
+		lbl.Text = line
+		lbl.TextTransparency = 1
+		lbl.TextColor3 = line == "Retro Record" and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(155, 155, 155)
+		lbl.FontFace = (line == "Retro Record") and CUSTOM_FONT_BOLD or CUSTOM_FONT
+		lbl.TextSize = line == "Retro Record" and 30 or (line == "INSPIRED FROM RETRORASTER BY ETHANTHEGRAND14" and 11 or 16)
+		lbl.TextXAlignment = Enum.TextXAlignment.Center
+		lbl.ZIndex = 3
+		labels[i] = lbl
+	end
+
+	task.delay(0.5, function()
+		local delay = 0
+		for i, lbl in ipairs(labels) do
+			task.delay(delay, function()
+				TweenService:Create(lbl, TweenInfo.new(1.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+					TextTransparency = 0,
+					Position = targetPositions[i],
+				}):Play()
+			end)
+			delay = delay + 0.32
+		end
+
+		task.delay(delay + 2.6, function()
+			for _, lbl in ipairs(labels) do
+				TweenService:Create(lbl, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1}):Play()
+			end
+			TweenService:Create(topBar, TweenInfo.new(0.9, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+			TweenService:Create(botBar, TweenInfo.new(0.9, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+			task.delay(1.0, function()
+				introGui:Destroy()
+				if writefile then
+					writefile(SAVE_FILE, "seen")
+				end
+				callback()
+			end)
+		end)
+	end)
+end
+
+local function showWelcomeBack(callback)
+	local wbGui = Instance.new("ScreenGui", playerGui)
+	wbGui.DisplayOrder = 9998
+	wbGui.IgnoreGuiInset = true
+	wbGui.ResetOnSpawn = false
+	wbGui.Name = "WelcomeBackGui"
+
+	local bg = Instance.new("Frame", wbGui)
+	bg.Size = UDim2.new(1, 0, 1, 0)
+	bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	bg.BackgroundTransparency = 0
+	bg.BorderSizePixel = 0
+
+	local lbl = Instance.new("TextLabel", bg)
+	lbl.Size = UDim2.new(0.8, 0, 0, 40)
+	lbl.AnchorPoint = Vector2.new(0.5, 0.5)
+	lbl.Position = UDim2.new(0.5, 0, 0.55, 0)
+	lbl.BackgroundTransparency = 1
+	lbl.Text = "WELCOME BACK .. " .. player.DisplayName:upper()
+	lbl.TextTransparency = 1
+	lbl.TextColor3 = Color3.fromRGB(200, 200, 200)
+	lbl.FontFace = CUSTOM_FONT_BOLD
+	lbl.TextSize = 22
+	lbl.TextXAlignment = Enum.TextXAlignment.Center
+
+	task.delay(0.2, function()
+		TweenService:Create(lbl, TweenInfo.new(1.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+			TextTransparency = 0,
+			Position = UDim2.new(0.5, 0, 0.5, 0),
+		}):Play()
+		task.delay(2.2, function()
+			TweenService:Create(lbl, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {TextTransparency = 1}):Play()
+			task.delay(0.9, function()
+				wbGui:Destroy()
+				callback()
+			end)
+		end)
+	end)
+end
+
+local function showWarning(callback)
+	local warnGui = Instance.new("ScreenGui", playerGui)
+	warnGui.DisplayOrder = 9999
+	warnGui.IgnoreGuiInset = true
+	warnGui.ResetOnSpawn = false
+	warnGui.Name = "WarningGui"
+
+	local bg = Instance.new("Frame", warnGui)
+	bg.Size = UDim2.new(1, 0, 1, 0)
+	bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	bg.BackgroundTransparency = 0
+	bg.BorderSizePixel = 0
+
+	local topBar = Instance.new("Frame", bg)
+	topBar.Size = UDim2.new(1, 0, 0, 0)
+	topBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	topBar.BorderSizePixel = 0
+	topBar.ZIndex = 5
+
+	local botBar = Instance.new("Frame", bg)
+	botBar.AnchorPoint = Vector2.new(0, 1)
+	botBar.Position = UDim2.new(0, 0, 1, 0)
+	botBar.Size = UDim2.new(1, 0, 0, 0)
+	botBar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	botBar.BorderSizePixel = 0
+	botBar.ZIndex = 5
+
+	TweenService:Create(topBar, TweenInfo.new(1.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0.09, 0)}):Play()
+	TweenService:Create(botBar, TweenInfo.new(1.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0.09, 0)}):Play()
+
+	local warnLines = {
+		"HEALTH & SAFETY WARNING",
+		"",
+		"THIS SCRIPT CONTAINS FLASHING LIGHTS",
+		"AND RAPID VISUAL CHANGES,",
+		"ANIMATED SCANLINES, AND SCREEN GLITCHES.",
+		"",
+		"THESE EFFECTS MAY AFFECT PEOPLE WITH",
+		"PHOTOSENSITIVE CONDITIONS.",
+		"",
+		"DO YOU WISH TO CONTINUE?",
+	}
+
+	local LINE_H = 34
+	local LINE_GAP = 4
+	local SLIDE_OFFSET = 0.045
+	local warnLabels = {}
+	local warnTargets = {}
+	local totalH = #warnLines * (LINE_H + LINE_GAP)
+	local startY = (1 - (totalH / 600)) / 2
+
+	for i, line in ipairs(warnLines) do
+		local lbl = Instance.new("TextLabel", bg)
+		lbl.Size = UDim2.new(0.9, 0, 0, LINE_H)
+		lbl.AnchorPoint = Vector2.new(0.5, 0)
+		local targetY = startY + (i - 1) * (LINE_H + LINE_GAP) / 600
+		warnTargets[i] = UDim2.new(0.5, 0, targetY, 0)
+		lbl.Position = UDim2.new(0.5, 0, targetY + SLIDE_OFFSET, 0)
+		lbl.BackgroundTransparency = 1
+		lbl.Text = line
+		lbl.TextTransparency = 1
+		lbl.TextColor3 = line == "HEALTH & SAFETY WARNING" and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(155, 155, 155)
+		lbl.FontFace = line == "HEALTH & SAFETY WARNING" and CUSTOM_FONT_BOLD or CUSTOM_FONT
+		lbl.TextSize = line == "HEALTH & SAFETY WARNING" and 28 or (line == "DO YOU WISH TO CONTINUE?" and 18 or 14)
+		lbl.TextXAlignment = Enum.TextXAlignment.Center
+		lbl.ZIndex = 3
+		warnLabels[i] = lbl
+	end
+
+	local btnY = startY + #warnLines * (LINE_H + LINE_GAP) / 600 + 10 / 600
+
+	local noBtn = Instance.new("TextButton", bg)
+	noBtn.Size = UDim2.new(0, 160, 0, 36)
+	noBtn.AnchorPoint = Vector2.new(1, 0)
+	noBtn.Position = UDim2.new(0.5, -8, btnY + SLIDE_OFFSET, 0)
+	noBtn.BackgroundTransparency = 1
+	noBtn.BorderSizePixel = 0
+	noBtn.Text = "NO — EXIT"
+	noBtn.TextColor3 = Color3.fromRGB(120, 120, 120)
+	noBtn.TextTransparency = 1
+	noBtn.FontFace = CUSTOM_FONT_BOLD
+	noBtn.TextSize = 14
+	noBtn.ZIndex = 3
+	local noBtnTarget = UDim2.new(0.5, -8, btnY, 0)
+
+	local yesBtn = Instance.new("TextButton", bg)
+	yesBtn.Size = UDim2.new(0, 160, 0, 36)
+	yesBtn.AnchorPoint = Vector2.new(0, 0)
+	yesBtn.Position = UDim2.new(0.5, 8, btnY + SLIDE_OFFSET, 0)
+	yesBtn.BackgroundTransparency = 1
+	yesBtn.BorderSizePixel = 0
+	yesBtn.Text = "YES — CONTINUE"
+	yesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	yesBtn.TextTransparency = 1
+	yesBtn.FontFace = CUSTOM_FONT_BOLD
+	yesBtn.TextSize = 14
+	yesBtn.ZIndex = 3
+	local yesBtnTarget = UDim2.new(0.5, 8, btnY, 0)
+
+	local function animateIn(labels, targets, buttons, buttonTargets, startDelay, stagger)
+		task.delay(startDelay, function()
+			local d = 0
+			for i, lbl in ipairs(labels) do
+				task.delay(d, function()
+					TweenService:Create(lbl, TweenInfo.new(1.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						TextTransparency = 0,
+						Position = targets[i],
+					}):Play()
+				end)
+				d = d + stagger
+			end
+			task.delay(d, function()
+				for j, btn in ipairs(buttons) do
+					TweenService:Create(btn, TweenInfo.new(1.1, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+						TextTransparency = 0,
+						Position = buttonTargets[j],
+					}):Play()
+				end
+			end)
+		end)
+	end
+
+	local function fadeOutAll(lbls, btns, onDone)
+		for _, lbl in ipairs(lbls) do
+			TweenService:Create(lbl, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1}):Play()
+		end
+		for _, btn in ipairs(btns) do
+			TweenService:Create(btn, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {TextTransparency = 1}):Play()
+		end
+		task.delay(0.95, onDone)
+	end
+
+	animateIn(warnLabels, warnTargets, {noBtn, yesBtn}, {noBtnTarget, yesBtnTarget}, 0.5, 0.2)
+
+	-- DEBOUNCE FLAG: Prevents the first set of buttons from double-firing
+	local isProcessing = false 
+
+	noBtn.MouseButton1Click:Connect(function()
+		if isProcessing then return end
+		isProcessing = true
+		
+		fadeOutAll(warnLabels, {noBtn, yesBtn}, function()
+			TweenService:Create(topBar, TweenInfo.new(0.9, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+			TweenService:Create(botBar, TweenInfo.new(0.9, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+			task.delay(1.0, function()
+				warnGui:Destroy()
+			end)
+		end)
+	end)
+
+	yesBtn.MouseButton1Click:Connect(function()
+		if isProcessing then return end
+		isProcessing = true
+		
+		fadeOutAll(warnLabels, {noBtn, yesBtn}, function()
+			local confLines = {
+				"ARE YOU SURE?",
+				"",
+				"I CONFIRM I HAVE READ THE WARNING",
+				"AND UNDERSTAND THE RISKS ASSOCIATED",
+				"WITH THESE VISUAL EFFECTS.",
+			}
+			local confLabels = {}
+			local confTargets = {}
+			local confTotalH = #confLines * (LINE_H + LINE_GAP)
+			local confStartY = (1 - (confTotalH / 600)) / 2
+
+			for i, line in ipairs(confLines) do
+				local lbl = Instance.new("TextLabel", bg)
+				lbl.Size = UDim2.new(0.9, 0, 0, LINE_H)
+				lbl.AnchorPoint = Vector2.new(0.5, 0)
+				local targetY = confStartY + (i - 1) * (LINE_H + LINE_GAP) / 600
+				confTargets[i] = UDim2.new(0.5, 0, targetY, 0)
+				lbl.Position = UDim2.new(0.5, 0, targetY + SLIDE_OFFSET, 0)
+				lbl.BackgroundTransparency = 1
+				lbl.Text = line
+				lbl.TextTransparency = 1
+				lbl.TextColor3 = line == "ARE YOU SURE?" and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(155, 155, 155)
+				lbl.FontFace = line == "ARE YOU SURE?" and CUSTOM_FONT_BOLD or CUSTOM_FONT
+				lbl.TextSize = line == "ARE YOU SURE?" and 28 or 14
+				lbl.TextXAlignment = Enum.TextXAlignment.Center
+				lbl.ZIndex = 3
+				confLabels[i] = lbl
+			end
+
+			local confBtnY = confStartY + #confLines * (LINE_H + LINE_GAP) / 600 + 10 / 600
+
+			local goBackBtn = Instance.new("TextButton", bg)
+			goBackBtn.Size = UDim2.new(0, 160, 0, 36)
+			goBackBtn.AnchorPoint = Vector2.new(1, 0)
+			goBackBtn.Position = UDim2.new(0.5, -8, confBtnY + SLIDE_OFFSET, 0)
+			goBackBtn.BackgroundTransparency = 1
+			goBackBtn.BorderSizePixel = 0
+			goBackBtn.Text = "← GO BACK"
+			goBackBtn.TextColor3 = Color3.fromRGB(120, 120, 120)
+			goBackBtn.TextTransparency = 1
+			goBackBtn.FontFace = CUSTOM_FONT_BOLD
+			goBackBtn.TextSize = 14
+			goBackBtn.ZIndex = 3
+			local goBackTarget = UDim2.new(0.5, -8, confBtnY, 0)
+
+			local confirmBtn = Instance.new("TextButton", bg)
+			confirmBtn.Size = UDim2.new(0, 160, 0, 36)
+			confirmBtn.AnchorPoint = Vector2.new(0, 0)
+			confirmBtn.Position = UDim2.new(0.5, 8, confBtnY + SLIDE_OFFSET, 0)
+			confirmBtn.BackgroundTransparency = 1
+			confirmBtn.BorderSizePixel = 0
+			confirmBtn.Text = "✓ I UNDERSTAND"
+			confirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+			confirmBtn.TextTransparency = 1
+			confirmBtn.FontFace = CUSTOM_FONT_BOLD
+			confirmBtn.TextSize = 14
+			confirmBtn.ZIndex = 3
+			local confirmBtnTarget = UDim2.new(0.5, 8, confBtnY, 0)
+
+			animateIn(confLabels, confTargets, {goBackBtn, confirmBtn}, {goBackTarget, confirmBtnTarget}, 0, 0.2)
+
+			-- DEBOUNCE FLAG: Prevents the confirmation screen buttons from double-firing
+			local confProcessing = false
+
+			goBackBtn.MouseButton1Click:Connect(function()
+				if confProcessing then return end
+				confProcessing = true
+				
+				fadeOutAll(confLabels, {goBackBtn, confirmBtn}, function()
+					for _, lbl in ipairs(confLabels) do lbl:Destroy() end
+					goBackBtn:Destroy()
+					confirmBtn:Destroy()
+					
+					for i, lbl in ipairs(warnLabels) do
+						lbl.TextTransparency = 1
+						lbl.Position = UDim2.new(0.5, 0, select(2, warnTargets[i].Y.Scale, 0) + SLIDE_OFFSET, 0)
+					end
+					
+					noBtn.TextTransparency = 1
+					noBtn.Position = UDim2.new(0.5, -8, btnY + SLIDE_OFFSET, 0)
+					yesBtn.TextTransparency = 1
+					yesBtn.Position = UDim2.new(0.5, 8, btnY + SLIDE_OFFSET, 0)
+					
+					animateIn(warnLabels, warnTargets, {noBtn, yesBtn}, {noBtnTarget, yesBtnTarget}, 0, 0.2)
+					
+					-- Allow clicking the main warning buttons again since we went back
+					isProcessing = false 
+				end)
+			end)
+
+			confirmBtn.MouseButton1Click:Connect(function()
+				if confProcessing then return end
+				confProcessing = true
+				
+				fadeOutAll(confLabels, {goBackBtn, confirmBtn}, function()
+					TweenService:Create(topBar, TweenInfo.new(0.9, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+					TweenService:Create(botBar, TweenInfo.new(0.9, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+					task.delay(1.0, function()
+						warnGui:Destroy()
+						callback()
+					end)
+				end)
+			end)
+		end)
+	end)
+end
+
+
+local function launchMainScript()
+	local RunService = game:GetService("RunService")
+	local UserInputService = game:GetService("UserInputService")
+	local AssetService = game:GetService("AssetService")
+	local Workspace = game:GetService("Workspace")
+
+	local camera = workspace.CurrentCamera
+
+	player.CameraMode = Enum.CameraMode.LockFirstPerson
+	camera.FieldOfView = 120
+
+	local BOB_SPEED = 14
+	local BOB_SENS = 0.25
+	local SWAY_SENS = 0.3
+	local MOUSE_TILT_SENS = 0.6
+	local SMOOTHNESS = 0.15
+	local bobTime = 0
+	local currentIntensity = 0
+	local lastPos = Vector3.new()
+	local lastTilt = 0
+
+	RunService:BindToRenderStep("CleanFPSCamera", Enum.RenderPriority.Camera.Value + 1, function(dt)
+		local char = player.Character
+		local hum = char and char:FindFirstChild("Humanoid")
+		local root = char and char:FindFirstChild("HumanoidRootPart")
+		if not hum or not root or hum.Health <= 0 then return end
+		local velocity = root.AssemblyLinearVelocity
+		local speed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
+		local moving = speed > 1 and hum.MoveDirection.Magnitude > 0
+		local targetIntensity = moving and math.clamp(speed / 16, 0, 1.2) or 0
+		currentIntensity = math.lerp(currentIntensity, targetIntensity, 0.1)
+		bobTime = bobTime + (dt * BOB_SPEED)
+		local vBob = math.abs(math.sin(bobTime)) * BOB_SENS * currentIntensity
+		local hSway = math.sin(bobTime * 0.5) * SWAY_SENS * currentIntensity
+		local tSway = math.sin(bobTime * 0.5) * (currentIntensity * 1.5)
+		local mouseDelta = UserInputService:GetMouseDelta()
+		local mouseRoll = 0
+		if math.abs(mouseDelta.X) > 0.1 then
+			mouseRoll = math.clamp(-mouseDelta.X * MOUSE_TILT_SENS, -8, 8)
+		end
+		local targetPos = Vector3.new(hSway, vBob, 0)
+		local targetTilt = math.rad(mouseRoll + tSway)
+		lastPos = lastPos:Lerp(targetPos, SMOOTHNESS)
+		lastTilt = math.lerp(lastTilt, targetTilt, SMOOTHNESS)
+		camera.CFrame = camera.CFrame
+			* CFrame.new(lastPos.X, lastPos.Y, 0)
+			* CFrame.Angles(0, 0, lastTilt)
+	end)
+
+	player.CharacterAdded:Connect(function(char)
+		local head = char:WaitForChild("Head")
+		head.LocalTransparencyModifier = 1
+		head:GetPropertyChangedSignal("LocalTransparencyModifier"):Connect(function()
+			head.LocalTransparencyModifier = 1
+		end)
+	end)
+
+	local DOWNSCALE = 5
+	local MIN_DIM = math.min(camera.ViewportSize.X, camera.ViewportSize.Y) / DOWNSCALE
+	local RES_X, RES_Y = math.floor(MIN_DIM), math.floor(MIN_DIM)
+	local TOTAL_PIXELS = RES_X * RES_Y
+	local BATCH_SIZE = math.floor(TOTAL_PIXELS * 0.15)
+	local LIGHT_DIR = Vector3.new(0.5, 0.8, 0.5).Unit
+	local SUN_COLOR = Vector3.new(255, 250, 240)
+	local SKY_TOP = Vector3.new(80, 120, 200)
+	local SKY_BOTTOM = Vector3.new(150, 180, 220)
+	local AMBIENT = 0.18
+	local SUN_INTENSITY = 1.0
+	local CLOUD_COLOR = Vector3.new(245, 245, 255)
+	local CLOUD_HEIGHT = 300
+	local CLOUD_SCALE = 0.003
+	local CLOUD_SPEED = 1
+	local CLOUD_COVERAGE = 0.55
+	local CLOUD_OPACITY = 0.85
+	local NEON_RANGE = 120
+	local NEON_RANGE_SQ = NEON_RANGE * NEON_RANGE
+	local MAX_NEON_LIGHTS = 8
+	local NEON_REFRESH_INTERVAL = 0.5
+	local GOD_RAY_STEPS = 6
+	local GOD_RAY_SCATTER = 0.22
+	local GOD_RAY_SKY_SHAFTS = 0.50
+
+	local MAT_REFLECT = {
+		[Enum.Material.Metal] = 0.42,
+		[Enum.Material.DiamondPlate] = 0.55,
+		[Enum.Material.Foil] = 0.50,
+		[Enum.Material.Ice] = 0.45,
+		[Enum.Material.Glass] = 0.35,
+		[Enum.Material.SmoothPlastic] = 0.15,
+		[Enum.Material.Plastic] = 0.10,
+		[Enum.Material.Wood] = 0.05,
+		[Enum.Material.WoodPlanks] = 0.05,
+		[Enum.Material.Brick] = 0.05,
+		[Enum.Material.Concrete] = 0.05,
+		[Enum.Material.Cobblestone] = 0.05,
+		[Enum.Material.Grass] = 0.12,
+		[Enum.Material.Ground] = 0.08,
+		[Enum.Material.Sand] = 0.10,
+		[Enum.Material.Slate] = 0.08,
+		[Enum.Material.Marble] = 0.25,
+		[Enum.Material.Granite] = 0.10,
+		[Enum.Material.CorrodedMetal] = 0.10,
+		[Enum.Material.Fabric] = 0.05,
+		[Enum.Material.Pebble] = 0.05,
+	}
+
+	local screenGui = Instance.new("ScreenGui", playerGui)
+	screenGui.DisplayOrder = -1000
+	screenGui.IgnoreGuiInset = true
+
+	local blackBg = Instance.new("Frame", screenGui)
+	blackBg.Size = UDim2.new(1, 0, 1, 0)
+	blackBg.BackgroundColor3 = Color3.new(0, 0, 0)
+	blackBg.BorderSizePixel = 0
+
+	local imageLabel = Instance.new("ImageLabel", blackBg)
+	imageLabel.Size = UDim2.new(1, 0, 1, 0)
+	imageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+	imageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+	imageLabel.BackgroundTransparency = 1
+	imageLabel.ResampleMode = Enum.ResamplerMode.Pixelated
+
+	local aspectConstraint = Instance.new("UIAspectRatioConstraint", imageLabel)
+	aspectConstraint.AspectRatio = 1
+	aspectConstraint.AspectType = Enum.AspectType.FitWithinMaxSize
+	aspectConstraint.DominantAxis = Enum.DominantAxis.Height
+
+	local editableImage = AssetService:CreateEditableImage({ Size = Vector2.new(RES_X, RES_Y) })
+	imageLabel.ImageContent = Content.fromObject(editableImage)
+
+	local frameBuffer = buffer.create(TOTAL_PIXELS * 4)
+	local FULL_FRAME_SIZE = Vector2.new(RES_X, RES_Y)
+	local FRAME_ORIGIN = Vector2.new(0, 0)
+
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { player.Character, screenGui }
+
+	local mmax = math.max
+	local mmin = math.min
+	local mclamp = math.clamp
+	local mfloor = math.floor
+	local msqrt = math.sqrt
+	local mnoise = math.noise
+	local mrandom = math.random
+	local bwriteu8 = buffer.writeu8
+	local breadu8 = buffer.readu8
+
+	local LDX, LDY, LDZ = LIGHT_DIR.X, LIGHT_DIR.Y, LIGHT_DIR.Z
+	local STPX, STPY, STPZ = SKY_TOP.X, SKY_TOP.Y, SKY_TOP.Z
+	local SBTX, SBTY, SBTZ = SKY_BOTTOM.X, SKY_BOTTOM.Y, SKY_BOTTOM.Z
+	local SUNX, SUNY, SUNZ = SUN_COLOR.X, SUN_COLOR.Y, SUN_COLOR.Z
+	local CCX, CCY, CCZ = CLOUD_COLOR.X, CLOUD_COLOR.Y, CLOUD_COLOR.Z
+	local INV_CLOUD_RANGE = 1 / (1 - CLOUD_COVERAGE)
+
+	local pixelPool = table.create(TOTAL_PIXELS)
+	for i = 1, TOTAL_PIXELS do pixelPool[i] = i - 1 end
+	local poolPos = 1
+
+	local function refillPool()
+		for i = TOTAL_PIXELS, 2, -1 do
+			local j = mrandom(i)
+			pixelPool[i], pixelPool[j] = pixelPool[j], pixelPool[i]
+		end
+		poolPos = 1
+	end
+	refillPool()
+
+	local neonLights = {}
+	local lastNeonRefresh = -999
+
+	local function refreshNeonLights()
+		local list = {}
+		local count = 0
+		for _, v in ipairs(Workspace:GetDescendants()) do
+			if v:IsA("BasePart") and v.Material == Enum.Material.Neon then
+				count += 1
+				local c = v.Color
+				list[count] = {
+					px = v.Position.X, py = v.Position.Y, pz = v.Position.Z,
+					r = c.R * 255, g = c.G * 255, b = c.B * 255,
+					rangeSq = NEON_RANGE_SQ,
+				}
+			elseif (v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight")) and v.Enabled then
+				local parent = v.Parent
+				if parent and parent:IsA("BasePart") then
+					count += 1
+					local c = v.Color
+					local bright = v.Brightness
+					local range = (v.Range > 0) and v.Range or 60
+					list[count] = {
+						px = parent.Position.X, py = parent.Position.Y, pz = parent.Position.Z,
+						r = c.R * 255 * bright * 2,
+						g = c.G * 255 * bright * 2,
+						b = c.B * 255 * bright * 2,
+						rangeSq = range * range,
+					}
+				end
+			end
+		end
+		neonLights = list
+	end
+
+	local function getCloudDensity(cx, cz, timeOffset)
+		local nx = cx * CLOUD_SCALE + timeOffset * CLOUD_SPEED
+		local nz = cz * CLOUD_SCALE
+		local n1 = mnoise(nx, nz, timeOffset * CLOUD_SPEED * 0.05) * 0.5 + 0.5
+		local n2 = mnoise(nx * 2.5, nz * 2.5, 10) * 0.5 + 0.5
+		local v = n1 * 0.7 + n2 * 0.3
+		if v < CLOUD_COVERAGE then return 0 end
+		return mclamp((v - CLOUD_COVERAGE) * INV_CLOUD_RANGE, 0, 1) * CLOUD_OPACITY
+	end
+
+	local function getSkyRGB(opx, opy, opz, dx, dy, dz, t)
+		local sun = mmax(0, dx*LDX + dy*LDY + dz*LDZ)
+		local r, g, b
+		if sun > 0.995 then
+			r, g, b = SUNX, SUNY, SUNZ
+		else
+			local tv = 0.5 * (dy + 1)
+			local mt = 1 - tv
+			r = STPX*tv + SBTX*mt
+			g = STPY*tv + SBTY*mt
+			b = STPZ*tv + SBTZ*mt
+			if sun > 0.98 then
+				local sf = (sun - 0.98) / 0.015
+				r = r + (SUNX - r) * sf
+				g = g + (SUNY - g) * sf
+				b = b + (SUNZ - b) * sf
+			end
+		end
+		if dy > 0 then
+			local dist = (CLOUD_HEIGHT - opy) / dy
+			if dist > 0 then
+				local density = getCloudDensity(opx + dx*dist, opz + dz*dist, t)
+				if density > 0 then
+					local f = 1 - sun
+					r = r + (CCX + (180 - CCX)*f - r) * density
+					g = g + (CCY + (180 - CCY)*f - g) * density
+					b = b + (CCZ + (190 - CCZ)*f - b) * density
+				end
+			end
+		end
+		if LDY > 0 and sun > 0.65 then
+			local proximity = (sun - 0.65) / 0.35
+			local shaftNoise = mnoise(dx * 7 + t * 0.04, dy * 7, dz * 5) * 0.5 + 0.5
+			local phase = (1 + sun * sun) * 0.75
+			local strength = proximity * mmax(0, shaftNoise - 0.3) * phase * GOD_RAY_SKY_SHAFTS
+			r = r + SUNX * strength
+			g = g + SUNY * strength
+			b = b + SUNZ * strength
+		end
+		return r, g, b
+	end
+
+	local neonBuf = table.create(MAX_NEON_LIGHTS * 2)
+
+	local function getNearbyNeon(hpx, hpy, hpz)
+		local count = 0
+		for _, nl in ipairs(neonLights) do
+			local dx = nl.px - hpx
+			local dy = nl.py - hpy
+			local dz = nl.pz - hpz
+			local dsq = dx*dx + dy*dy + dz*dz
+			if dsq < nl.rangeSq then
+				count += 1
+				neonBuf[count] = { nl = nl, dsq = dsq }
+				if count >= MAX_NEON_LIGHTS * 2 then break end
+			end
+		end
+		table.sort(neonBuf, function(a, b) return a.dsq < b.dsq end)
+		local out = {}
+		for i = 1, mmin(count, MAX_NEON_LIGHTS) do out[i] = neonBuf[i] end
+		return out
+	end
+
+	local function CastRayIgnoreTransparent(origin, dirUnit, maxDist)
+		local curOrigin = origin
+		local distLeft = maxDist
+		local attempts = 0
+		while attempts < 4 do
+			local result = Workspace:Raycast(curOrigin, dirUnit * distLeft, params)
+			if result then
+				local inst = result.Instance
+				if inst.Transparency > 0.95 or inst.Name == "HumanoidRootPart" then
+					local traveled = (result.Position - curOrigin).Magnitude
+					distLeft -= traveled
+					if distLeft <= 0 then return nil end
+					curOrigin = result.Position + (dirUnit * 0.01)
+					attempts += 1
+				else
+					return result
+				end
+			else
+				return nil
+			end
+		end
+		return nil
+	end
+
+	local function getVolumetricGodRay(opx, opy, opz, rdx, rdy, rdz, hitDist)
+		local cosTheta = rdx*LDX + rdy*LDY + rdz*LDZ
+		local phase = 1 + mmax(0, cosTheta) * 0.6
+		local litSamples = 0
+		local inv = 1 / GOD_RAY_STEPS
+		for i = 1, GOD_RAY_STEPS do
+			local frac = (i - 0.5) * inv
+			local sx = opx + rdx * frac * hitDist
+			local sy = opy + rdy * frac * hitDist
+			local sz = opz + rdz * frac * hitDist
+			if not CastRayIgnoreTransparent(Vector3.new(sx, sy, sz), LIGHT_DIR, 100) then
+				litSamples += 1 - frac * 0.5
+			end
+		end
+		local strength = (litSamples * inv) * GOD_RAY_SCATTER * phase
+		return SUNX * strength, SUNY * strength, SUNZ * strength
+	end
+
+	task.spawn(function()
+		local vHeight = math.tan(math.rad(camera.FieldOfView) / 2)
+		local vWidth = vHeight * (RES_X / RES_Y)
+		local invResX = 1 / RES_X
+		local invResY = 1 / RES_Y
+
+		while true do
+			local t = os.clock()
+			if t - lastNeonRefresh > NEON_REFRESH_INTERVAL then
+				refreshNeonLights()
+				lastNeonRefresh = t
+			end
+
+			local camCF = camera.CFrame
+			local camPos = camCF.Position
+			local cpx, cpy, cpz = camPos.X, camPos.Y, camPos.Z
+			local rvx, rvy, rvz = camCF.RightVector.X, camCF.RightVector.Y, camCF.RightVector.Z
+			local uvx, uvy, uvz = camCF.UpVector.X, camCF.UpVector.Y, camCF.UpVector.Z
+			local lvx, lvy, lvz = camCF.LookVector.X, camCF.LookVector.Y, camCF.LookVector.Z
+
+			for _ = 1, BATCH_SIZE do
+				if poolPos > TOTAL_PIXELS then refillPool() end
+				local currentIdx = pixelPool[poolPos]
+				poolPos += 1
+
+				local px = currentIdx % RES_X
+				local py = mfloor(currentIdx * invResX)
+				local ndcX = (2 * (px + 0.5) * invResX - 1) * vWidth
+				local ndcY = (1 - 2 * (py + 0.5) * invResY) * vHeight
+				local rdx = ndcX*rvx + ndcY*uvx + lvx
+				local rdy = ndcX*rvy + ndcY*uvy + lvy
+				local rdz = ndcX*rvz + ndcY*uvz + lvz
+				local invLen = 1 / msqrt(rdx*rdx + rdy*rdy + rdz*rdz)
+				rdx, rdy, rdz = rdx*invLen, rdy*invLen, rdz*invLen
+
+				local result = CastRayIgnoreTransparent(camPos, Vector3.new(rdx, rdy, rdz), 500)
+				local cr, cg, cb
+
+				if result then
+					local inst = result.Instance
+					local mat = inst.Material
+					if mat == Enum.Material.Neon then
+						local ic = inst.Color
+						cr, cg, cb = ic.R*255, ic.G*255, ic.B*255
+					else
+						local hitPos = result.Position
+						local hpx, hpy, hpz = hitPos.X, hitPos.Y, hitPos.Z
+						local norm = result.Normal
+						local nnx, nny, nnz = norm.X, norm.Y, norm.Z
+						local ic = inst.Color
+						local pr, pg, pb = ic.R*255, ic.G*255, ic.B*255
+						local ox = hpx + nnx*0.01
+						local oy = hpy + nny*0.01
+						local oz = hpz + nnz*0.01
+						local offsetOrigin = Vector3.new(ox, oy, oz)
+						local isShadow = CastRayIgnoreTransparent(offsetOrigin, LIGHT_DIR, 100)
+						local shadowMult = isShadow and AMBIENT or SUN_INTENSITY
+						if shadowMult > AMBIENT and LDY > 0 then
+							local distToCloud = (CLOUD_HEIGHT - hpy) / LDY
+							if distToCloud > 0 then
+								local density = getCloudDensity(hpx + LDX*distToCloud, hpz + LDZ*distToCloud, t)
+								if density > 0.1 then
+									shadowMult = mmax(AMBIENT, 1 - density * 0.8)
+								end
+							end
+						end
+						local diffuse = mmax(AMBIENT, nnx*LDX + nny*LDY + nnz*LDZ) * shadowMult
+						local dr = pr * diffuse
+						local dg = pg * diffuse
+						local db = pb * diffuse
+						local nlr, nlg, nlb = 0, 0, 0
+						local nearNeon = getNearbyNeon(hpx, hpy, hpz)
+						for _, entry in ipairs(nearNeon) do
+							local nl = entry.nl
+							local lx = nl.px - hpx
+							local ly = nl.py - hpy
+							local lz = nl.pz - hpz
+							local dist = msqrt(entry.dsq)
+							local invD = 1 / dist
+							local lnx, lny, lnz = lx*invD, ly*invD, lz*invD
+							local nDotL = nnx*lnx + nny*lny + nnz*lnz
+							if nDotL > 0 then
+								local blocked = CastRayIgnoreTransparent(offsetOrigin, Vector3.new(lnx, lny, lnz), dist)
+								if not blocked then
+									local atten = nDotL / (1 + entry.dsq * 0.002)
+									nlr += nl.r * atten
+									nlg += nl.g * atten
+									nlb += nl.b * atten
+								end
+							end
+						end
+						local ns = 1 / 255
+						dr = dr + nlr * ns * pr * ns
+						dg = dg + nlg * ns * pg * ns
+						db = db + nlb * ns * pb * ns
+						local reflectivity = MAT_REFLECT[mat] or 0.30
+						local dot2 = 2 * (rdx*nnx + rdy*nny + rdz*nnz)
+						local refDx = rdx - dot2*nnx
+						local refDy = rdy - dot2*nny
+						local refDz = rdz - dot2*nnz
+						local refRes = CastRayIgnoreTransparent(offsetOrigin, Vector3.new(refDx, refDy, refDz), 300)
+						local rr, rg, rb
+						if refRes then
+							local rmat = refRes.Instance.Material
+							local rc = refRes.Instance.Color
+							if rmat == Enum.Material.Neon then
+								rr, rg, rb = rc.R*255, rc.G*255, rc.B*255
+							else
+								local rlit = mmax(AMBIENT, refRes.Normal.X*LDX + refRes.Normal.Y*LDY + refRes.Normal.Z*LDZ)
+								rr, rg, rb = rc.R*255*rlit, rc.G*255*rlit, rc.B*255*rlit
+							end
+						else
+							rr, rg, rb = getSkyRGB(ox, oy, oz, refDx, refDy, refDz, t)
+						end
+						local inv_ref = 1 - reflectivity
+						cr = dr*inv_ref + rr*reflectivity
+						cg = dg*inv_ref + rg*reflectivity
+						cb = db*inv_ref + rb*reflectivity
+						if LDY > 0 then
+							local dx2 = hpx - cpx
+							local dy2 = hpy - cpy
+							local dz2 = hpz - cpz
+							local hitDist = msqrt(dx2*dx2 + dy2*dy2 + dz2*dz2)
+							local grr, grg, grb = getVolumetricGodRay(cpx, cpy, cpz, rdx, rdy, rdz, hitDist)
+							cr = cr + grr
+							cg = cg + grg
+							cb = cb + grb
+						end
+					end
+				else
+					cr, cg, cb = getSkyRGB(cpx, cpy, cpz, rdx, rdy, rdz, t)
+				end
+
+				local off = currentIdx * 4
+				local nr = mclamp(mfloor(cr), 0, 255)
+				local ng = mclamp(mfloor(cg), 0, 255)
+				local nb = mclamp(mfloor(cb), 0, 255)
+				if breadu8(frameBuffer, off) ~= nr or breadu8(frameBuffer, off+1) ~= ng or breadu8(frameBuffer, off+2) ~= nb then
+					bwriteu8(frameBuffer, off, nr)
+					bwriteu8(frameBuffer, off + 1, ng)
+					bwriteu8(frameBuffer, off + 2, nb)
+					bwriteu8(frameBuffer, off + 3, 255)
+				end
+			end
+
+			editableImage:WritePixelsBuffer(FRAME_ORIGIN, FULL_FRAME_SIZE, frameBuffer)
+			RunService.RenderStepped:Wait()
+		end
+	end)
+
+	local overlayGui = Instance.new("ScreenGui", playerGui)
+	overlayGui.DisplayOrder = -999
+	overlayGui.IgnoreGuiInset = true
+	overlayGui.ResetOnSpawn = false
+
+	local overlayLabel = Instance.new("ImageLabel", overlayGui)
+	overlayLabel.Size = UDim2.new(1, 0, 1, 0)
+	overlayLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+	overlayLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+	overlayLabel.BackgroundTransparency = 1
+	overlayLabel.ResampleMode = Enum.ResamplerMode.Pixelated
+
+	local overlayAR = Instance.new("UIAspectRatioConstraint", overlayLabel)
+	overlayAR.AspectRatio = 1
+	overlayAR.AspectType = Enum.AspectType.FitWithinMaxSize
+	overlayAR.DominantAxis = Enum.DominantAxis.Height
+
+	local overlayImage = AssetService:CreateEditableImage({ Size = Vector2.new(RES_X, RES_Y) })
+	overlayLabel.ImageContent = Content.fromObject(overlayImage)
+
+	local overlayBuf = buffer.create(RES_X * RES_Y * 4)
+
+	local PIXEL_FONT = {
+		["0"] = {14, 17, 17, 17, 17, 17, 14},
+		["1"] = {4,  12, 4,  4,  4,  4,  14},
+		["2"] = {14, 17, 1,  2,  4,  8,  31},
+		["3"] = {14, 1,  1,  6,  1,  1,  14},
+		["4"] = {17, 17, 17, 31, 1,  1,  1 },
+		["5"] = {31, 16, 30, 1,  1,  17, 14},
+		["6"] = {14, 16, 16, 30, 17, 17, 14},
+		["7"] = {31, 1,  2,  4,  4,  4,  4 },
+		["8"] = {14, 17, 17, 14, 17, 17, 14},
+		["9"] = {14, 17, 17, 15, 1,  1,  14},
+		["R"] = {30, 17, 17, 30, 20, 18, 17},
+		["E"] = {31, 16, 16, 30, 16, 16, 31},
+		["C"] = {14, 17, 16, 16, 16, 17, 14},
+		[":"] = {0,  4,  4,  0,  4,  4,  0 },
+	}
+
+	local FONT_W = 5
+	local FONT_H = 7
+
+	local function ovPx(x, y, r, g, b, a)
+		if x < 0 or x >= RES_X or y < 0 or y >= RES_Y then return end
+		local off = (y * RES_X + x) * 4
+		buffer.writeu8(overlayBuf, off,     r)
+		buffer.writeu8(overlayBuf, off + 1, g)
+		buffer.writeu8(overlayBuf, off + 2, b)
+		buffer.writeu8(overlayBuf, off + 3, a or 255)
+	end
+
+	local function drawChar(ch, ox, oy, r, g, b, sc)
+		local rows = PIXEL_FONT[ch]
+		if not rows then return end
+		for row = 1, FONT_H do
+			local bits = rows[row]
+			for col = 0, FONT_W - 1 do
+				local bit = mfloor(bits / (2 ^ (FONT_W - 1 - col))) % 2
+				if bit == 1 then
+					for sy = 0, sc - 1 do
+						for sx = 0, sc - 1 do
+							ovPx(ox + col * sc + sx, oy + (row - 1) * sc + sy, r, g, b, 255)
+						end
+					end
+				end
+			end
+		end
+	end
+
+	local function drawString(str, ox, oy, r, g, b, sc)
+		local cx = ox
+		for i = 1, #str do
+			drawChar(str:sub(i, i), cx, oy, r, g, b, sc)
+			cx = cx + (FONT_W + 1) * sc
+		end
+	end
+
+	local function drawRect(x, y, w, h, r, g, b, a)
+		for py = y, y + h - 1 do
+			for px = x, x + w - 1 do
+				ovPx(px, py, r, g, b, a)
+			end
+		end
+	end
+
+	local function drawCircle(cx, cy, rad, r, g, b, a)
+		for py = cy - rad, cy + rad do
+			for px = cx - rad, cx + rad do
+				local dx = px - cx
+				local dy = py - cy
+				if dx*dx + dy*dy <= rad*rad then
+					ovPx(px, py, r, g, b, a)
+				end
+			end
+		end
+	end
+
+	local hudStart = os.clock()
+	local recOn = true
+	local lastBlink = 0
+	local BLINK_RATE = 0.65
+	local glitchActive = false
+	local glitchTimer = 0
+	local glitchDuration = 0
+	local glitchBands = {}
+	local nextGlitch = os.clock() + math.random(3, 8)
+
+	local wmGui = Instance.new("ScreenGui", playerGui)
+	wmGui.DisplayOrder = -998
+	wmGui.IgnoreGuiInset = true
+	wmGui.ResetOnSpawn = false
+
+	local wmOuter = Instance.new("TextLabel", wmGui)
+	wmOuter.Size = UDim2.new(0, 120, 0, 22)
+	wmOuter.AnchorPoint = Vector2.new(1, 1)
+	wmOuter.Position = UDim2.new(1, -8, 1, -8)
+	wmOuter.BackgroundTransparency = 1
+	wmOuter.Text = "RetroRecord"
+	wmOuter.TextColor3 = Color3.fromRGB(0, 0, 0)
+	wmOuter.Font = Enum.Font.GothamBold
+	wmOuter.TextSize = 13
+	wmOuter.TextXAlignment = Enum.TextXAlignment.Right
+
+	local wmInner = Instance.new("TextLabel", wmGui)
+	wmInner.Size = UDim2.new(0, 120, 0, 22)
+	wmInner.AnchorPoint = Vector2.new(1, 1)
+	wmInner.Position = UDim2.new(1, -9, 1, -9)
+	wmInner.BackgroundTransparency = 1
+	wmInner.Text = "gazer_ha"
+	wmInner.TextColor3 = Color3.fromRGB(200, 200, 200)
+	wmInner.Font = Enum.Font.GothamBold
+	wmInner.TextSize = 13
+	wmInner.TextXAlignment = Enum.TextXAlignment.Right
+
+	task.spawn(function()
+		while true do
+			local t = os.clock()
+
+			buffer.fill(overlayBuf, 0, 0, RES_X * RES_Y * 4)
+
+			local SC = math.max(1, mfloor(RES_X / 90))
+			local M = SC * 3
+
+			local scanOff = mfloor(t * 20) % 3
+			for py = 0, RES_Y - 1 do
+				if (py + scanOff) % 3 == 0 then
+					for px = 0, RES_X - 1 do
+						ovPx(px, py, 0, 0, 0, 22)
+					end
+				end
+			end
+
+			if t - lastBlink >= BLINK_RATE then
+				recOn = not recOn
+				lastBlink = t
+			end
+
+			local dotR = SC * 3
+			local dotCX = M + dotR
+			local dotCY = M + dotR
+
+			if recOn then
+				drawCircle(dotCX, dotCY, dotR, 220, 25, 25, 255)
+			end
+
+			drawString("REC", dotCX + dotR + SC * 2, M, 230, 230, 230, SC)
+
+			local elapsed = t - hudStart
+			local totalSec = mfloor(elapsed)
+			local hours = mfloor(totalSec / 3600)
+			local mins = mfloor((totalSec % 3600) / 60)
+			local secs = totalSec % 60
+			local timerStr = string.format("%02d:%02d:%02d", hours, mins, secs)
+			drawString(timerStr, M, M + (FONT_H + 2) * SC, 230, 230, 230, SC)
+
+			local bottomBarY = RES_Y - M - FONT_H * SC
+			local dateStr = "REC"
+			local dateW = #dateStr * (FONT_W + 1) * SC
+			drawRect(RES_X - M - dateW - SC * 2, bottomBarY - SC, dateW + SC * 2, FONT_H * SC + SC * 2, 180, 20, 20, 200)
+			drawString(dateStr, RES_X - M - dateW, bottomBarY, 240, 240, 240, SC)
+
+			if t >= nextGlitch then
+				glitchActive = true
+				glitchTimer = t
+				glitchDuration = math.random() * 0.18 + 0.04
+				local numBands = math.random(1, 4)
+				glitchBands = {}
+				for i = 1, numBands do
+					glitchBands[i] = {
+						y      = math.random(0, RES_Y - 1),
+						h      = math.random(1, math.max(1, mfloor(RES_Y * 0.06))),
+						shift  = math.random(-mfloor(RES_X * 0.12), mfloor(RES_X * 0.12)),
+						ch     = math.random(1, 3),
+						bright = math.random() < 0.3,
+					}
+				end
+				nextGlitch = t + math.random() * 5 + 2
+			end
+
+			if glitchActive then
+				if t - glitchTimer < glitchDuration then
+					for _, band in ipairs(glitchBands) do
+						local shift = band.shift
+						local ch = band.ch
+						local bright = band.bright
+						for py = band.y, math.min(band.y + band.h - 1, RES_Y - 1) do
+							for px = 0, RES_X - 1 do
+								local srcX = px - shift
+								if srcX >= 0 and srcX < RES_X then
+									local srcOff = (py * RES_X + srcX) * 4
+									local r = breadu8(frameBuffer, srcOff)
+									local g = breadu8(frameBuffer, srcOff + 1)
+									local b = breadu8(frameBuffer, srcOff + 2)
+									if bright then
+										r = math.min(255, r + 40)
+										g = math.min(255, g + 40)
+										b = math.min(255, b + 40)
+									end
+									if ch == 1 then r = math.min(255, r + 80)
+									elseif ch == 2 then g = math.min(255, g + 70)
+									else b = math.min(255, b + 90) end
+									ovPx(px, py, r, g, b, 210)
+								end
+							end
+						end
+						local caShift = math.random(1, math.max(1, mfloor(RES_X * 0.03)))
+						local caY = glitchBands[1].y
+						local caH = glitchBands[1].h
+						for py = caY, math.min(caY + caH - 1, RES_Y - 1) do
+							for px = 0, RES_X - 1 do
+								local srcR = math.min(px + caShift, RES_X - 1)
+								local srcB = math.max(px - caShift, 0)
+								local offR = (py * RES_X + srcR) * 4
+								local offB = (py * RES_X + srcB) * 4
+								local rr = breadu8(frameBuffer, offR)
+								local gg = breadu8(frameBuffer, (py * RES_X + px) * 4 + 1)
+								local bb = breadu8(frameBuffer, offB + 2)
+								ovPx(px, py, rr, gg, bb, 180)
+							end
+						end
+					end
+				else
+					glitchActive = false
+					glitchBands = {}
+				end
+			end
+
+			overlayImage:WritePixelsBuffer(Vector2.new(0, 0), Vector2.new(RES_X, RES_Y), overlayBuf)
+			RunService.RenderStepped:Wait()
+		end
+	end)
+
+	task.delay(2.0, function()
+		TweenService:Create(pbFrame, TweenInfo.new(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
+		task.delay(1.5, function()
+			persistentBlack:Destroy()
+		end)
+	end)
+end
+
+persistentBlack = Instance.new("ScreenGui", playerGui)
+persistentBlack.DisplayOrder = 9995
+persistentBlack.IgnoreGuiInset = true
+persistentBlack.ResetOnSpawn = false
+persistentBlack.Name = "PersistentBlack"
+pbFrame = Instance.new("Frame", persistentBlack)
+pbFrame.Size = UDim2.new(1, 0, 1, 0)
+pbFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+pbFrame.BackgroundTransparency = 0
+pbFrame.BorderSizePixel = 0
+
+showWarning(function()
+	if alreadySeen then
+		showWelcomeBack(launchMainScript)
+	else
+		showIntro(launchMainScript)
+	end
+end)

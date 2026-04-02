@@ -1,16 +1,31 @@
--- [[ TILT & SHIFT-LOCK SCRIPT ]] --
+-- [[ COMBINED TILT, SHIFT-LOCK & MOVEMENT SCRIPT ]] --
+
+--// Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
 
+--// Global Variables & Constants
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
-local rootPart = character:WaitForChild("HumanoidRootPart")
 
+-- Tilt Settings
+local maxTilt, fadeSpeed, tiltMultiplier = 40, 10, 1.2
+local jumpTiltFactor = 1/3
+
+-- Animation IDs
+local SIDE_ID   = "rbxassetid://132218385473651"
+local BACK_ID   = "rbxassetid://16738337225"
+local POSE_ID   = "rbxassetid://82261197744576"
+local TRACK1_ID = "rbxassetid://138665010911335"
+local TRACK2_ID = "rbxassetid://140131631438778"
+
+local connections = {}
 local shiftLockToggled = false
+
+--// Shift-Lock GUI Setup (Runs Once Globally)
 local guiParent = (type(gethui) == "function" and gethui()) or game:GetService("CoreGui")
 local shiftLockGui = Instance.new("ScreenGui")
 shiftLockGui.Name = "CustomShiftLockGui"
@@ -55,133 +70,25 @@ shiftLockButton.MouseButton1Click:Connect(function()
     shiftLockToggled = not shiftLockToggled
     local targetSize = UDim2.new(0, 65, 0, 35)
     local currentPos = shiftLockButton.Position
-    local targetPos = UDim2.new(
-        currentPos.X.Scale, 
-        currentPos.X.Offset, 
-        currentPos.Y.Scale, 
-        currentPos.Y.Offset + 7
-    )
+    local targetPos = UDim2.new(currentPos.X.Scale, currentPos.X.Offset, currentPos.Y.Scale, currentPos.Y.Offset + 7)
     
-    local squishTween = TweenService:Create(shiftLockButton, squishInfo, {
-        Size = targetSize,
-        Position = targetPos
-    })
-    squishTween:Play()
+    TweenService:Create(shiftLockButton, squishInfo, {Size = targetSize, Position = targetPos}):Play()
     
     task.delay(squishTime, function()
-        TweenService:Create(shiftLockButton, resetInfo, {
-            Size = UDim2.new(0, 50, 0, 50),
-            Position = currentPos
-        }):Play()
+        TweenService:Create(shiftLockButton, resetInfo, {Size = UDim2.new(0, 50, 0, 50), Position = currentPos}):Play()
     end)
     
     local targetOffset = shiftLockToggled and Vector2.new(0.5, 0) or Vector2.new(-0.5, 0)
-    local gradientTween = TweenService:Create(gradient, gradientInfo, {Offset = targetOffset})
-    gradientTween:Play()
+    TweenService:Create(gradient, gradientInfo, {Offset = targetOffset}):Play()
 end)
 
-local function isFirstPerson()
-    local head = character:FindFirstChild("Head")
+--// Helper Functions
+local function isFirstPerson(char)
+    local head = char:FindFirstChild("Head")
     if not head then return false end
     return (camera.CFrame.Position - head.Position).Magnitude < 1
 end
 
-local attachment = rootPart:FindFirstChild("RotationAttachment") or Instance.new("Attachment", rootPart)
-attachment.Name = "RotationAttachment"
-
-local align = rootPart:FindFirstChild("RotationWeld") or Instance.new("AlignOrientation", rootPart)
-align.Name = "RotationWeld"
-align.Mode = Enum.OrientationAlignmentMode.OneAttachment
-align.Attachment0 = attachment
-align.RigidityEnabled = false 
-align.MaxTorque = math.huge
-align.MaxAngularVelocity = math.huge
-align.Responsiveness = 55 
-align.Enabled = true
-
-humanoid.AutoRotate = false
-
-humanoid.Seated:Connect(function(isSeated)
-    if isSeated then
-        align.Enabled = false
-        humanoid.AutoRotate = true
-        humanoid.CameraOffset = Vector3.new(0, 0, 0)
-        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-    else
-        align.Enabled = true
-        humanoid.AutoRotate = false
-    end
-end)
-
-local maxTilt, fadeSpeed, tiltMultiplier = 40, 10, 1.2
-local currentTiltX, currentTiltZ = 0, 0
-local jumpTiltFactor = 1/3
-
-RunService.RenderStepped:Connect(function(dt)
-    if not character or not character.Parent or humanoid.Sit or humanoid.Health <= 0 then return end
-
-    local isFP = isFirstPerson()
-    local shiftLockActive = shiftLockToggled or isFP
-    
-    if shiftLockActive then
-        UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-        humanoid.CameraOffset = humanoid.CameraOffset:Lerp(isFP and Vector3.zero or Vector3.new(1.75, 0, 0), 0.2)
-    else
-        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-        humanoid.CameraOffset = humanoid.CameraOffset:Lerp(Vector3.zero, 0.2)
-    end
-
-    local moveDir = humanoid.MoveDirection
-    local speed = rootPart.Velocity.Magnitude
-    local state = humanoid:GetState()
-    local inAir = (state == Enum.HumanoidStateType.Jumping or state == Enum.HumanoidStateType.Freefall)
-    
-    local flatLook = rootPart.CFrame.LookVector
-    local lookTarget = CFrame.lookAt(Vector3.zero, Vector3.new(flatLook.X, 0, flatLook.Z).Unit)
-    
-    if shiftLockActive then
-        local camLook = camera.CFrame.LookVector
-        lookTarget = CFrame.lookAt(Vector3.zero, Vector3.new(camLook.X, 0, camLook.Z).Unit)
-    elseif moveDir.Magnitude > 0 then
-        lookTarget = CFrame.lookAt(Vector3.zero, moveDir)
-    end
-
-    local targetTiltX, targetTiltZ = 0, 0
-    if speed > 0.1 then
-        local look, right = rootPart.CFrame.LookVector, rootPart.CFrame.RightVector
-        targetTiltX = math.clamp(-moveDir:Dot(look) * tiltMultiplier * speed, -maxTilt, maxTilt)
-        targetTiltZ = math.clamp(-moveDir:Dot(right) * tiltMultiplier * speed, -maxTilt, maxTilt)
-    end
-
-    if inAir then
-        targetTiltX, targetTiltZ = targetTiltX * jumpTiltFactor, targetTiltZ * jumpTiltFactor
-    end
-
-    currentTiltX += (targetTiltX - currentTiltX) * dt * fadeSpeed
-    currentTiltZ += (targetTiltZ - currentTiltZ) * dt * fadeSpeed
-    align.CFrame = lookTarget * CFrame.Angles(math.rad(currentTiltX), 0, math.rad(currentTiltZ))
-end)
-
-
-
---// Services
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
-
---// Player & Constants
-local player = Players.LocalPlayer
-
---// Animation IDs
-local SIDE_ID   = "rbxassetid://132218385473651"
-local BACK_ID   = "rbxassetid://16738337225"
-local POSE_ID   = "rbxassetid://82261197744576"
-local TRACK1_ID = "rbxassetid://138665010911335"
-local TRACK2_ID = "rbxassetid://140131631438778"
-
-local connections = {}
-
---// Helper: Load animation safely
 local function loadAnimation(animator, id, priority, looped)
 	local anim = Instance.new("Animation")
 	anim.AnimationId = id
@@ -191,9 +98,9 @@ local function loadAnimation(animator, id, priority, looped)
 	return track
 end
 
---// Main character setup
+--// Main Character Setup (Runs every spawn)
 local function setupCharacter(char)
-	-- Cleanup old connections
+	-- Cleanup old connections on respawn
 	for _, c in ipairs(connections) do c:Disconnect() end
 	table.clear(connections)
 
@@ -201,114 +108,163 @@ local function setupCharacter(char)
 	local animator = humanoid:WaitForChild("Animator")
 	local rootPart = char:WaitForChild("HumanoidRootPart")
 	
-	-- Check for R6 Compatibility
+    -- Tilt / AlignOrientation Setup
+    local attachment = rootPart:FindFirstChild("RotationAttachment") or Instance.new("Attachment", rootPart)
+    attachment.Name = "RotationAttachment"
+
+    local align = rootPart:FindFirstChild("RotationWeld") or Instance.new("AlignOrientation", rootPart)
+    align.Name = "RotationWeld"
+    align.Mode = Enum.OrientationAlignmentMode.OneAttachment
+    align.Attachment0 = attachment
+    align.RigidityEnabled = false 
+    align.MaxTorque = math.huge
+    align.MaxAngularVelocity = math.huge
+    align.Responsiveness = 55 
+    align.Enabled = true
+
+    humanoid.AutoRotate = false
+
+    -- Handle Seated State
+    connections[#connections+1] = humanoid.Seated:Connect(function(isSeated)
+        if isSeated then
+            align.Enabled = false
+            humanoid.AutoRotate = true
+            humanoid.CameraOffset = Vector3.new(0, 0, 0)
+            UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+        else
+            align.Enabled = true
+            humanoid.AutoRotate = false
+        end
+    end)
+
+    -- Animation Setup
 	local isR6 = humanoid.RigType == Enum.HumanoidRigType.R6
+    local sideTrack, backwardTrack, poseTrack, track1, track2
+
 	if isR6 then
 		StarterGui:SetCore("SendNotification", {
-			Title = "FE Better Movement",
-			Text = "R6 detected. Loading external module...",
-			Duration = 5
+			Title = "FE Better Movement", Text = "R6 detected. Loading external module...", Duration = 5
 		})
 		coroutine.wrap(function()
 			loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/NOT-MINE/refs/heads/main/R6%20animation%20custe"))()
 		end)()
-		return -- Stop R15 logic if R6
+	else
+        -- Load R15 tracks
+        sideTrack     = loadAnimation(animator, SIDE_ID, Enum.AnimationPriority.Movement, true)
+        backwardTrack = loadAnimation(animator, BACK_ID, Enum.AnimationPriority.Movement, true)
+        poseTrack     = loadAnimation(animator, POSE_ID, Enum.AnimationPriority.Action4, false)
+        track1        = loadAnimation(animator, TRACK1_ID, Enum.AnimationPriority.Action, true)
+        track2        = loadAnimation(animator, TRACK2_ID, Enum.AnimationPriority.Action, true)
+
+        if poseTrack.Length == 0 then poseTrack:GetPropertyChangedSignal("Length"):Wait() end
+
+        local function playPose()
+            poseTrack:Play(0)
+            poseTrack.TimePosition = poseTrack.Length * 0.98
+            poseTrack:AdjustSpeed(0)
+        end
+
+        playPose()
+        connections[#connections+1] = poseTrack.Stopped:Connect(playPose)
 	end
 
-	--// Load R15 tracks
-	local sideTrack     = loadAnimation(animator, SIDE_ID, Enum.AnimationPriority.Movement, true)
-	local backwardTrack = loadAnimation(animator, BACK_ID, Enum.AnimationPriority.Movement, true)
-	local poseTrack     = loadAnimation(animator, POSE_ID, Enum.AnimationPriority.Action4, false)
-	local track1        = loadAnimation(animator, TRACK1_ID, Enum.AnimationPriority.Action, true)
-	local track2        = loadAnimation(animator, TRACK2_ID, Enum.AnimationPriority.Action, true)
+    local currentTiltX, currentTiltZ = 0, 0
 
-	-- Ensure PoseTrack length is loaded
-	if poseTrack.Length == 0 then
-		poseTrack:GetPropertyChangedSignal("Length"):Wait()
-	end
-
-	local function playPose()
-		poseTrack:Play(0)
-		poseTrack.TimePosition = poseTrack.Length * 0.98
-		poseTrack:AdjustSpeed(0) -- Freeze at end
-	end
-
-	playPose()
-
-	-- Keep Pose active
-	connections[#connections+1] = poseTrack.Stopped:Connect(playPose)
-
-	--// Logic Loop
+	--// Unified Logic Loop
 	connections[#connections+1] = RunService.RenderStepped:Connect(function(dt)
 		if not char.Parent or humanoid.Health <= 0 then return end
 
-		-- Safety check for Pose
-		if not poseTrack.IsPlaying then playPose() end
-
-		local moveDir = humanoid.MoveDirection
+        local isFP = isFirstPerson(char)
+        local shiftLockActive = shiftLockToggled or isFP
+        local moveDir = humanoid.MoveDirection
 		local actualSpeed = Vector3.new(rootPart.AssemblyLinearVelocity.X, 0, rootPart.AssemblyLinearVelocity.Z).Magnitude
-		local isMoving = moveDir.Magnitude > 0.05
 		local state = humanoid:GetState()
+		local inAir = (state == Enum.HumanoidStateType.Jumping or state == Enum.HumanoidStateType.Freefall or state == Enum.HumanoidStateType.FallingDown or humanoid.Sit)
 
-		local inAir = state == Enum.HumanoidStateType.Jumping or 
-					  state == Enum.HumanoidStateType.Freefall or 
-					  state == Enum.HumanoidStateType.FallingDown or 
-					  humanoid.Sit
+        -- 1. Camera & Mouse Logic
+        if shiftLockActive then
+            UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+            humanoid.CameraOffset = humanoid.CameraOffset:Lerp(isFP and Vector3.zero or Vector3.new(1.75, 0, 0), 0.2)
+        else
+            UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+            humanoid.CameraOffset = humanoid.CameraOffset:Lerp(Vector3.zero, 0.2)
+        end
 
-		--// MOVEMENT LOGIC
-		if isMoving and not inAir then
-			poseTrack:AdjustWeight(0.05) -- Low weight during movement
-			
-			-- Stop Idle layers
-			if track1.IsPlaying then track1:Stop(0.1) end
-			if track2.IsPlaying then track2:Stop(0.1) end
+        -- 2. Tilt & Orientation Logic
+        if not humanoid.Sit then
+            local flatLook = rootPart.CFrame.LookVector
+            local lookTarget = CFrame.lookAt(Vector3.zero, Vector3.new(flatLook.X, 0, flatLook.Z).Unit)
+            
+            if shiftLockActive then
+                local camLook = camera.CFrame.LookVector
+                lookTarget = CFrame.lookAt(Vector3.zero, Vector3.new(camLook.X, 0, camLook.Z).Unit)
+            elseif moveDir.Magnitude > 0 then
+                lookTarget = CFrame.lookAt(Vector3.zero, moveDir)
+            end
 
-			local forwardDot = moveDir:Dot(rootPart.CFrame.LookVector)
-			local rightDot = moveDir:Dot(rootPart.CFrame.RightVector)
+            local targetTiltX, targetTiltZ = 0, 0
+            if actualSpeed > 0.1 then
+                local look, right = rootPart.CFrame.LookVector, rootPart.CFrame.RightVector
+                targetTiltX = math.clamp(-moveDir:Dot(look) * tiltMultiplier * actualSpeed, -maxTilt, maxTilt)
+                targetTiltZ = math.clamp(-moveDir:Dot(right) * tiltMultiplier * actualSpeed, -maxTilt, maxTilt)
+            end
 
-			-- Primarily Sideways
-			if math.abs(rightDot) > math.abs(forwardDot) then
-				if not sideTrack.IsPlaying then sideTrack:Play(0.2) end
-				sideTrack:AdjustSpeed(1.5 * (actualSpeed / 15) * (rightDot >= 0 and -1 or 1))
-				
-				if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
+            if inAir then
+                targetTiltX, targetTiltZ = targetTiltX * jumpTiltFactor, targetTiltZ * jumpTiltFactor
+            end
 
-			-- Primarily Backward
-			elseif forwardDot <= -0.5 then
-				if not backwardTrack.IsPlaying then backwardTrack:Play(0.2) end
-				backwardTrack:AdjustSpeed(-1.3 * (actualSpeed / 15))
-				
-				if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
+            currentTiltX += (targetTiltX - currentTiltX) * dt * fadeSpeed
+            currentTiltZ += (targetTiltZ - currentTiltZ) * dt * fadeSpeed
+            align.CFrame = lookTarget * CFrame.Angles(math.rad(currentTiltX), 0, math.rad(currentTiltZ))
+        end
 
-			-- Forward movement (Let default animations handle it)
-			else
-				if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
-				if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
-			end
+		-- 3. Animation Logic (R15 Only)
+        if not isR6 then
+            if not poseTrack.IsPlaying then poseTrack:Play(); poseTrack.TimePosition = poseTrack.Length * 0.98; poseTrack:AdjustSpeed(0) end
 
-		--// IDLE OR AIRBORNE LOGIC
-		else
-			-- Stop custom movement tracks
-			if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
-			if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
+            local isMoving = moveDir.Magnitude > 0.05
 
-			if inAir then
-				poseTrack:AdjustWeight(0.05)
-				if track1.IsPlaying then track1:Stop(0.1) end
-				if track2.IsPlaying then track2:Stop(0.1) end
-			else
-				-- True Idle
-				poseTrack:AdjustWeight(0.08)
-				
-				if not track1.IsPlaying then track1:Play(0.1) end
-				track1:AdjustWeight(0.9, 0.1)
+            if isMoving and not inAir then
+                poseTrack:AdjustWeight(0.05)
+                
+                if track1.IsPlaying then track1:Stop(0.1) end
+                if track2.IsPlaying then track2:Stop(0.1) end
 
-				if not track2.IsPlaying then track2:Play(0.1) end
-				track2:AdjustWeight(0.2, 0.1)
-			end
-		end
+                local forwardDot = moveDir:Dot(rootPart.CFrame.LookVector)
+                local rightDot = moveDir:Dot(rootPart.CFrame.RightVector)
+
+                if math.abs(rightDot) > math.abs(forwardDot) then
+                    if not sideTrack.IsPlaying then sideTrack:Play(0.2) end
+                    sideTrack:AdjustSpeed(1.5 * (actualSpeed / 15) * (rightDot >= 0 and -1 or 1))
+                    if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
+                elseif forwardDot <= -0.5 then
+                    if not backwardTrack.IsPlaying then backwardTrack:Play(0.2) end
+                    backwardTrack:AdjustSpeed(-1.3 * (actualSpeed / 15))
+                    if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
+                else
+                    if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
+                    if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
+                end
+            else
+                if sideTrack.IsPlaying then sideTrack:Stop(0.2) end
+                if backwardTrack.IsPlaying then backwardTrack:Stop(0.2) end
+
+                if inAir then
+                    poseTrack:AdjustWeight(0.05)
+                    if track1.IsPlaying then track1:Stop(0.1) end
+                    if track2.IsPlaying then track2:Stop(0.1) end
+                else
+                    poseTrack:AdjustWeight(0.08)
+                    if not track1.IsPlaying then track1:Play(0.1) end
+                    track1:AdjustWeight(0.9, 0.1)
+                    if not track2.IsPlaying then track2:Play(0.1) end
+                    track2:AdjustWeight(0.2, 0.1)
+                end
+            end
+        end
 	end)
 end
 
---// Initial Setup & Respawn Handling
+--// Apply to Player
+player.CharacterAdded:Connect(setupCharacter)
 if player.Character then setupCharacter(player.Character) end

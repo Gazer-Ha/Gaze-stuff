@@ -151,15 +151,19 @@ task.spawn(function()
         local track1 = loadAnim(TRACK1_ID, Enum.AnimationPriority.Action)
         local track2 = loadAnim(TRACK2_ID, Enum.AnimationPriority.Action)
 
+        -- Safely wait for length and play once (Removed the freeze so it can replay later)
         task.spawn(function() 
-            if poseTrack.Length == 0 then poseTrack:GetPropertyChangedSignal("Length"):Wait() end
-            while char.Parent and humanoid.Health > 0 do
-                poseTrack:Play(0) poseTrack.TimePosition = poseTrack.Length * 0.98 poseTrack:AdjustSpeed(0)
-                poseTrack.Stopped:Wait()
+            while poseTrack.Length <= 0 do
+                task.wait()
             end
+            poseTrack:Play(0,1,0)
+            poseTrack:AdjustSpeed(0)
+            poseTrack.TimePosition = poseTrack.Length * 0.98
         end)
 
+        local wasMoving = false -- Track whether the player was moving in the previous frame
         local animConn
+
         animConn = RunService.RenderStepped:Connect(function()
             if not char.Parent or humanoid.Health <= 0 then animConn:Disconnect() return end
 
@@ -168,7 +172,9 @@ task.spawn(function()
             local inAir = humanoid:GetState() == Enum.HumanoidStateType.Jumping or humanoid:GetState() == Enum.HumanoidStateType.Freefall or humanoid.Sit
 
             if moveDir.Magnitude > 0.05 and not inAir then
-                poseTrack:AdjustWeight(0.05)
+                wasMoving = true -- Update state: Character is moving
+
+                poseTrack:AdjustWeight(0.09) 
                 track1:Stop(0.1) track2:Stop(0.1)
                 
                 local fwd = moveDir:Dot(rootPart.CFrame.LookVector)
@@ -188,10 +194,23 @@ task.spawn(function()
             else
                 sideTrack:Stop(0.2) backTrack:Stop(0.2)
                 if inAir then
-                    poseTrack:AdjustWeight(0.05)
+                    wasMoving = false
+                    poseTrack:AdjustWeight(0.06) 
                     track1:Stop(0.1) track2:Stop(0.1)
                 else
-                    poseTrack:AdjustWeight(0.08)
+                    -- Stopped / Idling State
+                    if wasMoving then
+                        -- The character JUST stopped moving. Replay the pose track.
+                        
+                        poseTrack:AdjustSpeed(0)
+                        if not poseTrack.IsPlaying then 
+                            poseTrack:Play(0,1,0)
+                            poseTrack.TimePosition = poseTrack.Length * 0.98
+                        end
+                        wasMoving = false
+                    end
+
+                    poseTrack:AdjustWeight(0.09) 
                     if not track1.IsPlaying then track1:Play(0.1) end
                     if not track2.IsPlaying then track2:Play(0.1) end
                     track1:AdjustWeight(0.9, 0.1) track2:AdjustWeight(0.2, 0.1)

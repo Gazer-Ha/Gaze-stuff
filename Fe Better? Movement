@@ -29,7 +29,7 @@ local shiftLockToggled = false
 local guiParent = (type(gethui) == "function" and gethui()) or game:GetService("CoreGui")
 local shiftLockGui = Instance.new("ScreenGui")
 shiftLockGui.Name = "CustomShiftLockGui"
-shiftLockGui.ResetOnSpawn = false
+shiftLockGui.ResetOnSpawn = true
 shiftLockGui.Parent = guiParent
 
 local shiftLockButton = Instance.new("ImageButton")
@@ -266,5 +266,4 @@ local function setupCharacter(char)
 end
 
 --// Apply to Player
-player.CharacterAdded:Connect(setupCharacter)
 if player.Character then setupCharacter(player.Character) end

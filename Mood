@@ -1,0 +1,891 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local HttpService = game:GetService("HttpService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local animator = humanoid:WaitForChild("Animator")
+
+local function gethui()
+    return game:GetService("CoreGui")
+end
+
+local function getAnimationIdFromMood(id)
+    local success, objects = pcall(function()
+        return game:GetObjects("rbxassetid://" .. math.floor(id))
+    end)
+
+    if success and #objects > 0 then
+        local root = objects[1]
+
+        if root:IsA("Animation") and root.AnimationId ~= "" then
+            return root.AnimationId
+        end
+
+        local descendants = root:GetDescendants()
+        for _, descendant in ipairs(descendants) do
+            if descendant:IsA("Animation") and descendant.AnimationId ~= "" then
+                return descendant.AnimationId
+            end
+        end
+    end
+
+    return "rbxassetid://" .. tostring(id)
+end
+
+-- Extended mood IDs list with more animations
+local moodIds = {
+    14618207727, -- Default Mood
+    10647852134,
+    10725833199,
+    11163856931,
+    11822637523,
+    14532855772,
+    11236428476,
+    11308848181,
+    13692973305,
+    12936976200,
+    121076841749094,
+    110580025832371,
+    140640344101974,
+    140674747936185,
+    140618689743432,
+    140480905079474,
+    140044533863949,
+    139474716430273,
+    139316725131015,
+    139953850337831,
+    139526093746720,
+    137609125548926,
+    138185630136605,
+    140052496463742,
+    136879820533259,
+    136546654719224,
+    137408517878226,
+    134291162215057,
+    130561088322232,
+    130497284519819,
+    128421511488094,
+    128407337644177,
+    128134603526623,
+    126528619438701,
+    124996118032440,
+    125691365606754,
+    124025238726707,
+    124888276087842,
+    124706365042112,
+    124258266581596,
+    -- Additional moods found
+    11573370910, -- Anime - Mood
+    12939349434, -- MoodAnimation
+    84955571284688,
+    74391685088689,
+    7715145252,  -- Classic smile/open mouth
+    13823254132, -- Dynamic head mood
+}
+
+-- File persistence for saved emotes
+local SAVE_FILE = "FeMoodAnimations_SavedEmotes.json"
+
+local function saveEmotes()
+    local success, err = pcall(function()
+        writefile(SAVE_FILE, HttpService:JSONEncode(moodIds))
+    end)
+    if not success then
+        warn("Failed to save emotes: " .. tostring(err))
+    end
+end
+
+local function loadEmotes()
+    local success, content = pcall(function()
+        return readfile(SAVE_FILE)
+    end)
+    
+    if success and content then
+        local decodeSuccess, decoded = pcall(function()
+            return HttpService:JSONDecode(content)
+        end)
+        
+        if decodeSuccess and typeof(decoded) == "table" then
+            -- Add loaded emotes that aren't already in the list
+            for _, id in ipairs(decoded) do
+                if typeof(id) == "number" then
+                    local exists = false
+                    for _, existingId in ipairs(moodIds) do
+                        if existingId == id then
+                            exists = true
+                            break
+                        end
+                    end
+                    if not exists then
+                        table.insert(moodIds, id)
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- Load saved emotes on startup
+loadEmotes()
+
+local currentTrack = nil
+local currentAnimData = nil
+local looped = false
+local moodButtons = {} -- Store buttons for search filtering
+local moodNames = {} -- Cache mood names
+
+local defaultSettings = {
+    timePosition = 0,
+    weight = 1,
+    speed = 1,
+    priority = Enum.AnimationPriority.Action4
+}
+
+local settings = {
+    timePosition = defaultSettings.timePosition,
+    weight = defaultSettings.weight,
+    speed = defaultSettings.speed,
+    priority = defaultSettings.priority
+}
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "FeMoodAnimations"
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+pcall(function()
+    screenGui.Parent = gethui()
+end)
+
+if not screenGui.Parent then
+    screenGui.Parent = player:WaitForChild("PlayerGui")
+end
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 420, 0, 320)
+mainFrame.Position = UDim2.new(0.5, -210, 0.5, -160)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = mainFrame
+
+local titleBar = Instance.new("Frame")
+titleBar.Name = "TitleBar"
+titleBar.Size = UDim2.new(1, 0, 0, 35)
+titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 10)
+titleCorner.Parent = titleBar
+
+local title = Instance.new("TextLabel")
+title.Name = "Title"
+title.Size = UDim2.new(1, -20, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Fe Mood Animations"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 16
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+-- Search Box
+local searchBox = Instance.new("TextBox")
+searchBox.Name = "SearchBox"
+searchBox.Size = UDim2.new(0, 260, 0, 30)
+searchBox.Position = UDim2.new(0, 10, 0, 45)
+searchBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+searchBox.BorderSizePixel = 0
+searchBox.Text = ""
+searchBox.PlaceholderText = "Search moods..."
+searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+searchBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+searchBox.TextSize = 12
+searchBox.Font = Enum.Font.Gotham
+searchBox.Parent = mainFrame
+
+local searchCorner = Instance.new("UICorner")
+searchCorner.CornerRadius = UDim.new(0, 6)
+searchCorner.Parent = searchBox
+
+-- Add Mood Button
+local addMoodBtn = Instance.new("TextButton")
+addMoodBtn.Name = "AddMoodBtn"
+addMoodBtn.Size = UDim2.new(0, 30, 0, 30)
+addMoodBtn.Position = UDim2.new(0, 275, 0, 45)
+addMoodBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+addMoodBtn.BorderSizePixel = 0
+addMoodBtn.Text = "+"
+addMoodBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+addMoodBtn.TextSize = 20
+addMoodBtn.Font = Enum.Font.GothamBold
+addMoodBtn.Parent = mainFrame
+
+local addMoodCorner = Instance.new("UICorner")
+addMoodCorner.CornerRadius = UDim.new(0, 6)
+addMoodCorner.Parent = addMoodBtn
+
+-- Scroll Frame for Moods
+local scrollFrame = Instance.new("ScrollingFrame")
+scrollFrame.Name = "MoodList"
+scrollFrame.Size = UDim2.new(0, 260, 0, 225)
+scrollFrame.Position = UDim2.new(0, 10, 0, 80)
+scrollFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+scrollFrame.BorderSizePixel = 0
+scrollFrame.ScrollBarThickness = 4
+scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
+scrollFrame.CanvasSize = UDim2.new(0, 0, 0, math.ceil(#moodIds / 3) * 85)
+scrollFrame.Parent = mainFrame
+
+local scrollCorner = Instance.new("UICorner")
+scrollCorner.CornerRadius = UDim.new(0, 8)
+scrollCorner.Parent = scrollFrame
+
+local gridLayout = Instance.new("UIGridLayout")
+gridLayout.CellSize = UDim2.new(0, 80, 0, 75)
+gridLayout.CellPadding = UDim2.new(0, 6, 0, 6)
+gridLayout.FillDirectionMaxCells = 3
+gridLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+gridLayout.Parent = scrollFrame
+
+-- Settings Frame
+local settingsFrame = Instance.new("Frame")
+settingsFrame.Name = "Settings"
+settingsFrame.Size = UDim2.new(0, 130, 0, 260)
+settingsFrame.Position = UDim2.new(0, 280, 0, 80)
+settingsFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+settingsFrame.BorderSizePixel = 0
+settingsFrame.Parent = mainFrame
+
+local settingsCorner = Instance.new("UICorner")
+settingsCorner.CornerRadius = UDim.new(0, 8)
+settingsCorner.Parent = settingsFrame
+
+local settingsScroll = Instance.new("ScrollingFrame")
+settingsScroll.Name = "SettingsScroll"
+settingsScroll.Size = UDim2.new(1, -10, 1, -10)
+settingsScroll.Position = UDim2.new(0, 5, 0, 5)
+settingsScroll.BackgroundTransparency = 1
+settingsScroll.BorderSizePixel = 0
+settingsScroll.ScrollBarThickness = 3
+settingsScroll.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
+settingsScroll.CanvasSize = UDim2.new(0, 0, 0, 350)
+settingsScroll.Parent = settingsFrame
+
+local resetBtn = Instance.new("TextButton")
+resetBtn.Size = UDim2.new(1, -10, 0, 28)
+resetBtn.Position = UDim2.new(0, 5, 0, 0)
+resetBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+resetBtn.BorderSizePixel = 0
+resetBtn.Text = "Reset Settings"
+resetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+resetBtn.TextSize = 12
+resetBtn.Font = Enum.Font.GothamBold
+resetBtn.Parent = settingsScroll
+
+local resetCorner = Instance.new("UICorner")
+resetCorner.CornerRadius = UDim.new(0, 6)
+resetCorner.Parent = resetBtn
+
+-- Add Mood Dialog
+local addMoodDialog = Instance.new("Frame")
+addMoodDialog.Name = "AddMoodDialog"
+addMoodDialog.Size = UDim2.new(0, 250, 0, 150)
+addMoodDialog.Position = UDim2.new(0.5, -125, 0.5, -75)
+addMoodDialog.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+addMoodDialog.BorderSizePixel = 0
+addMoodDialog.Visible = false
+addMoodDialog.ZIndex = 100
+addMoodDialog.Parent = screenGui
+
+local dialogCorner = Instance.new("UICorner")
+dialogCorner.CornerRadius = UDim.new(0, 10)
+dialogCorner.Parent = addMoodDialog
+
+local dialogTitle = Instance.new("TextLabel")
+dialogTitle.Size = UDim2.new(1, 0, 0, 30)
+dialogTitle.BackgroundTransparency = 1
+dialogTitle.Text = "Add New Mood"
+dialogTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+dialogTitle.TextSize = 16
+dialogTitle.Font = Enum.Font.GothamBold
+dialogTitle.ZIndex = 101
+dialogTitle.Parent = addMoodDialog
+
+local idInput = Instance.new("TextBox")
+idInput.Name = "IdInput"
+idInput.Size = UDim2.new(1, -20, 0, 35)
+idInput.Position = UDim2.new(0, 10, 0, 40)
+idInput.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+idInput.BorderSizePixel = 0
+idInput.Text = ""
+idInput.PlaceholderText = "Enter Asset ID..."
+idInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+idInput.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+idInput.TextSize = 14
+idInput.Font = Enum.Font.Gotham
+idInput.ZIndex = 101
+idInput.Parent = addMoodDialog
+
+local inputCorner = Instance.new("UICorner")
+inputCorner.CornerRadius = UDim.new(0, 6)
+inputCorner.Parent = idInput
+
+local confirmBtn = Instance.new("TextButton")
+confirmBtn.Size = UDim2.new(0.45, 0, 0, 35)
+confirmBtn.Position = UDim2.new(0.05, 0, 0, 90)
+confirmBtn.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+confirmBtn.BorderSizePixel = 0
+confirmBtn.Text = "Add"
+confirmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+confirmBtn.TextSize = 14
+confirmBtn.Font = Enum.Font.GothamBold
+confirmBtn.ZIndex = 101
+confirmBtn.Parent = addMoodDialog
+
+local confirmCorner = Instance.new("UICorner")
+confirmCorner.CornerRadius = UDim.new(0, 6)
+confirmCorner.Parent = confirmBtn
+
+local cancelBtn = Instance.new("TextButton")
+cancelBtn.Size = UDim2.new(0.45, 0, 0, 35)
+cancelBtn.Position = UDim2.new(0.5, 0, 0, 90)
+cancelBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+cancelBtn.BorderSizePixel = 0
+cancelBtn.Text = "Cancel"
+cancelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+cancelBtn.TextSize = 14
+cancelBtn.Font = Enum.Font.GothamBold
+cancelBtn.ZIndex = 101
+cancelBtn.Parent = addMoodDialog
+
+local cancelCorner = Instance.new("UICorner")
+cancelCorner.CornerRadius = UDim.new(0, 6)
+cancelCorner.Parent = cancelBtn
+
+local function updateCanvasSize()
+    local visibleCount = 0
+    for _, btn in ipairs(moodButtons) do
+        if btn.Visible then
+            visibleCount = visibleCount + 1
+        end
+    end
+    scrollFrame.CanvasSize = UDim2.new(0, 0, 0, math.ceil(visibleCount / 3) * 85)
+end
+
+local function filterMoods(searchText)
+    searchText = string.lower(searchText)
+    for i, btn in ipairs(moodButtons) do
+        local moodName = moodNames[i] or ""
+        if searchText == "" or string.find(string.lower(moodName), searchText) then
+            btn.Visible = true
+        else
+            btn.Visible = false
+        end
+    end
+    updateCanvasSize()
+end
+
+searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+    filterMoods(searchBox.Text)
+end)
+
+addMoodBtn.MouseButton1Click:Connect(function()
+    addMoodDialog.Visible = true
+    idInput.Text = ""
+    idInput:CaptureFocus()
+end)
+
+cancelBtn.MouseButton1Click:Connect(function()
+    addMoodDialog.Visible = false
+end)
+
+confirmBtn.MouseButton1Click:Connect(function()
+    local id = tonumber(idInput.Text)
+    if id then
+        -- Check if already exists
+        local exists = false
+        for _, existingId in ipairs(moodIds) do
+            if existingId == id then
+                exists = true
+                break
+            end
+        end
+        
+        if not exists then
+            table.insert(moodIds, id)
+            
+            -- Save to file
+            saveEmotes()
+            
+            -- Create button for new mood
+            local btn = Instance.new("ImageButton")
+            btn.Name = tostring(id)
+            btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            btn.BorderSizePixel = 0
+            btn.Image = "rbxthumb://type=Asset&id=" .. id .. "&w=420&h=420"
+            btn.ScaleType = Enum.ScaleType.Crop
+            btn.ClipsDescendants = true
+            btn.Parent = scrollFrame
+            
+            local btnCorner = Instance.new("UICorner")
+            btnCorner.CornerRadius = UDim.new(0, 6)
+            btnCorner.Parent = btn
+            
+            btn.MouseEnter:Connect(function()
+                TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+            end)
+            
+            btn.MouseLeave:Connect(function()
+                TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
+            end)
+            
+            local nameLabel = Instance.new("TextLabel")
+            nameLabel.Size = UDim2.new(1, 0, 0, 18)
+            nameLabel.Position = UDim2.new(0, 0, 1, -18)
+            nameLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            nameLabel.BackgroundTransparency = 0.4
+            nameLabel.BorderSizePixel = 0
+            nameLabel.Text = "..."
+            nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            nameLabel.TextSize = 10
+            nameLabel.TextScaled = true  -- TextScaled enabled
+            nameLabel.Font = Enum.Font.GothamBold
+            nameLabel.Parent = btn
+            
+            task.spawn(function()
+                local success, result = pcall(function()
+                    return MarketplaceService:GetProductInfo(id)
+                end)
+                if success and result then
+                    local cleanName = result.Name
+                    cleanName = string.gsub(cleanName, "%s*-%s*[Mm]ood%s*$", "")
+                    cleanName = string.gsub(cleanName, "%s*[Mm]ood%s*$", "")
+                    nameLabel.Text = cleanName
+                    table.insert(moodNames, cleanName)
+                else
+                    nameLabel.Text = string.sub(tostring(id), -4)
+                    table.insert(moodNames, tostring(id))
+                end
+            end)
+            
+            btn.MouseButton1Click:Connect(function()
+                playMoodAnimation(id)
+            end)
+            
+            table.insert(moodButtons, btn)
+            updateCanvasSize()
+        end
+        
+        addMoodDialog.Visible = false
+    end
+end)
+
+local sliderRefs = {}
+local priorityBtnRef = nil
+local loopToggleRef = nil
+
+local function updateUIFromSettings()
+    if sliderRefs.timePosition then
+        sliderRefs.timePosition.setValue(settings.timePosition)
+    end
+    if sliderRefs.weight then
+        sliderRefs.weight.setValue(settings.weight)
+    end
+    if sliderRefs.speed then
+        sliderRefs.speed.setValue(settings.speed)
+    end
+    if priorityBtnRef then
+        priorityBtnRef.Text = string.gsub(tostring(settings.priority), "Enum.AnimationPriority.", "")
+    end
+    if loopToggleRef then
+        loopToggleRef.Text = looped and "ON" or "OFF"
+        loopToggleRef.BackgroundColor3 = looped and Color3.fromRGB(88, 101, 242) or Color3.fromRGB(80, 80, 80)
+    end
+end
+
+resetBtn.MouseButton1Click:Connect(function()
+    settings.timePosition = defaultSettings.timePosition
+    settings.weight = defaultSettings.weight
+    settings.speed = defaultSettings.speed
+    settings.priority = defaultSettings.priority
+    looped = false
+    
+    updateUIFromSettings()
+    
+    if currentTrack then
+        currentTrack:AdjustWeight(settings.weight)
+        currentTrack:AdjustSpeed(settings.speed)
+        currentTrack.Priority = settings.priority
+        currentTrack.Looped = looped
+        if currentTrack.Length > 0 then
+            currentTrack.TimePosition = settings.timePosition * currentTrack.Length
+        end
+    end
+end)
+
+local function createSlider(name, default, min, max, yPos, callback)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, 0, 0, 60)
+    container.Position = UDim2.new(0, 0, 0, yPos)
+    container.BackgroundTransparency = 1
+    container.Parent = settingsScroll
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0, 16)
+    label.BackgroundTransparency = 1
+    label.Text = name
+    label.TextColor3 = Color3.fromRGB(180, 180, 180)
+    label.TextSize = 11
+    label.Font = Enum.Font.GothamSemibold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = container
+    
+    local sliderBg = Instance.new("TextButton")
+    sliderBg.Size = UDim2.new(1, 0, 0, 16)
+    sliderBg.Position = UDim2.new(0, 0, 0, 18)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    sliderBg.BorderSizePixel = 0
+    sliderBg.Text = ""
+    sliderBg.AutoButtonColor = false
+    sliderBg.Parent = container
+    
+    local bgCorner = Instance.new("UICorner")
+    bgCorner.CornerRadius = UDim.new(0, 8)
+    bgCorner.Parent = sliderBg
+    
+    local fill = Instance.new("Frame")
+    fill.Name = "Fill"
+    fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+    fill.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
+    fill.BorderSizePixel = 0
+    fill.Parent = sliderBg
+    
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(0, 8)
+    fillCorner.Parent = fill
+    
+    local textBox = Instance.new("TextBox")
+    textBox.Size = UDim2.new(0, 40, 0, 18)
+    textBox.Position = UDim2.new(0.5, -20, 0, 36)
+    textBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    textBox.BorderSizePixel = 0
+    textBox.Text = tostring(default)
+    textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textBox.TextSize = 11
+    textBox.Font = Enum.Font.Gotham
+    textBox.ClearTextOnFocus = false
+    textBox.Parent = container
+    
+    local boxCorner = Instance.new("UICorner")
+    boxCorner.CornerRadius = UDim.new(0, 4)
+    boxCorner.Parent = textBox
+    
+    local dragging = false
+    
+    local function updateVisual(value)
+        local scale = (value - min) / (max - min)
+        fill.Size = UDim2.new(scale, 0, 1, 0)
+        textBox.Text = tostring(value)
+    end
+    
+    local function setValue(value)
+        updateVisual(value)
+        callback(value)
+    end
+    
+    local function updateSlider(input)
+        local relativeX = math.clamp((input.Position.X - sliderBg.AbsolutePosition.X) / sliderBg.AbsoluteSize.X, 0, 1)
+        local value = min + (relativeX * (max - min))
+        value = math.floor(value * 100) / 100
+        updateVisual(value)
+        callback(value)
+    end
+    
+    sliderBg.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            updateSlider(input)
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            updateSlider(input)
+        end
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
+        end
+    end)
+    
+    textBox.FocusLost:Connect(function()
+        local num = tonumber(textBox.Text)
+        if num then
+            num = math.clamp(num, min, max)
+            num = math.floor(num * 100) / 100
+            updateVisual(num)
+            callback(num)
+        else
+            textBox.Text = tostring(settings[string.lower(name)])
+        end
+    end)
+    
+    return {setValue = setValue}
+end
+
+sliderRefs.timePosition = createSlider("TimePosition", settings.timePosition, 0, 0.99, 35, function(val)
+    settings.timePosition = val
+    if currentTrack and currentTrack.Length > 0 then
+        currentTrack.TimePosition = val * currentTrack.Length
+    end
+end)
+
+sliderRefs.weight = createSlider("Weight", settings.weight, 0, 10, 100, function(val)
+    settings.weight = val
+    if currentTrack then
+        currentTrack:AdjustWeight(val)
+    end
+end)
+
+sliderRefs.speed = createSlider("Speed", settings.speed, 0, 5, 165, function(val)
+    settings.speed = val
+    if currentTrack then
+        currentTrack:AdjustSpeed(val)
+    end
+end)
+
+local priorityFrame = Instance.new("Frame")
+priorityFrame.Size = UDim2.new(1, 0, 0, 50)
+priorityFrame.Position = UDim2.new(0, 0, 0, 230)
+priorityFrame.BackgroundTransparency = 1
+priorityFrame.Parent = settingsScroll
+
+local priorityLabel = Instance.new("TextLabel")
+priorityLabel.Size = UDim2.new(1, 0, 0, 16)
+priorityLabel.BackgroundTransparency = 1
+priorityLabel.Text = "Priority"
+priorityLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+priorityLabel.TextSize = 11
+priorityLabel.Font = Enum.Font.GothamSemibold
+priorityLabel.TextXAlignment = Enum.TextXAlignment.Left
+priorityLabel.Parent = priorityFrame
+
+local priorities = {
+    Enum.AnimationPriority.Action,
+    Enum.AnimationPriority.Action2,
+    Enum.AnimationPriority.Action3,
+    Enum.AnimationPriority.Action4
+}
+
+local priorityBtn = Instance.new("TextButton")
+priorityBtn.Size = UDim2.new(1, 0, 0, 28)
+priorityBtn.Position = UDim2.new(0, 0, 0, 20)
+priorityBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+priorityBtn.BorderSizePixel = 0
+priorityBtn.Text = string.gsub(tostring(settings.priority), "Enum.AnimationPriority.", "")
+priorityBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+priorityBtn.TextSize = 12
+priorityBtn.Font = Enum.Font.GothamBold
+priorityBtn.Parent = priorityFrame
+
+priorityBtnRef = priorityBtn
+
+local priorityCorner = Instance.new("UICorner")
+priorityCorner.CornerRadius = UDim.new(0, 6)
+priorityCorner.Parent = priorityBtn
+
+local currentPriorityIndex = 4
+for i, p in ipairs(priorities) do
+    if p == settings.priority then
+        currentPriorityIndex = i
+        break
+    end
+end
+
+priorityBtn.MouseButton1Click:Connect(function()
+    currentPriorityIndex = currentPriorityIndex % #priorities + 1
+    local newPriority = priorities[currentPriorityIndex]
+    settings.priority = newPriority
+    priorityBtn.Text = string.gsub(tostring(newPriority), "Enum.AnimationPriority.", "")
+    
+    if currentTrack then
+        currentTrack.Priority = newPriority
+    end
+end)
+
+local loopFrame = Instance.new("Frame")
+loopFrame.Size = UDim2.new(1, 0, 0, 35)
+loopFrame.Position = UDim2.new(0, 0, 0, 290)
+loopFrame.BackgroundTransparency = 1
+loopFrame.Parent = settingsScroll
+
+local loopLabel = Instance.new("TextLabel")
+loopLabel.Size = UDim2.new(0, 60, 1, 0)
+loopLabel.BackgroundTransparency = 1
+loopLabel.Text = "Looped"
+loopLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+loopLabel.TextSize = 11
+loopLabel.Font = Enum.Font.GothamSemibold
+loopLabel.TextXAlignment = Enum.TextXAlignment.Left
+loopLabel.Parent = loopFrame
+
+local loopToggle = Instance.new("TextButton")
+loopToggle.Size = UDim2.new(0, 50, 0, 24)
+loopToggle.Position = UDim2.new(1, -50, 0.5, -12)
+loopToggle.BackgroundColor3 = looped and Color3.fromRGB(88, 101, 242) or Color3.fromRGB(80, 80, 80)
+loopToggle.BorderSizePixel = 0
+loopToggle.Text = looped and "ON" or "OFF"
+loopToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+loopToggle.TextSize = 11
+loopToggle.Font = Enum.Font.GothamBold
+loopToggle.Parent = loopFrame
+
+loopToggleRef = loopToggle
+
+local loopCorner = Instance.new("UICorner")
+loopCorner.CornerRadius = UDim.new(0, 6)
+loopCorner.Parent = loopToggle
+
+loopToggle.MouseButton1Click:Connect(function()
+    looped = not looped
+    loopToggle.Text = looped and "ON" or "OFF"
+    loopToggle.BackgroundColor3 = looped and Color3.fromRGB(88, 101, 242) or Color3.fromRGB(80, 80, 80)
+    if currentTrack then
+        currentTrack.Looped = looped
+    end
+end)
+
+local function applySettingsToTrack(track)
+    track.Priority = settings.priority
+    track.Looped = looped
+    track:AdjustWeight(settings.weight)
+    track:AdjustSpeed(settings.speed)
+    
+    if track.Length > 0 then
+        track.TimePosition = settings.timePosition * track.Length
+    else
+        task.delay(0.1, function()
+            if track and track.Parent and track.Length > 0 then
+                track.TimePosition = settings.timePosition * track.Length
+            end
+        end)
+    end
+end
+
+local function playMoodAnimation(moodId)
+    if currentTrack then
+        currentTrack:Stop(0.1)
+        currentTrack:Destroy()
+        currentTrack = nil
+    end
+    
+    currentAnimData = moodId
+    
+    local animId = getAnimationIdFromMood(moodId)
+    local animation = Instance.new("Animation")
+    animation.AnimationId = animId
+    
+    local track = animator:LoadAnimation(animation)
+    applySettingsToTrack(track)
+    
+    currentTrack = track
+    track:Play()
+    
+    if not looped then
+        track.Stopped:Connect(function()
+            if currentTrack == track and currentAnimData == moodId then
+                if track.Length > 0 then
+                    track.TimePosition = settings.timePosition * track.Length
+                end
+                track:Play()
+            end
+        end)
+    end
+end
+
+-- Create mood buttons
+for _, moodId in ipairs(moodIds) do
+    local btn = Instance.new("ImageButton")
+    btn.Name = tostring(moodId)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    btn.BorderSizePixel = 0
+    btn.Image = "rbxthumb://type=Asset&id=" .. moodId .. "&w=420&h=420"
+    btn.ScaleType = Enum.ScaleType.Crop
+    btn.ClipsDescendants = true
+    btn.Parent = scrollFrame
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 6)
+    btnCorner.Parent = btn
+    
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 40)}):Play()
+    end)
+    
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(1, 0, 0, 18)
+    nameLabel.Position = UDim2.new(0, 0, 1, -18)
+    nameLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    nameLabel.BackgroundTransparency = 0.4
+    nameLabel.BorderSizePixel = 0
+    nameLabel.Text = "..."
+    nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    nameLabel.TextSize = 10
+    nameLabel.TextScaled = true  -- TextScaled enabled
+    nameLabel.Font = Enum.Font.GothamBold
+    nameLabel.Parent = btn
+    
+    table.insert(moodButtons, btn)
+    
+    task.spawn(function()
+        local success, result = pcall(function()
+            return MarketplaceService:GetProductInfo(moodId)
+        end)
+        if success and result then
+            local cleanName = result.Name
+            cleanName = string.gsub(cleanName, "%s*-%s*[Mm]ood%s*$", "")
+            cleanName = string.gsub(cleanName, "%s*[Mm]ood%s*$", "")
+            nameLabel.Text = cleanName
+            table.insert(moodNames, cleanName)
+        else
+            nameLabel.Text = string.sub(tostring(moodId), -4)
+            table.insert(moodNames, tostring(moodId))
+        end
+    end)
+    
+    btn.MouseButton1Click:Connect(function()
+        playMoodAnimation(moodId)
+    end)
+end
+
+player.CharacterAdded:Connect(function(char)
+    character = char
+    humanoid = char:WaitForChild("Humanoid")
+    animator = humanoid:WaitForChild("Animator")
+    
+    if currentAnimData then
+        task.wait(0.3)
+        playMoodAnimation(currentAnimData)
+    end
+end)

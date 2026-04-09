@@ -9,10 +9,10 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 local animator = humanoid:WaitForChild("Animator")
-
-local function gethui()
+local gethui = gethui or function()
     return game:GetService("CoreGui")
 end
+
 
 local function getAnimationIdFromMood(id)
     local success, objects = pcall(function()

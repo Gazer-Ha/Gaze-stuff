@@ -167,3 +167,54 @@ _44:GetPropertyChangedSignal("Text"):Connect(_80)
 _37.MouseButton1Click:Connect(function()_TAB+=1 _39.Visible=false _43.Visible=true 
 _36.BackgroundColor3=Color3.fromRGB(20,20,40)_37.BackgroundColor3=Color3.fromRGB(30,80,30)_80()end)
 _75("")local _79=_26 local function _81()_79.Enabled=not _79.Enabled end local _82=Instance.new("ScreenGui")_82.Name="ToggleButtonGui"_82.ResetOnSpawn=false _82.Parent=_25 _82.Enabled=true local _83=Instance.new("TextButton")_83.Parent=_82 _83.Text="G"_83.Font=Enum.Font.GothamSemibold _83.TextScaled=true _83.Size=UDim2.new(0,50,0,50)_83.Position=UDim2.new(0,20,0.5,-50)_83.AnchorPoint=Vector2.new(0,0.5)_83.BackgroundColor3=Color3.fromRGB(25,25,35)_83.BackgroundTransparency=0.2 _83.TextColor3=Color3.new(1,1,1)_83.Active=true pcall(function()_83.Draggable=true end)_27(_83,12)_28(_83,Color3.fromRGB(60,60,100),2)local _84=Instance.new("UIAspectRatioConstraint")_84.Parent=_83 _84.AspectRatio=1 _83.MouseButton1Click:Connect(_81)_10.InputBegan:Connect(function(_a,_b)if _b then return end if _a.UserInputType==Enum.UserInputType.Keyboard and _a.KeyCode==Enum.KeyCode.G then _81()end end)_26.Enabled=true _80()
+
+
+
+
+
+task.spawn(function()
+	local RunService = game:GetService("RunService")
+	local Players = game.Players
+	local player = Players.LocalPlayer
+
+	local function setupCollision(character)
+		local hrp = character:WaitForChild("HumanoidRootPart")
+		local bodyParts = {}
+
+		hrp.CanCollide = true
+
+		local function addPart(part)
+			if part:IsA("BasePart") and part ~= hrp then
+				table.insert(bodyParts, part)
+			end
+		end
+
+		for _, part in pairs(character:GetDescendants()) do
+			addPart(part)
+		end
+
+		local descendantConnection = character.DescendantAdded:Connect(addPart)
+
+		local heartbeatConnection
+		heartbeatConnection = RunService.Heartbeat:Connect(function()
+			if not character or not character.Parent then
+				heartbeatConnection:Disconnect()
+				descendantConnection:Disconnect()
+				return
+			end
+
+			for i = 1, #bodyParts do
+				local p = bodyParts[i]
+				if p and p.Parent then
+					p.CanCollide = false
+				end
+			end
+		end)
+	end
+
+	if player.Character then
+		setupCollision(player.Character)
+	end
+
+	player.CharacterAdded:Connect(setupCollision)
+end)

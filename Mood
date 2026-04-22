@@ -100,7 +100,6 @@ local defaultMoods = {
     {id=124888276087842, name="FragmentedNoob-MoodAnimation", custom=false},
     {id=124706365042112, name="Nouveau George", custom=false},
     {id=124258266581596, name="You ated my caik!", custom=false},
-    {id=11573370910, name="Anime Mood", custom=false},
     {id=12939349434, name="MoodAnimation", custom=false},
     {id=7715145252, name="moods_11_FaceAnimation", custom=false},
     {id=13823254132, name="I <3 New Site Theme", custom=false},

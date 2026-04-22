@@ -3,10 +3,7 @@ if getgenv().TiltConnection then
     getgenv().TiltConnection = nil
 end
 
-if getgenv().TiltCharacterAdded then
-    getgenv().TiltCharacterAdded:Disconnect()
-    getgenv().TiltCharacterAdded = nil
-end
+
 
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -102,4 +99,3 @@ if player.Character then
     setup(player.Character)
 end
 
-getgenv().TiltCharacterAdded = player.CharacterAdded:Connect(setup)

@@ -60,8 +60,6 @@ local function getAnimId(id)
     return "rbxassetid://" .. tostring(id)
 end
 
-local SAVE_FILE = "FeMoodAnimations_v2.json"
-
 local SAVE_FILE = "FeMoodAnimations_v3.json"
 
 local defaultMoods = {

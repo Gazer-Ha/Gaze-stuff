@@ -22,10 +22,7 @@ local FACS_PROPERTIES = {
 }
 
 local function resetFace(character)
-    local faceControls = character:WaitForChild("Head"):WaitForChild("FaceControls")
-    for _, prop in ipairs(FACS_PROPERTIES) do
-        pcall(function() faceControls[prop] = 0 end)
-    end
+    --nothin nfvm
 end
 
 local Players = svc("Players")

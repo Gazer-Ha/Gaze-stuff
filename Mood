@@ -4,8 +4,6 @@ local function svc(s)
     return cloneref(game:GetService(s))
 end
 
-
-
 local FACS_PROPERTIES = {
     "ChinRaiser", "ChinRaiserUpperLip", "Corrugator", "EyesLookDown", 
     "EyesLookLeft", "EyesLookRight", "EyesLookUp", "FlatPucker", 
@@ -25,13 +23,10 @@ local FACS_PROPERTIES = {
 
 local function resetFace(character)
     local faceControls = character:WaitForChild("Head"):WaitForChild("FaceControls")
-    
     for _, prop in ipairs(FACS_PROPERTIES) do
         pcall(function() faceControls[prop] = 0 end)
     end
-    
 end
-
 
 local Players = svc("Players")
 local RunSvc = svc("RunService")
@@ -104,7 +99,6 @@ local defaultMoods = {
     {id=12939349434, name="MoodAnimation", custom=false},
     {id=7715145252, name="moods_11_FaceAnimation", custom=false},
     {id=13823254132, name="I <3 New Site Theme", custom=false},
-    -- New entries from links
     {id=134419765247655, name=nil, custom=false},
     {id=107730729807187, name=nil, custom=false},
     {id=120553760947068, name=nil, custom=false},
@@ -174,25 +168,22 @@ local function loadData()
     local ok, content = pcall(function() return readfile(SAVE_FILE) end)
     if ok and content then
         local dok, decoded = pcall(function() return HttpSvc:JSONDecode(content) end)
-        -- If a valid JSON file exists, load EXCLUSIVELY from the file
         if dok and type(decoded) == "table" then
             for _, entry in ipairs(decoded) do
                 if type(entry) == "table" and type(entry.id) == "number" then
                     table.insert(moods, {id=entry.id, name=entry.name, custom=entry.custom})
                 end
             end
-            return true -- Successfully loaded from file
+            return true
         end
     end
-    return false -- No file, or the file was invalid
+    return false
 end
 
--- Only load default anims if no mood file exists yet
 if not loadData() then
     for _, m in ipairs(defaultMoods) do
         table.insert(moods, {id=m.id, name=m.name, custom=false})
     end
-    -- Save immediately so the defaults become the new base file
     saveData()
 end
 
@@ -556,8 +547,9 @@ end
 
 local function playMood(moodId)
     if curTrack then
-    resetFace(char)
-        curTrack:Stop(0)
+        resetFace(char)
+        curTrack:AdjustWeight(0)
+        
         curTrack:Destroy()
         resetFace(char)
         curTrack = nil
